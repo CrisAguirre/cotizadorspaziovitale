@@ -35,7 +35,7 @@ export class LoginComponent implements OnInit {
         next: (response) => {
           this.authService.saveToken(response.token);
           this.isLoading = false;
-          alert('Inicio de sesión exitoso. ¡Bienvenido a Spazio Vitale!');
+          this.router.navigate(['/dashboard']);
         },
         error: (err) => {
           this.isLoading = false;
