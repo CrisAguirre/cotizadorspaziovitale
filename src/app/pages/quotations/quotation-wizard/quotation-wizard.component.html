@@ -1,15 +1,15 @@
 <div class="wizard-container">
   <div class="wizard-header glass-panel">
-    <div class="step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">1. Información General</div>
-    <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">2. Áreas y Muebles</div>
-    <div class="step" [class.active]="currentStep === 3" [class.completed]="currentStep > 3">3. Presupuesto Detallado</div>
+    <div class="step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">1. Cliente</div>
+    <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">2. Muebles</div>
+    <div class="step" [class.active]="currentStep === 3" [class.completed]="currentStep > 3">3. Presupuesto</div>
     <div class="step" [class.active]="currentStep === 4" [class.completed]="currentStep > 4">4. Resumen</div>
   </div>
 
-  <form [formGroup]="quotationForm" class="wizard-body glass-panel">
-    <!-- Paso 1: Información -->
-    <div *ngIf="currentStep === 1">
-      <h2>Información del Cliente y Proyecto</h2>
+  <div class="wizard-body glass-panel">
+    <!-- PASO 1: INFORMACIÓN DEL CLIENTE (Formulario Reactivo) -->
+    <form *ngIf="currentStep === 1" [formGroup]="quotationForm">
+      <h2>Información del Proyecto y Cliente</h2>
       <div class="form-grid">
         <div class="form-group">
           <label>Título del Proyecto</label>
@@ -43,43 +43,270 @@
           <input type="email" formControlName="email" class="form-control">
         </div>
       </div>
-    </div>
+    </form>
 
-    <!-- Paso 2: Áreas -->
+    <!-- PASO 2: ÁREAS Y MUEBLES (NgModel Directo) -->
     <div *ngIf="currentStep === 2">
       <div class="flex-between">
-        <h2>Áreas del Proyecto</h2>
+        <h2>Áreas y Muebles del Proyecto</h2>
         <button type="button" class="btn-secondary" (click)="addArea()">+ Agregar Área</button>
       </div>
-      <div formArrayName="areas" class="mt-4">
-        <div *ngFor="let area of areas.controls; let i=index" [formGroupName]="i" class="area-card">
-          <div class="flex-between">
-            <div class="form-group" style="width: 300px; margin-bottom: 0;">
-              <label>Nombre del Área</label>
-              <input type="text" formControlName="name" class="form-control" placeholder="Ej. Cocina, Baño Principal">
-            </div>
-            <button type="button" class="btn-icon text-error" (click)="removeArea(i)" title="Eliminar Área">🗑️</button>
+
+      <div *ngFor="let area of activeQuotation.areas; let aIndex = index" class="area-card mt-4">
+        <div class="flex-between area-header">
+          <div class="form-group" style="width: 300px; margin-bottom: 0;">
+            <label>Nombre del Área</label>
+            <input type="text" [(ngModel)]="area.name" class="form-control" placeholder="Ej. Cocina, Baño">
           </div>
-          <p class="mt-2 text-muted text-sm">Los muebles se agregarán en el paso 3.</p>
+          <button type="button" class="btn-icon text-error" (click)="removeArea(aIndex)">🗑️ Eliminar Área</button>
+        </div>
+
+        <div class="furniture-list mt-4">
+          <h4>Muebles en {{ area.name || 'esta área' }}</h4>
+          <div *ngFor="let furn of area.furniture; let fIndex = index" class="furniture-card">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Nombre del Mueble</label>
+                <input type="text" [(ngModel)]="furn.name" class="form-control">
+              </div>
+              <div class="form-group">
+                <label>Cantidad</label>
+                <input type="number" [(ngModel)]="furn.quantity" (change)="recalculate()" class="form-control">
+              </div>
+              <div class="form-group">
+                <label>&nbsp;</label>
+                <button type="button" class="btn-icon text-error" (click)="removeFurniture(area, fIndex)">Eliminar Mueble</button>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn-secondary mt-2" (click)="addFurniture(area)">+ Agregar Mueble</button>
         </div>
       </div>
     </div>
 
-    <!-- Paso 3 y 4 (Placeholder) -->
+    <!-- PASO 3: PRESUPUESTO MATEMÁTICO (NgModel) -->
     <div *ngIf="currentStep === 3">
       <h2>Presupuesto Detallado</h2>
-      <p>Aquí irá la lógica de agregar materiales, cortes, y tiempos a cada mueble de cada área.</p>
+      <p class="text-muted">Ingresa los insumos y rubros para cada mueble. Los totales se calcularán automáticamente.</p>
+      
+      <div *ngFor="let area of activeQuotation.areas" class="mt-4">
+        <h3 class="area-title">{{ area.name }}</h3>
+        
+        <div *ngFor="let furn of area.furniture" class="furniture-budget-card">
+          <h4>{{ furn.name }} (x{{ furn.quantity }})</h4>
+          
+          <!-- Insumos -->
+          <div class="budget-section">
+            <div class="flex-between">
+              <h5>1. Insumos (Láminas, etc.)</h5>
+              <button class="btn-icon" (click)="addItem(furn, 'supplies')">+ Añadir</button>
+            </div>
+            <table class="budget-table" *ngIf="furn.supplies?.length">
+              <thead>
+                <tr>
+                  <th>Descripción</th>
+                  <th>Cant.</th>
+                  <th>Precio Und</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let sup of furn.supplies; let i = index">
+                  <td><input type="text" [(ngModel)]="sup.description" class="form-control-sm"></td>
+                  <td><input type="number" [(ngModel)]="sup.quantity" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="sup.unitPrice" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td>{{ sup.totalPrice | currency:'COP':'symbol':'1.0-0' }}</td>
+                  <td><button class="text-error" (click)="removeItem(furn, 'supplies', i)">X</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Cantos -->
+          <div class="budget-section">
+            <div class="flex-between">
+              <h5>2. Cantos (Desperdicio Automático)</h5>
+              <button class="btn-icon" (click)="addItem(furn, 'edgeBands')">+ Añadir</button>
+            </div>
+            <table class="budget-table" *ngIf="furn.edgeBands?.length">
+              <thead>
+                <tr>
+                  <th>Descripción</th>
+                  <th>Cant. ML</th>
+                  <th>% Desperdicio</th>
+                  <th>ML Totales</th>
+                  <th>Precio Und</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let edge of furn.edgeBands; let i = index">
+                  <td><input type="text" [(ngModel)]="edge.description" class="form-control-sm"></td>
+                  <td><input type="number" [(ngModel)]="edge.quantity" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td>{{ (edge.wasteFactor || 0) * 100 }}%</td>
+                  <td>{{ edge.total | number:'1.0-2' }}</td>
+                  <td><input type="number" [(ngModel)]="edge.unitPrice" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td>{{ edge.totalPrice | currency:'COP':'symbol':'1.0-0' }}</td>
+                  <td><button class="text-error" (click)="removeItem(furn, 'edgeBands', i)">X</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Herrajes -->
+          <div class="budget-section">
+            <div class="flex-between">
+              <h5>3. Herrajes y Accesorios</h5>
+              <button class="btn-icon" (click)="addItem(furn, 'accessories')">+ Añadir</button>
+            </div>
+            <table class="budget-table" *ngIf="furn.accessories?.length">
+              <thead>
+                <tr>
+                  <th>Descripción</th>
+                  <th>Cant.</th>
+                  <th>Precio Und</th>
+                  <th>Hrs Obra</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let acc of furn.accessories; let i = index">
+                  <td><input type="text" [(ngModel)]="acc.description" class="form-control-sm"></td>
+                  <td><input type="number" [(ngModel)]="acc.quantity" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="acc.unitPrice" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="acc.timeHours" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td>{{ acc.totalPrice | currency:'COP':'symbol':'1.0-0' }}</td>
+                  <td><button class="text-error" (click)="removeItem(furn, 'accessories', i)">X</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Cortes -->
+          <div class="budget-section">
+            <div class="flex-between">
+              <h5>4. Cortes (M2 y Tiempo)</h5>
+              <button class="btn-icon" (click)="addItem(furn, 'cuts')">+ Añadir</button>
+            </div>
+            <table class="budget-table" *ngIf="furn.cuts?.length">
+              <thead>
+                <tr>
+                  <th>Descripción</th>
+                  <th>M2</th>
+                  <th>Hrs</th>
+                  <th>Cant.</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let cut of furn.cuts; let i = index">
+                  <td><input type="text" [(ngModel)]="cut.description" class="form-control-sm"></td>
+                  <td><input type="number" [(ngModel)]="cut.sqm" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="cut.timeHours" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="cut.quantity" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td>{{ cut.totalPrice | currency:'COP':'symbol':'1.0-0' }}</td>
+                  <td><button class="text-error" (click)="removeItem(furn, 'cuts', i)">X</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Ensamble -->
+          <div class="budget-section">
+            <div class="flex-between">
+              <h5>5. Ensamble</h5>
+              <button class="btn-icon" (click)="addItem(furn, 'assembly')">+ Añadir</button>
+            </div>
+            <table class="budget-table" *ngIf="furn.assembly?.length">
+              <thead>
+                <tr>
+                  <th>Descripción</th>
+                  <th>Cant.</th>
+                  <th>Hrs</th>
+                  <th>Operarios</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let asm of furn.assembly; let i = index">
+                  <td><input type="text" [(ngModel)]="asm.description" class="form-control-sm"></td>
+                  <td><input type="number" [(ngModel)]="asm.totalQuantity" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="asm.assemblyHours" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="asm.persons" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td>{{ asm.totalPrice | currency:'COP':'symbol':'1.0-0' }}</td>
+                  <td><button class="text-error" (click)="removeItem(furn, 'assembly', i)">X</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="furniture-total text-right mt-2">
+            <strong>Subtotal Mueble: {{ furn.totalCost | currency:'COP':'symbol':'1.0-0' }}</strong>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div *ngIf="currentStep === 4">
-      <h2>Resumen y Confirmación</h2>
-      <p>Resumen de costos y utilidades.</p>
-    </div>
-  </form>
+    <!-- PASO 4: RESUMEN Y TOTALES GLOBALES (AIU) -->
+    <div *ngIf="currentStep === 4" class="summary-section">
+      <h2>Resumen de Cotización</h2>
+      <div class="grid-2">
+        <div class="totals-card">
+          <h3>Costos Base</h3>
+          <p class="flex-between"><span>Costo Total Materiales/Operación:</span> <strong>{{ activeQuotation.totals.totalCost | currency:'COP':'symbol':'1.0-0' }}</strong></p>
+        </div>
+        <div class="totals-card primary-border">
+          <h3>AIU e Impuestos</h3>
+          
+          <div class="flex-between form-group-sm">
+            <span>Imprevistos (%)</span>
+            <input type="number" [(ngModel)]="activeQuotation.totals.unforeseenPercent" (change)="recalculate()" class="form-control-sm num-input">
+            <span>{{ activeQuotation.totals.unforeseenAmount | currency:'COP':'symbol':'1.0-0' }}</span>
+          </div>
+          
+          <div class="flex-between form-group-sm">
+            <span>Utilidad (%)</span>
+            <input type="number" [(ngModel)]="activeQuotation.totals.profitPercent" (change)="recalculate()" class="form-control-sm num-input">
+            <span>{{ activeQuotation.totals.profitAmount | currency:'COP':'symbol':'1.0-0' }}</span>
+          </div>
+          
+          <div class="flex-between form-group-sm">
+            <span>Gastos Indirectos (%)</span>
+            <input type="number" [(ngModel)]="activeQuotation.totals.indirectPercent" (change)="recalculate()" class="form-control-sm num-input">
+            <span>{{ activeQuotation.totals.indirectAmount | currency:'COP':'symbol':'1.0-0' }}</span>
+          </div>
 
+          <p class="flex-between mt-2"><span>SUBTOTAL:</span> <strong>{{ activeQuotation.totals.subtotal | currency:'COP':'symbol':'1.0-0' }}</strong></p>
+          
+          <div class="flex-between form-group-sm mt-2">
+            <span>IVA (%)</span>
+            <input type="number" [(ngModel)]="activeQuotation.totals.taxPercent" (change)="recalculate()" class="form-control-sm num-input">
+            <span>{{ activeQuotation.totals.taxAmount | currency:'COP':'symbol':'1.0-0' }}</span>
+          </div>
+          
+          <div class="flex-between form-group-sm">
+            <span>Descuento Adicional (%)</span>
+            <input type="number" [(ngModel)]="activeQuotation.totals.discountPercent" (change)="recalculate()" class="form-control-sm num-input">
+            <span class="text-error">- {{ activeQuotation.totals.discountAmount | currency:'COP':'symbol':'1.0-0' }}</span>
+          </div>
+
+          <div class="grand-total mt-4">
+            <h3>GRAN TOTAL: {{ activeQuotation.totals.grandTotal | currency:'COP':'symbol':'1.0-0' }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTONERA -->
   <div class="wizard-footer mt-4">
     <button type="button" class="btn-secondary" *ngIf="currentStep > 1" (click)="prevStep()">Anterior</button>
     <button type="button" class="btn-primary ml-auto" *ngIf="currentStep < 4" (click)="nextStep()">Siguiente</button>
-    <button type="button" class="btn-success ml-auto" *ngIf="currentStep === 4" (click)="saveQuotation()">Guardar Cotización</button>
+    <button type="button" class="btn-success ml-auto" *ngIf="currentStep === 4" (click)="saveQuotation()" [disabled]="isLoading">Guardar Cotización</button>
   </div>
 </div>

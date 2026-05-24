@@ -79,3 +79,89 @@
 .text-sm { font-size: 12px; }
 .btn-icon { background: transparent; border: none; cursor: pointer; opacity: 0.7; }
 .btn-icon:hover { opacity: 1; }
+
+.area-title {
+  margin-bottom: 15px;
+  color: var(--primary-color);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 5px;
+}
+.furniture-budget-card {
+  background-color: var(--input-bg);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+.budget-section {
+  margin-top: 20px;
+}
+.budget-section h5 {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.budget-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.budget-table th, .budget-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+.budget-table th {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.form-control-sm {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid var(--border-color);
+  background-color: transparent;
+  color: var(--text-main);
+  border-radius: 4px;
+}
+.num-input {
+  width: 80px;
+  text-align: right;
+}
+.furniture-total {
+  font-size: 16px;
+  color: var(--primary-color);
+}
+.text-right {
+  text-align: right;
+}
+.summary-section h2 {
+  text-align: center;
+  color: var(--primary-color);
+  margin-bottom: 20px;
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+.totals-card {
+  background: var(--input-bg);
+  padding: 20px;
+  border-radius: 8px;
+}
+.totals-card h3 {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+.primary-border {
+  border: 2px solid var(--primary-color);
+}
+.form-group-sm {
+  margin-bottom: 10px;
+}
+.grand-total {
+  text-align: center;
+  padding: 15px;
+  background-color: var(--primary-color);
+  color: #000;
+  border-radius: 8px;
+}
