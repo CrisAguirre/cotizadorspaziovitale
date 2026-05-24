@@ -4,12 +4,28 @@
   --primary-color: #D4AF37; /* Elegant gold tone */
   --primary-hover: #b8962c;
   --bg-color: #121212;
+  --bg-gradient: radial-gradient(circle at top right, #252525, #121212);
   --panel-bg: rgba(25, 25, 25, 0.6);
   --text-main: #f0f0f0;
   --text-muted: #a0a0a0;
   --border-color: rgba(255, 255, 255, 0.1);
   --error-color: #ff6b6b;
   --input-bg: rgba(15, 15, 15, 0.8);
+  --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+[data-theme="light"] {
+  --primary-color: #D4AF37; 
+  --primary-hover: #b8962c;
+  --bg-color: #f0f4f8;
+  --bg-gradient: radial-gradient(circle at top right, #ffffff, #e2e8f0);
+  --panel-bg: rgba(255, 255, 255, 0.6);
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border-color: rgba(255, 255, 255, 0.5);
+  --error-color: #ef4444;
+  --input-bg: rgba(255, 255, 255, 0.9);
+  --shadow: 0 8px 32px 0 rgba(30, 41, 59, 0.1);
 }
 
 * {
@@ -21,12 +37,12 @@
 body {
   font-family: 'Outfit', sans-serif;
   background-color: var(--bg-color);
-  /* Subtly radial gradient for depth */
-  background-image: radial-gradient(circle at top right, #252525, #121212);
+  background-image: var(--bg-gradient);
   color: var(--text-main);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.4s ease, color 0.4s ease, background-image 0.4s ease;
 }
 
 /* Glassmorphism Utility */
@@ -35,6 +51,7 @@ body {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  box-shadow: var(--shadow);
   border-radius: 16px;
+  transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }

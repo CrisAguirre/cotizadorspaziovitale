@@ -1,1 +1,6 @@
+<button class="theme-toggle" (click)="themeService.toggleTheme()" [attr.title]="themeService.isDarkTheme() ? 'Cambiar a modo diurno' : 'Cambiar a modo nocturno'">
+  <span *ngIf="themeService.isDarkTheme()">☀️</span>
+  <span *ngIf="!themeService.isDarkTheme()">🌙</span>
+</button>
+
 <router-outlet></router-outlet>
