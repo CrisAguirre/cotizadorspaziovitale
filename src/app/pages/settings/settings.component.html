@@ -1,0 +1,117 @@
+<div class="page-header">
+  <div>
+    <h1>Configuración del Sistema</h1>
+    <p>Parámetros globales y tablas de desperdicio.</p>
+  </div>
+</div>
+
+<div *ngIf="isLoading" class="loading-state">
+  <div class="loader"></div>
+  <p>Cargando configuración...</p>
+</div>
+
+<div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+<div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+<form [formGroup]="configForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
+  <div class="form-grid">
+    <!-- Costos y Valores -->
+    <div class="card glass-panel">
+      <h3>Costos Base</h3>
+      <div class="form-group">
+        <label>Valor Hora Operario ($)</label>
+        <input type="number" formControlName="laborRatePerHour" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Valor Hora Diseñador ($)</label>
+        <input type="number" formControlName="designRatePerHour" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Consecutivo Siguiente Cotización</label>
+        <input type="number" formControlName="nextQuotationNumber" class="form-control">
+      </div>
+    </div>
+
+    <!-- Porcentajes AIU e Impuestos -->
+    <div class="card glass-panel">
+      <h3>Porcentajes (AIU y Tributos)</h3>
+      <div class="form-group">
+        <label>Imprevistos (%)</label>
+        <input type="number" formControlName="unforeseenPercent" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Utilidad (%)</label>
+        <input type="number" formControlName="profitPercent" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Indirectos (%)</label>
+        <input type="number" formControlName="indirectPercent" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>IVA (%)</label>
+        <input type="number" formControlName="taxPercent" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Descuento por Defecto (%)</label>
+        <input type="number" formControlName="defaultDiscount" class="form-control">
+      </div>
+    </div>
+
+    <!-- Información de Empresa / Cotización -->
+    <div class="card glass-panel">
+      <h3>Información General</h3>
+      <div class="form-group">
+        <label>Nombre de la Empresa</label>
+        <input type="text" formControlName="companyName" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Ciudad</label>
+        <input type="text" formControlName="city" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Validez Cotización (Días)</label>
+        <input type="number" formControlName="validityDays" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Forma de Pago (Texto por defecto)</label>
+        <textarea formControlName="paymentTerms" class="form-control" rows="3"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de Desperdicios para Cantos -->
+  <div class="card glass-panel mt-4">
+    <div class="flex-between">
+      <h3>Tabla de Desperdicios (Cantos en ML)</h3>
+      <button type="button" class="btn-secondary btn-small" (click)="addWasteRange()">+ Agregar Rango</button>
+    </div>
+    
+    <table class="data-table mt-2">
+      <thead>
+        <tr>
+          <th>Mínimo (ML)</th>
+          <th>Máximo (ML)</th>
+          <th>Factor de Desperdicio (Ej: 0.35 para 35%)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody formArrayName="wasteTable">
+        <tr *ngFor="let control of wasteTable.controls; let i=index" [formGroupName]="i">
+          <td><input type="number" formControlName="minMl" class="form-control table-input"></td>
+          <td><input type="number" formControlName="maxMl" class="form-control table-input"></td>
+          <td><input type="number" step="0.01" formControlName="factor" class="form-control table-input"></td>
+          <td>
+            <button type="button" class="btn-icon" (click)="removeWasteRange(i)" title="Eliminar Rango">🗑️</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="actions-footer mt-4">
+    <button type="submit" class="btn-primary" [disabled]="configForm.invalid || isSaving">
+      <span *ngIf="isSaving">Guardando...</span>
+      <span *ngIf="!isSaving">Guardar Cambios</span>
+    </button>
+  </div>
+</form>

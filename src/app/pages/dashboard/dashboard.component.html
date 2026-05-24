@@ -1,7 +1,51 @@
-<div class="dashboard-container">
-  <div class="dashboard-content glass-panel">
-    <h1>Plataforma en desarrollo</h1>
-    <p>Pronto estarán disponibles todas las funcionalidades del menú principal.</p>
-    <button class="btn-primary" routerLink="/login">Cerrar Sesión</button>
+<div class="dashboard-wrapper">
+  <div class="header-section">
+    <h1>Dashboard</h1>
+    <p>Resumen de actividad de cotizaciones</p>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loader"></div>
+    <p>Cargando estadísticas...</p>
+  </div>
+
+  <div *ngIf="!isLoading && stats" class="stats-grid">
+    <div class="stat-card glass-panel">
+      <div class="stat-icon primary">📄</div>
+      <div class="stat-info">
+        <h3>Cotizaciones Mes</h3>
+        <span class="stat-value">{{ stats.monthQuotations }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card glass-panel">
+      <div class="stat-icon success">💰</div>
+      <div class="stat-info">
+        <h3>Total Mes</h3>
+        <span class="stat-value">{{ stats.monthTotal | currency:'COP':'symbol':'1.0-0' }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card glass-panel">
+      <div class="stat-icon warning">⏳</div>
+      <div class="stat-info">
+        <h3>Borradores</h3>
+        <span class="stat-value">{{ stats.statusCounts['borrador'] || 0 }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card glass-panel">
+      <div class="stat-icon info">✅</div>
+      <div class="stat-info">
+        <h3>Auditadas</h3>
+        <span class="stat-value">{{ stats.statusCounts['auditada'] || 0 }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions-section">
+    <button class="btn-primary" routerLink="/quotations/new">
+      ➕ Nueva Cotización
+    </button>
   </div>
 </div>

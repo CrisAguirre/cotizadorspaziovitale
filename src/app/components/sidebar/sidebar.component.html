@@ -1,0 +1,30 @@
+<aside class="sidebar glass-panel">
+  <div class="brand">
+    <div class="brand-logo-css">
+      <div class="logo-main">
+        <div class="logo-word">Spazio</div>
+        <div class="logo-word offset">Vitale</div>
+      </div>
+    </div>
+  </div>
+  <nav class="nav-menu">
+    <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+      <span>🏠 Dashboard</span>
+    </a>
+    <a routerLink="/quotations" routerLinkActive="active" class="nav-item">
+      <span>📄 Cotizaciones</span>
+    </a>
+    <a routerLink="/price-list" routerLinkActive="active" class="nav-item">
+      <span>💰 Lista de Precios</span>
+    </a>
+    <!-- Solo admin ve configuración -->
+    <a *ngIf="authService.getUser()?.role === 'admin'" routerLink="/settings" routerLinkActive="active" class="nav-item">
+      <span>⚙️ Configuración</span>
+    </a>
+  </nav>
+  <div class="logout-container">
+    <button class="nav-item logout-btn" (click)="logout()">
+      <span>🚪 Cerrar Sesión</span>
+    </button>
+  </div>
+</aside>

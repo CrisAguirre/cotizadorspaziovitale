@@ -23,13 +23,34 @@
   margin-bottom: 40px;
 }
 
-.brand-logo {
-  max-width: 140px;
-  max-height: 140px;
-  margin: 0 auto 15px;
-  display: block;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 10px rgba(212, 175, 55, 0.2));
+.brand-logo-css {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  user-select: none;
+}
+.logo-main {
+  display: flex;
+  flex-direction: column;
+  line-height: 0.8;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 800;
+  font-size: 46px;
+  letter-spacing: -1.5px;
+  color: var(--primary-color);
+}
+.logo-word.offset {
+  margin-left: 20px;
+}
+.logo-sub {
+  margin-top: 8px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--text-main);
+  margin-left: 20px;
 }
 
 .brand-section h2 {
@@ -64,7 +85,7 @@
   border: 1px solid var(--border-color);
   border-radius: 8px;
   color: var(--text-main);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 15px;
   transition: all 0.3s ease;
 }

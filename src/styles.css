@@ -1,31 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-  --primary-color: #D4AF37; /* Elegant gold tone */
-  --primary-hover: #b8962c;
-  --bg-color: #121212;
-  --bg-gradient: radial-gradient(circle at top right, #252525, #121212);
-  --panel-bg: rgba(25, 25, 25, 0.6);
-  --text-main: #f0f0f0;
-  --text-muted: #a0a0a0;
-  --border-color: rgba(255, 255, 255, 0.1);
+  --primary-color: #D5A052; /* Corporate Gold */
+  --primary-hover: #c48e42;
+  --bg-color: #0B4249; /* Corporate Dark/Navy */
+  --bg-gradient: radial-gradient(circle at top right, #116570, #0B4249);
+  --panel-bg: rgba(11, 66, 73, 0.6);
+  --text-main: #FFFFFF; /* Pure White */
+  --text-muted: #A8BDBF;
+  --border-color: rgba(255, 255, 255, 0.15);
   --error-color: #ff6b6b;
-  --input-bg: rgba(15, 15, 15, 0.8);
-  --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --input-bg: rgba(0, 0, 0, 0.2);
+  --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 }
 
 [data-theme="light"] {
-  --primary-color: #D4AF37; 
-  --primary-hover: #b8962c;
-  --bg-color: #f0f4f8;
-  --bg-gradient: radial-gradient(circle at top right, #ffffff, #e2e8f0);
-  --panel-bg: rgba(255, 255, 255, 0.6);
-  --text-main: #1e293b;
-  --text-muted: #64748b;
-  --border-color: rgba(255, 255, 255, 0.5);
+  --primary-color: #D5A052; 
+  --primary-hover: #c48e42;
+  --bg-color: #FFFFFF; /* Pure White */
+  --bg-gradient: radial-gradient(circle at top right, #FFFFFF, #F0F4F5);
+  --panel-bg: rgba(255, 255, 255, 0.7);
+  --text-main: #0B4249; /* Dark text for light mode */
+  --text-muted: #5A7B7E;
+  --border-color: rgba(11, 66, 73, 0.15);
   --error-color: #ef4444;
   --input-bg: rgba(255, 255, 255, 0.9);
-  --shadow: 0 8px 32px 0 rgba(30, 41, 59, 0.1);
+  --shadow: 0 8px 32px 0 rgba(11, 66, 73, 0.1);
 }
 
 * {
@@ -35,7 +35,7 @@
 }
 
 body {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   background-color: var(--bg-color);
   background-image: var(--bg-gradient);
   color: var(--text-main);

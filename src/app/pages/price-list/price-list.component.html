@@ -1,0 +1,47 @@
+<div class="page-header">
+  <div>
+    <h1>Lista de Precios</h1>
+    <p>Gestión de materiales, herrajes y accesorios.</p>
+  </div>
+  <button class="btn-primary">➕ Nuevo Material</button>
+</div>
+
+<div class="card glass-panel">
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loader"></div>
+    <p>Cargando materiales...</p>
+  </div>
+
+  <table class="data-table" *ngIf="!isLoading">
+    <thead>
+      <tr>
+        <th>Categoría</th>
+        <th>Código</th>
+        <th>Descripción</th>
+        <th>Dimensiones</th>
+        <th>Unidad</th>
+        <th>Precio / Unidad</th>
+        <th>Precio / m²</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let m of materials">
+        <td><span class="badge">{{ m.category | titlecase }}</span></td>
+        <td>{{ m.code }}</td>
+        <td>{{ m.description }}</td>
+        <td>{{ m.dimension || 'N/A' }}</td>
+        <td>{{ m.unit }}</td>
+        <td>{{ m.unitPrice | currency:'COP':'symbol':'1.0-0' }}</td>
+        <td>{{ m.pricePerSqm ? (m.pricePerSqm | currency:'COP':'symbol':'1.0-0') : '-' }}</td>
+        <td>
+          <button class="btn-icon" title="Editar">✏️</button>
+          <button class="btn-icon" title="Eliminar">🗑️</button>
+        </td>
+      </tr>
+      <tr *ngIf="materials.length === 0">
+        <td colspan="8" class="text-center">No hay materiales registrados.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

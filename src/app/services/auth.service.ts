@@ -19,7 +19,21 @@ export class AuthService {
     localStorage.setItem('token', token);
   }
 
+  saveUser(user: any): void {
+    localStorage.setItem('user', JSON.stringify(user));
+  }
+
+  getUser(): any {
+    const userStr = localStorage.getItem('user');
+    return userStr ? JSON.parse(userStr) : null;
+  }
+
   isAuthenticated(): boolean {
     return !!localStorage.getItem('token');
+  }
+
+  logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   }
 }

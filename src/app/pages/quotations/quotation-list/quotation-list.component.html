@@ -1,0 +1,47 @@
+<div class="page-header">
+  <div>
+    <h1>Cotizaciones</h1>
+    <p>Historial y gestión de cotizaciones.</p>
+  </div>
+  <button class="btn-primary" routerLink="/quotations/new">➕ Nueva Cotización</button>
+</div>
+
+<div class="card glass-panel">
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loader"></div>
+    <p>Cargando...</p>
+  </div>
+
+  <table class="data-table" *ngIf="!isLoading">
+    <thead>
+      <tr>
+        <th>N°</th>
+        <th>Fecha</th>
+        <th>Cliente</th>
+        <th>Ciudad</th>
+        <th>Total</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let q of quotations">
+        <td>{{ q.number }}</td>
+        <td>{{ q.date | date:'dd/MM/yyyy' }}</td>
+        <td>{{ q.client?.name }}</td>
+        <td>{{ q.city }}</td>
+        <td>{{ q.totals?.grandTotal | currency:'COP':'symbol':'1.0-0' }}</td>
+        <td>
+          <span class="badge" [ngClass]="q.status">{{ q.status | uppercase }}</span>
+        </td>
+        <td>
+          <button class="btn-icon" title="Ver / Editar" (click)="editQuotation(q._id)">👁️</button>
+          <button class="btn-icon" title="Descargar PDF">📄</button>
+        </td>
+      </tr>
+      <tr *ngIf="quotations.length === 0">
+        <td colspan="7" class="text-center">No hay cotizaciones registradas.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
