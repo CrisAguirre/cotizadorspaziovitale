@@ -18,4 +18,8 @@ export class AuthService {
   saveToken(token: string): void {
     localStorage.setItem('token', token);
   }
+
+  isAuthenticated(): boolean {
+    return !!localStorage.getItem('token');
+  }
 }
