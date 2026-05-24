@@ -28,9 +28,9 @@
       <tr *ngFor="let q of quotations">
         <td>{{ q.number }}</td>
         <td>{{ q.date | date:'dd/MM/yyyy' }}</td>
-        <td>{{ q.client?.name }}</td>
+        <td>{{ q.client.name }}</td>
         <td>{{ q.city }}</td>
-        <td>{{ q.totals?.grandTotal | currency:'COP':'symbol':'1.0-0' }}</td>
+        <td>{{ q.totals.grandTotal | currency:'COP':'symbol':'1.0-0' }}</td>
         <td>
           <span class="badge" [ngClass]="q.status">{{ q.status | uppercase }}</span>
         </td>
