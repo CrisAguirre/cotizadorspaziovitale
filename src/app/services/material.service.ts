@@ -39,4 +39,11 @@ export class MaterialService {
   deleteMaterial(id: string): Observable<ApiResponse<null>> {
     return this.http.delete<ApiResponse<null>>(`${this.apiUrl}/${id}`);
   }
+
+  bulkUpsert(materials: Material[], replaceProvider?: string): Observable<ApiResponse<{ created: number; updated: number; total: number }>> {
+    return this.http.post<ApiResponse<{ created: number; updated: number; total: number }>>(
+      `${this.apiUrl}/bulk-upsert`,
+      { materials, replaceProvider }
+    );
+  }
 }

@@ -1,0 +1,25 @@
+<div class="material-picker">
+  <input
+    type="text"
+    class="form-control-sm picker-input"
+    [(ngModel)]="query"
+    (input)="onInput()"
+    (focus)="onInput()"
+    (blur)="close()"
+    [placeholder]="placeholder"
+  />
+  <div class="picker-dropdown" *ngIf="isOpen && (results.length || isLoading)">
+    <div *ngIf="isLoading" class="picker-item muted">Buscando...</div>
+    <button
+      type="button"
+      class="picker-item"
+      *ngFor="let m of results"
+      (mousedown)="select(m); $event.preventDefault()"
+    >
+      <span class="picker-code">{{ m.code }}</span>
+      <span class="picker-desc">{{ m.description }}</span>
+      <span class="picker-meta">{{ m.provider }} · {{ m.unitPrice | currency:'COP':'symbol':'1.0-0' }}</span>
+    </button>
+    <div *ngIf="!isLoading && !results.length" class="picker-item muted">Sin resultados</div>
+  </div>
+</div>

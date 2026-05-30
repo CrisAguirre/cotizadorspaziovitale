@@ -123,6 +123,8 @@ export interface Furniture {
   name: string;
   description: string;
   measurements: string;
+  /** M² del mueble para precio/M² (Excel: ej. 2.08 × 2.1 = 4.368) */
+  areaSqm?: number;
   quantity: number;
   unit: string;
   type: 'standard' | 'custom' | 'meson';

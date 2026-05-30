@@ -9,8 +9,15 @@
   <div class="wizard-body glass-panel">
     <!-- PASO 1: INFORMACIÓN DEL CLIENTE (Formulario Reactivo) -->
     <form *ngIf="currentStep === 1" [formGroup]="quotationForm">
-      <h2>Información del Proyecto y Cliente</h2>
+      <div class="flex-between mb-2">
+        <h2>Información del Proyecto y Cliente</h2>
+        <button type="button" class="btn-secondary" (click)="loadSample2604()">Cargar ejemplo No. 2604</button>
+      </div>
       <div class="form-grid">
+        <div class="form-group">
+          <label>No. Cotización</label>
+          <input type="number" formControlName="number" class="form-control" placeholder="Ej. 2604">
+        </div>
         <div class="form-group">
           <label>Título del Proyecto</label>
           <input type="text" formControlName="title" class="form-control" placeholder="Ej. Cocina Casa Campo">
@@ -70,6 +77,14 @@
                 <input type="text" [(ngModel)]="furn.name" class="form-control">
               </div>
               <div class="form-group">
+                <label>Medidas</label>
+                <input type="text" [(ngModel)]="furn.measurements" class="form-control" placeholder="Ej. 2.08 x 2.1">
+              </div>
+              <div class="form-group">
+                <label>M² (precio/M²)</label>
+                <input type="number" [(ngModel)]="furn.areaSqm" (change)="recalculate()" class="form-control" step="0.001">
+              </div>
+              <div class="form-group">
                 <label>Cantidad</label>
                 <input type="number" [(ngModel)]="furn.quantity" (change)="recalculate()" class="form-control">
               </div>
@@ -104,6 +119,7 @@
             <table class="budget-table" *ngIf="furn.supplies?.length">
               <thead>
                 <tr>
+                  <th>Buscar lista</th>
                   <th>Descripción</th>
                   <th>Cant.</th>
                   <th>Precio Und</th>
@@ -113,6 +129,13 @@
               </thead>
               <tbody>
                 <tr *ngFor="let sup of furn.supplies; let i = index">
+                  <td>
+                    <app-material-picker
+                      category="melamina"
+                      placeholder="Melamina / tablero..."
+                      (materialSelected)="applySupplyMaterial(sup, $event)"
+                    ></app-material-picker>
+                  </td>
                   <td><input type="text" [(ngModel)]="sup.description" class="form-control-sm"></td>
                   <td><input type="number" [(ngModel)]="sup.quantity" (change)="recalculate()" class="form-control-sm num-input"></td>
                   <td><input type="number" [(ngModel)]="sup.unitPrice" (change)="recalculate()" class="form-control-sm num-input"></td>
@@ -132,6 +155,7 @@
             <table class="budget-table" *ngIf="furn.edgeBands?.length">
               <thead>
                 <tr>
+                  <th>Buscar</th>
                   <th>Descripción</th>
                   <th>Cant. ML</th>
                   <th>% Desperdicio</th>
@@ -143,6 +167,13 @@
               </thead>
               <tbody>
                 <tr *ngFor="let edge of furn.edgeBands; let i = index">
+                  <td>
+                    <app-material-picker
+                      category="canto"
+                      placeholder="Canto..."
+                      (materialSelected)="applyEdgeMaterial(edge, $event)"
+                    ></app-material-picker>
+                  </td>
                   <td><input type="text" [(ngModel)]="edge.description" class="form-control-sm"></td>
                   <td><input type="number" [(ngModel)]="edge.quantity" (change)="recalculate()" class="form-control-sm num-input"></td>
                   <td>{{ (edge.wasteFactor || 0) * 100 }}%</td>
@@ -155,15 +186,46 @@
             </table>
           </div>
 
+          <!-- Diseño -->
+          <div class="budget-section">
+            <div class="flex-between">
+              <h5>3. Asesoría y Diseño</h5>
+              <button class="btn-icon" (click)="addItem(furn, 'designTime')">+ Añadir</button>
+            </div>
+            <label class="checkbox-inline">
+              <input type="checkbox" [(ngModel)]="furn.clientPaidDesign" (change)="recalculate()">
+              Cliente ya pagó diseño ($0)
+            </label>
+            <table class="budget-table" *ngIf="furn.designTime?.length">
+              <thead>
+                <tr>
+                  <th>Descripción</th>
+                  <th>Horas</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let d of furn.designTime; let i = index">
+                  <td><input type="text" [(ngModel)]="d.description" class="form-control-sm"></td>
+                  <td><input type="number" [(ngModel)]="d.quantity" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td>{{ d.totalPrice | currency:'COP':'symbol':'1.0-0' }}</td>
+                  <td><button class="text-error" (click)="removeItem(furn, 'designTime', i)">X</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
           <!-- Herrajes -->
           <div class="budget-section">
             <div class="flex-between">
-              <h5>3. Herrajes y Accesorios</h5>
+              <h5>4. Herrajes y Accesorios</h5>
               <button class="btn-icon" (click)="addItem(furn, 'accessories')">+ Añadir</button>
             </div>
             <table class="budget-table" *ngIf="furn.accessories?.length">
               <thead>
                 <tr>
+                  <th>Buscar</th>
                   <th>Descripción</th>
                   <th>Cant.</th>
                   <th>Precio Und</th>
@@ -174,6 +236,12 @@
               </thead>
               <tbody>
                 <tr *ngFor="let acc of furn.accessories; let i = index">
+                  <td>
+                    <app-material-picker
+                      placeholder="Herraje / accesorio..."
+                      (materialSelected)="applyAccessoryMaterial(acc, $event)"
+                    ></app-material-picker>
+                  </td>
                   <td><input type="text" [(ngModel)]="acc.description" class="form-control-sm"></td>
                   <td><input type="number" [(ngModel)]="acc.quantity" (change)="recalculate()" class="form-control-sm num-input"></td>
                   <td><input type="number" [(ngModel)]="acc.unitPrice" (change)="recalculate()" class="form-control-sm num-input"></td>
@@ -188,7 +256,7 @@
           <!-- Cortes -->
           <div class="budget-section">
             <div class="flex-between">
-              <h5>4. Cortes (M2 y Tiempo)</h5>
+              <h5>5. Cortes Melaminas (M² × tiempo × cant.)</h5>
               <button class="btn-icon" (click)="addItem(furn, 'cuts')">+ Añadir</button>
             </div>
             <table class="budget-table" *ngIf="furn.cuts?.length">
@@ -218,7 +286,7 @@
           <!-- Ensamble -->
           <div class="budget-section">
             <div class="flex-between">
-              <h5>5. Ensamble</h5>
+              <h5>6. Mano de Obra Armado</h5>
               <button class="btn-icon" (click)="addItem(furn, 'assembly')">+ Añadir</button>
             </div>
             <table class="budget-table" *ngIf="furn.assembly?.length">
@@ -244,6 +312,46 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Instalación -->
+          <div class="budget-section">
+            <div class="flex-between">
+              <h5>7. Instalación en obra (2 personas)</h5>
+              <button class="btn-icon" (click)="addItem(furn, 'installation')">+ Añadir</button>
+            </div>
+            <table class="budget-table" *ngIf="furn.installation?.length">
+              <thead>
+                <tr>
+                  <th>Descripción</th>
+                  <th>Medida</th>
+                  <th>Hrs</th>
+                  <th>Operarios</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let inst of furn.installation; let i = index">
+                  <td><input type="text" [(ngModel)]="inst.description" class="form-control-sm"></td>
+                  <td><input type="number" [(ngModel)]="inst.totalQuantity" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="inst.installHours" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="inst.persons" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td>{{ inst.totalPrice | currency:'COP':'symbol':'1.0-0' }}</td>
+                  <td><button class="text-error" (click)="removeItem(furn, 'installation', i)">X</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="section-totals text-muted">
+            <span>Insumos: {{ furn.totalSupplies | currency:'COP':'symbol':'1.0-0' }}</span>
+            <span>Cantos: {{ furn.totalEdgeBands | currency:'COP':'symbol':'1.0-0' }}</span>
+            <span>Diseño: {{ furn.totalDesignTime | currency:'COP':'symbol':'1.0-0' }}</span>
+            <span>Accesorios: {{ furn.totalAccessories | currency:'COP':'symbol':'1.0-0' }}</span>
+            <span>Cortes: {{ furn.totalCuts | currency:'COP':'symbol':'1.0-0' }}</span>
+            <span>Armado: {{ furn.totalAssembly | currency:'COP':'symbol':'1.0-0' }}</span>
+            <span>Instalación: {{ furn.totalInstallation | currency:'COP':'symbol':'1.0-0' }}</span>
+          </div>
           
           <div class="furniture-total text-right mt-2">
             <strong>Subtotal Mueble: {{ furn.totalCost | currency:'COP':'symbol':'1.0-0' }}</strong>
@@ -254,7 +362,21 @@
 
     <!-- PASO 4: RESUMEN Y TOTALES GLOBALES (AIU) -->
     <div *ngIf="currentStep === 4" class="summary-section">
-      <h2>Resumen de Cotización</h2>
+      <h2>Resumen de Cotización <span *ngIf="activeQuotation.number">No. {{ activeQuotation.number }}</span></h2>
+
+      <div *ngIf="validationReport" class="validation-banner" [class.ok]="validationReport.ok" [class.warn]="!validationReport.ok">
+        <strong *ngIf="validationReport.ok">Validación 2604: totales alineados con Excel (±{{ reference2604.toleranceAmount | number }} COP)</strong>
+        <ng-container *ngIf="!validationReport.ok">
+          <strong>Validación 2604: revisar diferencias</strong>
+          <ul>
+            <li *ngFor="let r of validationReport.results">
+              {{ r.field }}: app {{ r.actual | currency:'COP':'symbol':'1.0-0' }} vs Excel {{ r.expected | currency:'COP':'symbol':'1.0-0' }}
+              <span *ngIf="!r.ok"> (Δ {{ r.diff | currency:'COP':'symbol':'1.0-0' }})</span>
+            </li>
+          </ul>
+        </ng-container>
+      </div>
+
       <div class="grid-2">
         <div class="totals-card">
           <h3>Costos Base</h3>
@@ -290,10 +412,13 @@
           </div>
           
           <div class="flex-between form-group-sm">
-            <span>Descuento Adicional (%)</span>
+            <span>Recargo adicional (%)</span>
             <input type="number" [(ngModel)]="activeQuotation.totals.discountPercent" (change)="recalculate()" class="form-control-sm num-input">
-            <span class="text-error">- {{ activeQuotation.totals.discountAmount | currency:'COP':'symbol':'1.0-0' }}</span>
+            <span>+ {{ activeQuotation.totals.discountAmount | currency:'COP':'symbol':'1.0-0' }}</span>
           </div>
+
+          <p class="flex-between mt-2"><span>Total con IVA:</span> <strong>{{ activeQuotation.totals.totalWithTax | currency:'COP':'symbol':'1.0-0' }}</strong></p>
+          <p class="flex-between" *ngIf="activeQuotation.totals.totalSqm > 0"><span>Precio por M²:</span> <strong>{{ activeQuotation.totals.pricePerSqm | currency:'COP':'symbol':'1.0-0' }}</strong></p>
 
           <div class="grand-total mt-4">
             <h3>GRAN TOTAL: {{ activeQuotation.totals.grandTotal | currency:'COP':'symbol':'1.0-0' }}</h3>

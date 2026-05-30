@@ -65,3 +65,53 @@
   padding: 30px !important;
   color: var(--text-muted) !important;
 }
+
+.import-panel {
+  margin-bottom: 20px;
+  padding: 20px;
+}
+.import-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.checkbox-row label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.filters-row .form-control {
+  flex: 1;
+  min-width: 160px;
+}
+.alert.ok {
+  color: #4ade80;
+  margin: 8px 0;
+}
+.alert.error {
+  color: #f87171;
+  margin: 8px 0;
+}
+.preview-box {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+.preview-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+.data-table.compact td,
+.data-table.compact th {
+  padding: 8px 10px;
+  font-size: 13px;
+}

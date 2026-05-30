@@ -3,8 +3,11 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { QuotationService } from '../../../services/quotation.service';
 import { ConfigService } from '../../../services/config.service';
 import { QuotationCalculatorService } from '../../../services/quotation-calculator.service';
+import { QuotationValidationService, QuotationValidationReport } from '../../../services/quotation-validation.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AppConfig, Quotation, Area, Furniture } from '../../../models/interfaces';
+import { AppConfig, Quotation, Area, Furniture, Material, SupplyItem, EdgeBandItem, AccessoryItem } from '../../../models/interfaces';
+import { buildQuotation2604Sample } from '../../../data/quotation-2604.sample';
+import { QUOTATION_2604_REFERENCE } from '../../../data/quotation-2604.reference';
 
 @Component({
   selector: 'app-quotation-wizard',
@@ -15,8 +18,9 @@ export class QuotationWizardComponent implements OnInit {
   currentStep = 1;
   quotationForm: FormGroup;
   isLoading = false;
-  
-  // Objeto de memoria para las matemáticas directas (Evitando lentitud de Reactive Forms en niveles profundos)
+  validationReport: QuotationValidationReport | null = null;
+  readonly reference2604 = QUOTATION_2604_REFERENCE;
+
   activeQuotation: Quotation = {
     number: 0,
     date: new Date().toISOString().substring(0, 10),
@@ -27,7 +31,7 @@ export class QuotationWizardComponent implements OnInit {
     totals: {
       totalCost: 0, unforeseenPercent: 10, unforeseenAmount: 0, profitPercent: 35, profitAmount: 0,
       indirectPercent: 32, indirectAmount: 0, subtotal: 0, taxPercent: 19, taxAmount: 0, totalWithTax: 0,
-      discountPercent: 0, discountAmount: 0, grandTotal: 0, totalSqm: 0, pricePerSqm: 0
+      discountPercent: 10, discountAmount: 0, grandTotal: 0, totalSqm: 0, pricePerSqm: 0
     },
     status: 'borrador' as const,
     paymentTerms: '',
@@ -42,10 +46,12 @@ export class QuotationWizardComponent implements OnInit {
     private quotationService: QuotationService,
     private configService: ConfigService,
     public calcService: QuotationCalculatorService,
+    private validationService: QuotationValidationService,
     private router: Router,
     private route: ActivatedRoute
   ) {
     this.quotationForm = this.fb.group({
+      number: [0],
       date: [new Date().toISOString().substring(0, 10), Validators.required],
       city: ['San Juan de Pasto', Validators.required],
       title: ['VENTA, ELABORACIÓN E INSTALACIÓN DE MOBILIARIO', Validators.required],
@@ -62,7 +68,13 @@ export class QuotationWizardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadConfig();
-    this.addArea();
+    this.route.queryParams.subscribe((params) => {
+      if (params['demo'] === '2604') {
+        this.loadSample2604();
+      } else if (!this.activeQuotation.areas?.length) {
+        this.addArea();
+      }
+    });
   }
 
   loadConfig() {
@@ -73,8 +85,32 @@ export class QuotationWizardComponent implements OnInit {
         this.activeQuotation.totals.profitPercent = this.appConfig.profitPercent;
         this.activeQuotation.totals.indirectPercent = this.appConfig.indirectPercent;
         this.activeQuotation.totals.taxPercent = this.appConfig.taxPercent;
+        this.activeQuotation.totals.discountPercent = this.appConfig.defaultDiscount ?? 10;
+        if (!this.activeQuotation.paymentTerms && this.appConfig.paymentTerms) {
+          this.activeQuotation.paymentTerms = this.appConfig.paymentTerms;
+        }
+        this.recalculate();
       }
     });
+  }
+
+  loadSample2604(): void {
+    this.activeQuotation = buildQuotation2604Sample();
+    this.quotationForm.patchValue({
+      number: this.activeQuotation.number,
+      date: this.activeQuotation.date,
+      city: this.activeQuotation.city,
+      title: this.activeQuotation.title,
+      client: this.activeQuotation.client,
+      paymentTerms: this.activeQuotation.paymentTerms,
+      validityDays: this.activeQuotation.validityDays
+    });
+    this.recalculate();
+    this.runValidation2604();
+  }
+
+  runValidation2604(): void {
+    this.validationReport = this.validationService.validateAgainst2604(this.activeQuotation.totals);
   }
 
   nextStep() {
@@ -84,6 +120,7 @@ export class QuotationWizardComponent implements OnInit {
         return;
       }
       const val = this.quotationForm.value;
+      this.activeQuotation.number = val.number || this.activeQuotation.number;
       this.activeQuotation.date = val.date;
       this.activeQuotation.city = val.city;
       this.activeQuotation.title = val.title;
@@ -91,15 +128,27 @@ export class QuotationWizardComponent implements OnInit {
       this.activeQuotation.paymentTerms = val.paymentTerms;
       this.activeQuotation.validityDays = val.validityDays;
     }
-    
-    if (this.currentStep < 4) this.currentStep++;
+
+    if (this.currentStep === 3) {
+      this.recalculate();
+    }
+
+    if (this.currentStep < 4) {
+      this.currentStep++;
+    }
+
+    if (this.currentStep === 4) {
+      this.recalculate();
+      if (this.activeQuotation.number === 2604) {
+        this.runValidation2604();
+      }
+    }
   }
 
   prevStep() {
     if (this.currentStep > 1) this.currentStep--;
   }
 
-  // ==== MANEJO DE ARRAY EN MEMORIA ====
   addArea() {
     if (!this.activeQuotation.areas) this.activeQuotation.areas = [];
     this.activeQuotation.areas.push({
@@ -150,33 +199,95 @@ export class QuotationWizardComponent implements OnInit {
     this.recalculate();
   }
 
-  addItem(furniture: Furniture, type: 'supplies' | 'edgeBands' | 'accessories' | 'cuts' | 'assembly' | 'installation') {
+  addItem(
+    furniture: Furniture,
+    type: 'supplies' | 'edgeBands' | 'accessories' | 'designTime' | 'cuts' | 'assembly' | 'installation'
+  ) {
     if (!furniture[type]) furniture[type] = [];
-    const item: any = {};
-    if (type === 'supplies') { item.unitOfMeasure = 'LAMINA'; item.quantity = 0; item.unitPrice = 0; }
-    if (type === 'edgeBands') { item.unitOfMeasure = 'ML'; item.quantity = 0; item.unitPrice = 0; }
-    if (type === 'accessories') { item.unit = 'UNIDAD'; item.quantity = 0; item.unitPrice = 0; item.timeHours = 0; }
-    if (type === 'cuts') { item.sqm = 0; item.timeHours = 0; item.quantity = 1; }
-    if (type === 'assembly') { item.unitOfMeasure = 'm2'; item.assemblyHours = 0; item.persons = 2; item.totalQuantity = 1; }
-    if (type === 'installation') { item.unitOfMeasure = 'm2'; item.installHours = 0; item.persons = 2; item.totalQuantity = 1; }
-    
-    (furniture[type] as any[]).push(item);
+    const item: Record<string, unknown> = {};
+    if (type === 'supplies') {
+      item['unitOfMeasure'] = 'LAMINA';
+      item['quantity'] = 0;
+      item['unitPrice'] = 0;
+    }
+    if (type === 'edgeBands') {
+      item['unitOfMeasure'] = 'ML';
+      item['quantity'] = 0;
+      item['unitPrice'] = 0;
+    }
+    if (type === 'accessories') {
+      item['unit'] = 'UNIDAD';
+      item['quantity'] = 1;
+      item['unitPrice'] = 0;
+      item['timeHours'] = 0;
+    }
+    if (type === 'designTime') {
+      item['description'] = '';
+      item['quantity'] = 0;
+    }
+    if (type === 'cuts') {
+      item['sqm'] = 0;
+      item['timeHours'] = 0;
+      item['quantity'] = 1;
+    }
+    if (type === 'assembly') {
+      item['unitOfMeasure'] = 'm2';
+      item['assemblyHours'] = 0;
+      item['persons'] = 2;
+      item['totalQuantity'] = 1;
+    }
+    if (type === 'installation') {
+      item['unitOfMeasure'] = 'm2';
+      item['installHours'] = 0;
+      item['persons'] = 2;
+      item['totalQuantity'] = 1;
+    }
+
+    (furniture[type] as unknown[]).push(item);
+    this.recalculate();
   }
 
   removeItem(furniture: Furniture, type: string, index: number) {
-    (furniture as any)[type].splice(index, 1);
+    (furniture as unknown as Record<string, unknown[]>)[type].splice(index, 1);
     this.recalculate();
   }
 
   recalculate() {
     if (!this.appConfig) return;
     this.calcService.recalculateAll(this.activeQuotation, this.appConfig);
+    if (this.activeQuotation.number === 2604 && this.currentStep === 4) {
+      this.runValidation2604();
+    }
+  }
+
+  applySupplyMaterial(item: SupplyItem, material: Material): void {
+    item.description = material.description;
+    item.unitPrice = material.unitPrice;
+    item.providerColor = material.provider;
+    item.unitOfMeasure = material.unit || 'LAMINA';
+    this.recalculate();
+  }
+
+  applyEdgeMaterial(item: EdgeBandItem, material: Material): void {
+    item.description = material.description;
+    item.unitPrice = material.unitPrice;
+    item.color = material.color || material.provider;
+    item.unitOfMeasure = material.unit || 'ML';
+    this.recalculate();
+  }
+
+  applyAccessoryMaterial(item: AccessoryItem, material: Material): void {
+    item.description = material.description;
+    item.code = material.code;
+    item.unitPrice = material.unitPrice;
+    item.unit = material.unit || 'UNIDAD';
+    this.recalculate();
   }
 
   saveQuotation() {
     this.isLoading = true;
-    this.recalculate(); 
-    
+    this.recalculate();
+
     this.quotationService.createQuotation(this.activeQuotation).subscribe({
       next: (res: any) => {
         this.isLoading = false;
@@ -184,7 +295,7 @@ export class QuotationWizardComponent implements OnInit {
           this.router.navigate(['/quotations']);
         }
       },
-      error: (err: any) => {
+      error: (err: unknown) => {
         this.isLoading = false;
         console.error(err);
       }

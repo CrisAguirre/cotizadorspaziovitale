@@ -16,6 +16,7 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { HeaderComponent } from './components/header/header.component';
+import { MaterialPickerComponent } from './components/material-picker/material-picker.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -47,7 +48,8 @@ const routes: Routes = [
     QuotationWizardComponent,
     MainLayoutComponent,
     SidebarComponent,
-    HeaderComponent
+    HeaderComponent,
+    MaterialPickerComponent
   ],
   imports: [
     BrowserModule,

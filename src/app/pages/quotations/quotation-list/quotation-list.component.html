@@ -3,7 +3,10 @@
     <h1>Cotizaciones</h1>
     <p>Historial y gestión de cotizaciones.</p>
   </div>
-  <button class="btn-primary" routerLink="/quotations/new">➕ Nueva Cotización</button>
+  <div class="header-actions">
+    <button class="btn-secondary" routerLink="/quotations/new" [queryParams]="{ demo: '2604' }">Ejemplo No. 2604</button>
+    <button class="btn-primary" routerLink="/quotations/new">➕ Nueva Cotización</button>
+  </div>
 </div>
 
 <div class="card glass-panel">

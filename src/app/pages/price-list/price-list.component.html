@@ -1,12 +1,84 @@
 <div class="page-header">
   <div>
-    <h1>Lista de Precios</h1>
-    <p>Gestión de materiales, herrajes y accesorios.</p>
+    <h1>Lista de precios</h1>
+    <p>Catálogo de proveedores para auditar el presupuesto interno.</p>
   </div>
-  <button class="btn-primary">➕ Nuevo Material</button>
+</div>
+
+<div class="card glass-panel import-panel">
+  <h3>Importar desde Excel</h3>
+  <p class="text-muted">Formatos: Hejercol, Ferramenta Italiana, Volpato, Iberway (cocina). Precios sin IVA.</p>
+
+  <div class="import-grid">
+    <div class="form-group">
+      <label>Formato</label>
+      <select [(ngModel)]="selectedFormat" class="form-control">
+        <option *ngFor="let f of formatOptions" [value]="f.value">{{ f.label }}</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Archivo .xlsx</label>
+      <input type="file" accept=".xlsx" (change)="onFileSelected($event)" class="form-control" />
+    </div>
+    <div class="form-group checkbox-row">
+      <label>
+        <input type="checkbox" [(ngModel)]="replaceProviderOnImport" />
+        Reemplazar todos los ítems del proveedor antes de importar
+      </label>
+    </div>
+  </div>
+
+  <div *ngIf="importMessage" class="alert ok">{{ importMessage }}</div>
+  <div *ngIf="importError" class="alert error">{{ importError }}</div>
+
+  <div *ngIf="preview" class="preview-box">
+    <p>
+      <strong>{{ preview.fileName }}</strong> — {{ preview.materials.length }} materiales
+      <span *ngIf="preview.skipped"> ({{ preview.skipped }} filas omitidas)</span>
+    </p>
+    <table class="data-table compact">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Descripción</th>
+          <th>Unidad</th>
+          <th>Precio</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let m of preview.materials | slice:0:8">
+          <td>{{ m.code }}</td>
+          <td>{{ m.description }}</td>
+          <td>{{ m.unit }}</td>
+          <td>{{ m.unitPrice | currency:'COP':'symbol':'1.0-0' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="preview.materials.length > 8" class="text-muted">… y {{ preview.materials.length - 8 }} más</p>
+    <div class="preview-actions">
+      <button type="button" class="btn-secondary" (click)="cancelPreview()">Cancelar</button>
+      <button type="button" class="btn-primary" (click)="confirmImport()" [disabled]="isImporting">
+        {{ isImporting ? 'Importando…' : 'Confirmar importación' }}
+      </button>
+    </div>
+  </div>
 </div>
 
 <div class="card glass-panel">
+  <div class="filters-row">
+    <select [(ngModel)]="filterCategory" (change)="loadMaterials()" class="form-control">
+      <option *ngFor="let c of categories" [value]="c.value">{{ c.label }}</option>
+    </select>
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar código, descripción, proveedor..."
+      [(ngModel)]="searchTerm"
+      (keyup.enter)="onSearch()"
+    />
+    <button type="button" class="btn-secondary" (click)="onSearch()">Buscar</button>
+  </div>
+
   <div *ngIf="isLoading" class="loading-state">
     <div class="loader"></div>
     <p>Cargando materiales...</p>
@@ -16,31 +88,24 @@
     <thead>
       <tr>
         <th>Categoría</th>
+        <th>Proveedor</th>
         <th>Código</th>
         <th>Descripción</th>
-        <th>Dimensiones</th>
         <th>Unidad</th>
-        <th>Precio / Unidad</th>
-        <th>Precio / m²</th>
-        <th>Acciones</th>
+        <th>Precio s/ IVA</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let m of materials">
-        <td><span class="badge">{{ m.category | titlecase }}</span></td>
+        <td><span class="badge">{{ m.category }}</span></td>
+        <td>{{ m.provider }}</td>
         <td>{{ m.code }}</td>
         <td>{{ m.description }}</td>
-        <td>{{ m.dimension || 'N/A' }}</td>
         <td>{{ m.unit }}</td>
         <td>{{ m.unitPrice | currency:'COP':'symbol':'1.0-0' }}</td>
-        <td>{{ m.pricePerSqm ? (m.pricePerSqm | currency:'COP':'symbol':'1.0-0') : '-' }}</td>
-        <td>
-          <button class="btn-icon" title="Editar">✏️</button>
-          <button class="btn-icon" title="Eliminar">🗑️</button>
-        </td>
       </tr>
       <tr *ngIf="materials.length === 0">
-        <td colspan="8" class="text-center">No hay materiales registrados.</td>
+        <td colspan="6" class="text-center">No hay materiales. Importe un Excel de proveedor.</td>
       </tr>
     </tbody>
   </table>
