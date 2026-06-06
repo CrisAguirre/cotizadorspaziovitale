@@ -4,7 +4,9 @@ import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { TDocumentDefinitions, Content, TableCell, StyleDictionary } from 'pdfmake/interfaces';
 
-(pdfMake as any).vfs = (pdfFonts as any).pdfMake.vfs;
+// Safe assignment for vfs fonts
+const fonts = (pdfFonts as any);
+(pdfMake as any).vfs = fonts.pdfMake ? fonts.pdfMake.vfs : fonts.default ? fonts.default : fonts;
 
 @Injectable({
   providedIn: 'root'
