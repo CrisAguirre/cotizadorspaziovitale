@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { QuotationService } from '../../../services/quotation.service';
 import { Quotation } from '../../../models/interfaces';
 import { Router } from '@angular/router';
+import { PdfGeneratorService } from '../../../services/pdf-generator.service';
 
 @Component({
   selector: 'app-quotation-list',
@@ -12,7 +13,11 @@ export class QuotationListComponent implements OnInit {
   quotations: Quotation[] = [];
   isLoading = true;
 
-  constructor(private quotationService: QuotationService, private router: Router) {}
+  constructor(
+    private quotationService: QuotationService,
+    private router: Router,
+    private pdfGenerator: PdfGeneratorService
+  ) {}
 
   ngOnInit() {
     this.loadQuotations();
@@ -38,5 +43,9 @@ export class QuotationListComponent implements OnInit {
     if (id) {
       this.router.navigate(['/quotations', id]);
     }
+  }
+
+  downloadPdf(quotation: Quotation) {
+    this.pdfGenerator.generateQuotationPdf(quotation, null);
   }
 }

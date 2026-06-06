@@ -1,0 +1,313 @@
+import { Injectable } from '@angular/core';
+import { Quotation, AppConfig, Area, Furniture, AccessoryItem } from '../models/interfaces';
+import * as pdfMake from 'pdfmake/build/pdfmake';
+import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+import { TDocumentDefinitions, Content, TableCell, StyleDictionary } from 'pdfmake/interfaces';
+
+(pdfMake as any).vfs = (pdfFonts as any).pdfMake.vfs;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class PdfGeneratorService {
+
+  constructor() { }
+
+  generateQuotationPdf(quotation: Quotation, appConfig: AppConfig | null) {
+    const docDef: TDocumentDefinitions = {
+      content: this.buildContent(quotation, appConfig),
+      styles: this.getStyles(),
+      defaultStyle: {
+        fontSize: 10,
+        color: '#333333'
+      },
+      pageMargins: [40, 60, 40, 60],
+      header: (currentPage, pageCount) => {
+        return {
+          text: `Cotización No. ${quotation.number} - Página ${currentPage} de ${pageCount}`,
+          alignment: 'right',
+          margin: [0, 20, 40, 0],
+          fontSize: 8,
+          color: '#999999'
+        };
+      }
+    };
+    pdfMake.createPdf(docDef).download(`Cotizacion_${quotation.number}_${quotation.client.name.replace(/\s+/g, '_')}.pdf`);
+  }
+
+  private buildContent(quotation: Quotation, appConfig: AppConfig | null): Content[] {
+    const content: Content[] = [];
+
+    // Header
+    content.push({
+      columns: [
+        {
+          text: 'SPAZIO VITALE',
+          style: 'headerCompany',
+          width: '*'
+        },
+        {
+          text: [
+            { text: `Cotización No. ${quotation.number}\n`, style: 'headerTitle' },
+            { text: `Fecha: ${quotation.date}\n` },
+            { text: `Ciudad: ${quotation.city}` }
+          ],
+          alignment: 'right',
+          width: '*'
+        }
+      ],
+      margin: [0, 0, 0, 20]
+    });
+
+    // Client Info
+    content.push({
+      style: 'clientBox',
+      table: {
+        widths: ['25%', '75%'],
+        body: [
+          [{ text: 'Cliente:', bold: true }, quotation.client.name],
+          [{ text: 'Ciudad:', bold: true }, quotation.client.city || 'N/A'],
+          [{ text: 'Teléfono:', bold: true }, quotation.client.phone || 'N/A'],
+          [{ text: 'Email:', bold: true }, quotation.client.email || 'N/A']
+        ]
+      },
+      layout: 'lightHorizontalLines',
+      margin: [0, 0, 0, 20]
+    });
+
+    // Title
+    content.push({
+      text: quotation.title,
+      style: 'projectTitle',
+      margin: [0, 0, 0, 20]
+    });
+
+    // Mapeo lógico de configuración
+    const wConfig = quotation.wizardConfig;
+    const markupFactor = quotation.totals.totalCost > 0 ? quotation.totals.grandTotal / quotation.totals.totalCost : 1;
+    const allAccessories: { furnName: string, acc: AccessoryItem, clientPrice: number }[] = [];
+
+    // Muebles y Áreas
+    quotation.areas.forEach(area => {
+      if (wConfig.areaDisplayMode !== 'single') {
+        content.push({ text: `Área: ${area.name}`, style: 'areaTitle', margin: [0, 10, 0, 10] });
+      }
+
+      let areaSubtotal = 0;
+
+      const tableBody: TableCell[][] = [
+        [{ text: 'Ítem', style: 'tableHeader' }, { text: 'Descripción / Medidas', style: 'tableHeader' }, { text: 'Cant', style: 'tableHeader' }, { text: 'Valor Unit.', style: 'tableHeader', alignment: 'right' as 'right' }, { text: 'Valor Total', style: 'tableHeader', alignment: 'right' as 'right' }]
+      ];
+
+      area.furniture.forEach((furn, index) => {
+        let furnBaseCost = furn.totalCost;
+
+        // Q2: Herrajes
+        if (wConfig.hardwareDisplayMode === 'table') {
+          furnBaseCost -= furn.totalAccessories; // Restamos accesorios del mueble
+          furn.accessories.forEach(acc => {
+            allAccessories.push({
+              furnName: furn.name,
+              acc,
+              clientPrice: acc.totalPrice * markupFactor
+            });
+          });
+        }
+
+        // Q1: Precio Cliente
+        let furnClientPrice = 0;
+        if (wConfig.clientPriceMode === 'proportional') {
+          furnClientPrice = furnBaseCost * markupFactor;
+        } else if (wConfig.clientPriceMode === 'sqm') {
+          furnClientPrice = (furn.areaSqm || 0) * quotation.totals.pricePerSqm;
+        } else {
+          // Manual fallback (if not input, fallback to proportional)
+          furnClientPrice = furnBaseCost * markupFactor; 
+        }
+
+        const unitPrice = furnClientPrice / (furn.quantity || 1);
+        areaSubtotal += furnClientPrice;
+
+        tableBody.push([
+          { text: (index + 1).toString() },
+          { text: [
+              { text: `${furn.name}\n`, bold: true },
+              { text: furn.description ? `${furn.description}\n` : '' },
+              { text: `Medidas: ${furn.measurements || 'N/A'}`, fontSize: 9, color: '#666' }
+            ] 
+          },
+          { text: furn.quantity.toString() },
+          { text: this.formatCurrency(unitPrice), alignment: 'right' as 'right' },
+          { text: this.formatCurrency(furnClientPrice), alignment: 'right' as 'right' }
+        ]);
+      });
+
+      content.push({
+        table: {
+          headerRows: 1,
+          widths: ['auto', '*', 'auto', 'auto', 'auto'],
+          body: tableBody
+        },
+        layout: {
+          hLineWidth: (i: number, node: any) => (i === 0 || i === node.table.body.length) ? 2 : 1,
+          vLineWidth: () => 0,
+          hLineColor: (i: number) => i === 1 ? '#cccccc' : '#eeeeee',
+          paddingTop: () => 8,
+          paddingBottom: () => 8
+        },
+        margin: [0, 0, 0, 10]
+      });
+
+      // Q5: Subtotales por área
+      if (wConfig.areaDisplayMode === 'subtotals') {
+        content.push({
+          text: `Subtotal ${area.name}: ${this.formatCurrency(areaSubtotal)}`,
+          style: 'areaSubtotal',
+          alignment: 'right' as 'right',
+          margin: [0, 0, 0, 20]
+        });
+      } else {
+        content.push({ text: '', margin: [0, 0, 0, 20] });
+      }
+    });
+
+    // Q2: Tabla de herrajes (si aplica)
+    if (wConfig.hardwareDisplayMode === 'table' && allAccessories.length > 0) {
+      content.push({ text: 'Herrajes y Accesorios Adicionales', style: 'areaTitle', margin: [0, 10, 0, 10] });
+      const accBody: TableCell[][] = [
+        [{ text: 'Mueble', style: 'tableHeader' }, { text: 'Descripción', style: 'tableHeader' }, { text: 'Cant', style: 'tableHeader' }, { text: 'Total', style: 'tableHeader', alignment: 'right' as 'right' }]
+      ];
+      
+      let accTotal = 0;
+      allAccessories.forEach(item => {
+        accTotal += item.clientPrice;
+        accBody.push([
+          { text: item.furnName, fontSize: 9 },
+          { text: item.acc.description },
+          { text: item.acc.quantity.toString() },
+          { text: this.formatCurrency(item.clientPrice), alignment: 'right' as 'right' }
+        ]);
+      });
+
+      content.push({
+        table: {
+          headerRows: 1,
+          widths: ['auto', '*', 'auto', 'auto'],
+          body: accBody
+        },
+        layout: 'lightHorizontalLines',
+        margin: [0, 0, 0, 10]
+      });
+      content.push({
+        text: `Subtotal Herrajes: ${this.formatCurrency(accTotal)}`,
+        style: 'areaSubtotal',
+        alignment: 'right' as 'right',
+        margin: [0, 0, 0, 20]
+      });
+    }
+
+    // Totales
+    content.push({
+      columns: [
+        { width: '*', text: '' },
+        {
+          width: '40%',
+          table: {
+            widths: ['*', 'auto'],
+            body: [
+              ['Costo Total Materiales/Operación:', { text: this.formatCurrency(quotation.totals.totalCost), alignment: 'right' as 'right' }],
+              ['AIU (Imprevistos, Utilidad, Indirectos):', { text: this.formatCurrency(quotation.totals.subtotal - quotation.totals.totalCost), alignment: 'right' as 'right' }],
+              [{ text: 'SUBTOTAL ANTES DE IVA:', bold: true }, { text: this.formatCurrency(quotation.totals.subtotal), alignment: 'right' as 'right', bold: true }],
+              ['IVA:', { text: this.formatCurrency(quotation.totals.taxAmount), alignment: 'right' as 'right' }],
+              ...(quotation.totals.discountAmount > 0 ? [['Recargo / Otros:', { text: this.formatCurrency(quotation.totals.discountAmount), alignment: 'right' as 'right' }]] : []),
+              [{ text: 'VALOR TOTAL:', style: 'grandTotalLabel' }, { text: this.formatCurrency(quotation.totals.grandTotal), style: 'grandTotalValue', alignment: 'right' as 'right' }]
+            ]
+          },
+          layout: 'noBorders'
+        }
+      ],
+      margin: [0, 20, 0, 40]
+    });
+
+    // Notas y condiciones
+    content.push({ text: 'Condiciones Comerciales', style: 'sectionTitle' });
+    content.push({
+      ul: [
+        `Forma de pago: ${quotation.paymentTerms || 'No especificada'}`,
+        `Validez de la oferta: ${quotation.validityDays || 15} días`,
+        ...(quotation.notes ? [`Notas adicionales: ${quotation.notes}`] : [])
+      ],
+      margin: [0, 5, 0, 0]
+    });
+
+    return content;
+  }
+
+  private getStyles(): StyleDictionary {
+    return {
+      headerCompany: {
+        fontSize: 24,
+        bold: true,
+        color: '#1a1a1a'
+      },
+      headerTitle: {
+        fontSize: 14,
+        bold: true,
+        color: '#666666'
+      },
+      clientBox: {
+        fillColor: '#f8f9fa',
+        margin: [0, 5, 0, 5]
+      },
+      projectTitle: {
+        fontSize: 16,
+        bold: true,
+        alignment: 'center',
+        color: '#111827'
+      },
+      areaTitle: {
+        fontSize: 14,
+        bold: true,
+        color: '#374151',
+        decoration: 'underline'
+      },
+      tableHeader: {
+        bold: true,
+        color: '#4b5563',
+        fillColor: '#f3f4f6'
+      },
+      areaSubtotal: {
+        fontSize: 11,
+        bold: true,
+        color: '#374151'
+      },
+      grandTotalLabel: {
+        fontSize: 14,
+        bold: true,
+        color: '#111827',
+        margin: [0, 10, 0, 0]
+      },
+      grandTotalValue: {
+        fontSize: 14,
+        bold: true,
+        color: '#2563eb',
+        margin: [0, 10, 0, 0]
+      },
+      sectionTitle: {
+        fontSize: 12,
+        bold: true,
+        color: '#111827',
+        margin: [0, 10, 0, 5]
+      }
+    };
+  }
+
+  private formatCurrency(value: number): string {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
+  }
+}

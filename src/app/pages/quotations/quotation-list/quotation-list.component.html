@@ -39,7 +39,7 @@
         </td>
         <td>
           <button class="btn-icon" title="Ver / Editar" (click)="editQuotation(q._id)">👁️</button>
-          <button class="btn-icon" title="Descargar PDF">📄</button>
+          <button class="btn-icon" title="Descargar PDF" (click)="downloadPdf(q)">📄</button>
         </td>
       </tr>
       <tr *ngIf="quotations.length === 0">

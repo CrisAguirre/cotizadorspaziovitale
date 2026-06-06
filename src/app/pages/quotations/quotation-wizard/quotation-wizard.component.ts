@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { QuotationService } from '../../../services/quotation.service';
 import { ConfigService } from '../../../services/config.service';
 import { QuotationCalculatorService } from '../../../services/quotation-calculator.service';
+import { PdfGeneratorService } from '../../../services/pdf-generator.service';
 import { QuotationValidationService, QuotationValidationReport } from '../../../services/quotation-validation.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AppConfig, Quotation, Area, Furniture, Material, SupplyItem, EdgeBandItem, AccessoryItem, WizardConfig } from '../../../models/interfaces';
@@ -72,6 +73,7 @@ export class QuotationWizardComponent implements OnInit {
     private quotationService: QuotationService,
     private configService: ConfigService,
     public calcService: QuotationCalculatorService,
+    private pdfGenerator: PdfGeneratorService,
     private validationService: QuotationValidationService,
     private router: Router,
     private route: ActivatedRoute
@@ -362,5 +364,9 @@ export class QuotationWizardComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+
+  generatePdf() {
+    this.pdfGenerator.generateQuotationPdf(this.activeQuotation, null);
   }
 }
