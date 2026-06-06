@@ -5,7 +5,7 @@ import { ConfigService } from '../../../services/config.service';
 import { QuotationCalculatorService } from '../../../services/quotation-calculator.service';
 import { QuotationValidationService, QuotationValidationReport } from '../../../services/quotation-validation.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AppConfig, Quotation, Area, Furniture, Material, SupplyItem, EdgeBandItem, AccessoryItem } from '../../../models/interfaces';
+import { AppConfig, Quotation, Area, Furniture, Material, SupplyItem, EdgeBandItem, AccessoryItem, WizardConfig } from '../../../models/interfaces';
 import { buildQuotation2604Sample } from '../../../data/quotation-2604.sample';
 import { QUOTATION_2604_REFERENCE } from '../../../data/quotation-2604.reference';
 
@@ -16,10 +16,25 @@ import { QUOTATION_2604_REFERENCE } from '../../../data/quotation-2604.reference
 })
 export class QuotationWizardComponent implements OnInit {
   currentStep = 1;
+  wizardStep = 1; // Sub-step within the configuration wizard (1-6)
+  readonly TOTAL_STEPS = 5;
+  readonly TOTAL_WIZARD_QUESTIONS = 6;
   quotationForm: FormGroup;
   isLoading = false;
   validationReport: QuotationValidationReport | null = null;
   readonly reference2604 = QUOTATION_2604_REFERENCE;
+
+  // Default wizard config
+  readonly defaultWizardConfig: WizardConfig = {
+    clientPriceMode: 'proportional',
+    hardwareDisplayMode: 'table',
+    moTimeMode: 'manual',
+    requiresDesignFiles: false,
+    designFilesInternal: false,
+    areaDisplayMode: 'subtotals',
+    mesonMode: 'none',
+    wizardCompleted: false
+  };
 
   activeQuotation: Quotation = {
     number: 0,
@@ -33,11 +48,22 @@ export class QuotationWizardComponent implements OnInit {
       indirectPercent: 32, indirectAmount: 0, subtotal: 0, taxPercent: 19, taxAmount: 0, totalWithTax: 0,
       discountPercent: 10, discountAmount: 0, grandTotal: 0, totalSqm: 0, pricePerSqm: 0
     },
+    wizardConfig: { ...this.defaultWizardConfig },
     status: 'borrador' as const,
     paymentTerms: '',
     validityDays: 15,
     notes: ''
   };
+
+  // Labels for the wizard questions
+  readonly wizardQuestions = [
+    { step: 1, title: 'Precio visible al cliente', icon: '💰' },
+    { step: 2, title: 'Herrajes en la cotización', icon: '🔩' },
+    { step: 3, title: 'Tiempos de mano de obra', icon: '⏱️' },
+    { step: 4, title: 'Despiece gráfico', icon: '📐' },
+    { step: 5, title: 'Estructura de áreas', icon: '🏠' },
+    { step: 6, title: 'Mesones', icon: '🍽️' }
+  ];
 
   appConfig!: AppConfig;
 
@@ -129,15 +155,20 @@ export class QuotationWizardComponent implements OnInit {
       this.activeQuotation.validityDays = val.validityDays;
     }
 
-    if (this.currentStep === 3) {
-      this.recalculate();
-    }
-
-    if (this.currentStep < 4) {
-      this.currentStep++;
+    // Step 2 is the config wizard — mark as completed when leaving
+    if (this.currentStep === 2) {
+      this.activeQuotation.wizardConfig.wizardCompleted = true;
     }
 
     if (this.currentStep === 4) {
+      this.recalculate();
+    }
+
+    if (this.currentStep < this.TOTAL_STEPS) {
+      this.currentStep++;
+    }
+
+    if (this.currentStep === 5) {
       this.recalculate();
       if (this.activeQuotation.number === 2604) {
         this.runValidation2604();
@@ -146,7 +177,38 @@ export class QuotationWizardComponent implements OnInit {
   }
 
   prevStep() {
+    if (this.currentStep === 2) {
+      this.wizardStep = 1; // Reset wizard sub-step when going back
+    }
     if (this.currentStep > 1) this.currentStep--;
+  }
+
+  // Config wizard sub-navigation
+  nextWizardQuestion() {
+    if (this.wizardStep < this.TOTAL_WIZARD_QUESTIONS) {
+      this.wizardStep++;
+    }
+  }
+
+  prevWizardQuestion() {
+    if (this.wizardStep > 1) {
+      this.wizardStep--;
+    }
+  }
+
+  isWizardComplete(): boolean {
+    return this.wizardStep === this.TOTAL_WIZARD_QUESTIONS;
+  }
+
+  setDesignFilesMode(mode: 'attach' | 'none' | 'internal') {
+    this.activeQuotation.wizardConfig.requiresDesignFiles = mode !== 'none';
+    this.activeQuotation.wizardConfig.designFilesInternal = mode === 'internal';
+  }
+
+  getDesignFilesMode(): string {
+    if (!this.activeQuotation.wizardConfig.requiresDesignFiles) return 'none';
+    if (this.activeQuotation.wizardConfig.designFilesInternal) return 'internal';
+    return 'attach';
   }
 
   addArea() {

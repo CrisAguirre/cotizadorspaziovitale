@@ -1,4 +1,4 @@
-import { Quotation } from '../models/interfaces';
+import { Quotation, WizardConfig } from '../models/interfaces';
 
 /**
  * Cotización de ejemplo No. 2604 — área COCINA.
@@ -102,6 +102,16 @@ export function buildQuotation2604Sample(): Quotation {
       grandTotal: 0,
       totalSqm: 0,
       pricePerSqm: 0
+    },
+    wizardConfig: {
+      clientPriceMode: 'proportional',
+      hardwareDisplayMode: 'table',
+      moTimeMode: 'manual',
+      requiresDesignFiles: false,
+      designFilesInternal: false,
+      areaDisplayMode: 'subtotals',
+      mesonMode: 'none',
+      wizardCompleted: true
     },
     status: 'borrador',
     paymentTerms: '',

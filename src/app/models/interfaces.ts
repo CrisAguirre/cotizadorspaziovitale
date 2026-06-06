@@ -207,6 +207,18 @@ export interface QuotationClient {
   email: string;
 }
 
+// ===== WIZARD CONFIG (FASE 0.5) =====
+export interface WizardConfig {
+  clientPriceMode: 'proportional' | 'sqm' | 'manual';
+  hardwareDisplayMode: 'table' | 'included' | 'selective';
+  moTimeMode: 'manual' | 'table' | 'mixed';
+  requiresDesignFiles: boolean;
+  designFilesInternal: boolean;
+  areaDisplayMode: 'subtotals' | 'global_only' | 'single';
+  mesonMode: 'special' | 'standard' | 'none';
+  wizardCompleted: boolean;
+}
+
 export interface Quotation {
   _id?: string;
   number: number;
@@ -216,6 +228,7 @@ export interface Quotation {
   title: string;
   areas: Area[];
   totals: QuotationTotals;
+  wizardConfig: WizardConfig;
   status: 'borrador' | 'auditada' | 'enviada' | 'aprobada';
   paymentTerms: string;
   validityDays: number;
