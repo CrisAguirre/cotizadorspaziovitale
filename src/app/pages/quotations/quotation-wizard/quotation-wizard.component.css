@@ -140,8 +140,9 @@
   margin-top: 20px;
 }
 .budget-section h5 {
-  color: var(--text-muted);
-  font-weight: 500;
+  color: var(--primary-color);
+  font-weight: 600;
+  margin-bottom: 10px;
 }
 .budget-table {
   width: 100%;
@@ -149,21 +150,16 @@
   margin-top: 10px;
 }
 .budget-table th, .budget-table td {
-  padding: 8px;
+  padding: 10px;
   text-align: left;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
 }
 .budget-table th {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-.form-control-sm {
-  width: 100%;
-  padding: 6px;
-  border: 1px solid var(--border-color);
-  background-color: transparent;
-  color: var(--text-main);
-  border-radius: 4px;
+  font-size: 13px;
+  color: var(--primary-color);
+  font-weight: 500;
+  opacity: 0.9;
 }
 .num-input {
   width: 80px;
