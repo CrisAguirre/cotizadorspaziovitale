@@ -86,7 +86,13 @@
       <div *ngIf="wizardStep === 1" class="config-question">
         <div class="question-header">
           <span class="question-number">1 / 6</span>
-          <h3>💰 ¿Cómo se calculará el precio de cada mueble que verá el cliente?</h3>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <h3 style="margin: 0;">💰 ¿Cómo se calculará el precio de cada mueble que verá el cliente?</h3>
+            <button type="button" class="btn-icon" (click)="showTipConfig[1] = !showTipConfig[1]" title="Ver ayuda de esta pregunta">💡</button>
+          </div>
+        </div>
+        <div class="wizard-tip" *ngIf="showTipConfig[1]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
+          <strong>💡 Objetivo:</strong> Define si el cliente verá un precio "por mueble" que se calcula repartiendo el costo total equitativamente según su peso, o si usarás otra metodología. Selecciona la opción que mejor se adapte a este cliente.
         </div>
         <div class="option-cards">
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.clientPriceMode === 'proportional'">
@@ -129,7 +135,13 @@
       <div *ngIf="wizardStep === 2" class="config-question">
         <div class="question-header">
           <span class="question-number">2 / 6</span>
-          <h3>🔩 ¿Cómo quieres que aparezcan los herrajes y accesorios en la cotización del cliente?</h3>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <h3 style="margin: 0;">🔩 ¿Cómo quieres que aparezcan los herrajes y accesorios en la cotización del cliente?</h3>
+            <button type="button" class="btn-icon" (click)="showTipConfig[2] = !showTipConfig[2]" title="Ver ayuda de esta pregunta">💡</button>
+          </div>
+        </div>
+        <div class="wizard-tip" *ngIf="showTipConfig[2]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
+          <strong>💡 Objetivo:</strong> Decide si prefieres transparencia total mostrando los herrajes en una tabla aparte con su respectivo precio, o si prefieres ocultarlos y absorber su costo en el valor general del mueble para simplificar la propuesta.
         </div>
         <div class="option-cards">
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.hardwareDisplayMode === 'table'">
@@ -172,7 +184,13 @@
       <div *ngIf="wizardStep === 3" class="config-question">
         <div class="question-header">
           <span class="question-number">3 / 6</span>
-          <h3>⏱️ Para calcular las horas de armado e instalación, ¿cómo prefieres trabajar?</h3>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <h3 style="margin: 0;">⏱️ Para calcular las horas de armado e instalación, ¿cómo prefieres trabajar?</h3>
+            <button type="button" class="btn-icon" (click)="showTipConfig[3] = !showTipConfig[3]" title="Ver ayuda de esta pregunta">💡</button>
+          </div>
+        </div>
+        <div class="wizard-tip" *ngIf="showTipConfig[3]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
+          <strong>💡 Objetivo:</strong> Las horas de Mano de Obra (MO) impactan directamente en el costo final. Elige si prefieres estimarlas tú mismo por cada mueble o usar una tabla predefinida para automatizar el cálculo.
         </div>
         <div class="option-cards">
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.moTimeMode === 'manual'">
@@ -215,8 +233,14 @@
       <div *ngIf="wizardStep === 4" class="config-question">
         <div class="question-header">
           <span class="question-number">4 / 6</span>
-          <h3>📐 ¿Quieres adjuntar archivos de despiece a esta cotización?</h3>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px;">
+            <h3 style="margin: 0;">📐 ¿Quieres adjuntar archivos de despiece a esta cotización?</h3>
+            <button type="button" class="btn-icon" (click)="showTipConfig[4] = !showTipConfig[4]" title="Ver ayuda de esta pregunta">💡</button>
+          </div>
           <p class="text-muted">El proceso estándar exige que la cantidad de láminas esté respaldada por una hoja de despieces.</p>
+        </div>
+        <div class="wizard-tip" *ngIf="showTipConfig[4]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
+          <strong>💡 Objetivo:</strong> Los archivos de diseño permiten que el área de producción audite tu trabajo. Si decides adjuntarlos, el sistema los guardará junto con el presupuesto. Puedes decidir si se muestran o no al cliente en el PDF.
         </div>
         <div class="option-cards">
           <label class="option-card" [class.selected]="getDesignFilesMode() === 'attach'">
@@ -262,7 +286,13 @@
       <div *ngIf="wizardStep === 5" class="config-question">
         <div class="question-header">
           <span class="question-number">5 / 6</span>
-          <h3>🏠 ¿Esta cotización tiene más de un espacio o área?</h3>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <h3 style="margin: 0;">🏠 ¿Esta cotización tiene más de un espacio o área?</h3>
+            <button type="button" class="btn-icon" (click)="showTipConfig[5] = !showTipConfig[5]" title="Ver ayuda de esta pregunta">💡</button>
+          </div>
+        </div>
+        <div class="wizard-tip" *ngIf="showTipConfig[5]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
+          <strong>💡 Objetivo:</strong> Organiza visualmente el presupuesto. Si agrupas los muebles por áreas (Cocina, Baño, Vestier), puedes mostrarle al cliente el subtotal de cada zona por separado para mayor claridad.
         </div>
         <div class="option-cards">
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.areaDisplayMode === 'subtotals'">
@@ -305,7 +335,13 @@
       <div *ngIf="wizardStep === 6" class="config-question">
         <div class="question-header">
           <span class="question-number">6 / 6</span>
-          <h3>🍽️ ¿Esta cotización incluye mesones (encimeras, superficies de trabajo)?</h3>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <h3 style="margin: 0;">🍽️ ¿Esta cotización incluye mesones (encimeras, superficies de trabajo)?</h3>
+            <button type="button" class="btn-icon" (click)="showTipConfig[6] = !showTipConfig[6]" title="Ver ayuda de esta pregunta">💡</button>
+          </div>
+        </div>
+        <div class="wizard-tip" *ngIf="showTipConfig[6]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
+          <strong>💡 Objetivo:</strong> Los mesones (granito, cuarzo, etc.) usualmente se tercerizan y tienen una lógica de cobro especial (por metro lineal o metro cuadrado). Define si necesitas activar este módulo de cálculo independiente.
         </div>
         <div class="option-cards">
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.mesonMode === 'special'">

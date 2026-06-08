@@ -209,13 +209,13 @@ export interface QuotationClient {
 
 // ===== WIZARD CONFIG (FASE 0.5) =====
 export interface WizardConfig {
-  clientPriceMode: 'proportional' | 'sqm' | 'manual';
-  hardwareDisplayMode: 'table' | 'included' | 'selective';
-  moTimeMode: 'manual' | 'table' | 'mixed';
-  requiresDesignFiles: boolean;
-  designFilesInternal: boolean;
-  areaDisplayMode: 'subtotals' | 'global_only' | 'single';
-  mesonMode: 'special' | 'standard' | 'none';
+  clientPriceMode: 'proportional' | 'sqm' | 'manual' | '';
+  hardwareDisplayMode: 'table' | 'included' | 'selective' | '';
+  moTimeMode: 'manual' | 'table' | 'mixed' | '';
+  requiresDesignFiles: boolean | null;
+  designFilesInternal: boolean | null;
+  areaDisplayMode: 'subtotals' | 'global_only' | 'single' | '';
+  mesonMode: 'special' | 'standard' | 'none' | '';
   wizardCompleted: boolean;
 }
 

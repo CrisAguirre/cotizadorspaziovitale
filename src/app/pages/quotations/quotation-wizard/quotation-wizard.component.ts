@@ -25,10 +25,21 @@ export class QuotationWizardComponent implements OnInit {
   validationReport: QuotationValidationReport | null = null;
   readonly reference2604 = QUOTATION_2604_REFERENCE;
   showTip: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false, 5: false };
+  showTipConfig: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false };
 
   isStepValid(step: number): boolean {
     if (step === 1) return this.quotationForm.valid;
-    if (step === 2) return this.activeQuotation.wizardConfig.wizardCompleted;
+    if (step === 2) {
+      const c = this.activeQuotation.wizardConfig;
+      if (!c.clientPriceMode) return false;
+      if (!c.hardwareDisplayMode) return false;
+      if (!c.moTimeMode) return false;
+      if (c.requiresDesignFiles === null) return false;
+      if (c.requiresDesignFiles && c.designFilesInternal === null) return false;
+      if (!c.areaDisplayMode) return false;
+      if (!c.mesonMode) return false;
+      return true;
+    }
     if (step === 3) {
       // Must have at least one area with a name, and each area must have at least one furniture with a name.
       if (!this.activeQuotation.areas || this.activeQuotation.areas.length === 0) return false;
@@ -50,13 +61,13 @@ export class QuotationWizardComponent implements OnInit {
 
   // Default wizard config
   readonly defaultWizardConfig: WizardConfig = {
-    clientPriceMode: 'proportional',
-    hardwareDisplayMode: 'table',
-    moTimeMode: 'manual',
-    requiresDesignFiles: false,
-    designFilesInternal: false,
-    areaDisplayMode: 'subtotals',
-    mesonMode: 'none',
+    clientPriceMode: '',
+    hardwareDisplayMode: '',
+    moTimeMode: '',
+    requiresDesignFiles: null,
+    designFilesInternal: null,
+    areaDisplayMode: '',
+    mesonMode: '',
     wizardCompleted: false
   };
 
