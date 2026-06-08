@@ -11,7 +11,13 @@
     <!-- PASO 1: INFORMACIÓN DEL CLIENTE (Formulario Reactivo) -->
     <form *ngIf="currentStep === 1" [formGroup]="quotationForm">
       <div class="flex-between mb-2">
-        <h2>Información del Proyecto y Cliente</h2>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <h2>Información del Proyecto y Cliente</h2>
+          <button type="button" class="btn-icon" (click)="showTip[1] = !showTip[1]" title="Ver ayuda de este paso">💡</button>
+        </div>
+      </div>
+      <div class="wizard-tip" *ngIf="showTip[1]">
+        <strong>💡 Objetivo:</strong> Ingresa los datos corporativos obligatorios del cliente y el consecutivo de la cotización para inicializar el documento de forma oficial.
       </div>
       <div class="form-grid">
         <div class="form-group">
@@ -19,22 +25,22 @@
           <input type="number" formControlName="number" class="form-control" placeholder="Ej. 2604">
         </div>
         <div class="form-group">
-          <label>Título del Proyecto</label>
+          <label>Título del Proyecto <span class="text-error">*</span></label>
           <input type="text" formControlName="title" class="form-control" placeholder="Ej. Cocina Casa Campo">
         </div>
         <div class="form-group">
-          <label>Fecha</label>
+          <label>Fecha <span class="text-error">*</span></label>
           <input type="date" formControlName="date" class="form-control">
         </div>
         <div class="form-group">
-          <label>Ciudad Instalación</label>
+          <label>Ciudad Instalación <span class="text-error">*</span></label>
           <input type="text" formControlName="city" class="form-control">
         </div>
       </div>
       
       <div formGroupName="client" class="form-grid mt-4">
         <div class="form-group">
-          <label>Nombre del Cliente</label>
+          <label>Nombre del Cliente <span class="text-error">*</span></label>
           <input type="text" formControlName="name" class="form-control">
         </div>
         <div class="form-group">
@@ -55,8 +61,13 @@
     <!-- PASO 2: WIZARD DE CONFIGURACIÓN INICIAL (FASE 0.5) -->
     <div *ngIf="currentStep === 2">
       <div class="config-wizard-header">
-        <h2>⚙️ Configuración de la Cotización</h2>
-        <p class="text-muted">Responde estas 6 preguntas para personalizar cómo se comportará esta cotización. Puedes elegir opciones diferentes para cada proyecto.</p>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
+          <h2 style="margin: 0;">⚙️ Configuración de la Cotización</h2>
+          <button type="button" class="btn-icon" (click)="showTip[2] = !showTip[2]" title="Ver ayuda de este paso">💡</button>
+        </div>
+        <div class="wizard-tip" *ngIf="showTip[2]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
+          <strong>💡 Objetivo:</strong> Responde estas preguntas clave para definir la estrategia comercial del proyecto. Tus respuestas habilitarán o inhabilitarán rubros (como render 3D u obras civiles) en el presupuesto final.
+        </div>
         <div class="wizard-progress">
           <div class="wizard-progress-bar" [style.width.%]="(wizardStep / TOTAL_WIZARD_QUESTIONS) * 100"></div>
         </div>
@@ -343,15 +354,21 @@
 
     <!-- PASO 3: ÁREAS Y MUEBLES (was step 2) -->
     <div *ngIf="currentStep === 3">
-      <div class="flex-between">
-        <h2>Áreas y Muebles del Proyecto</h2>
+      <div class="flex-between mb-4">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <h2>Áreas y Muebles del Proyecto</h2>
+          <button type="button" class="btn-icon" (click)="showTip[3] = !showTip[3]" title="Ver ayuda de este paso">💡</button>
+        </div>
         <button type="button" class="btn-secondary" (click)="addArea()">+ Agregar Área</button>
+      </div>
+      <div class="wizard-tip" *ngIf="showTip[3]">
+        <strong>💡 Objetivo:</strong> Estructura físicamente el proyecto dividiéndolo por áreas (Ej. Cocina, Baños) y lista los muebles que componen cada una. 
       </div>
 
       <div *ngFor="let area of activeQuotation.areas; let aIndex = index" class="area-card mt-4">
         <div class="flex-between area-header">
           <div class="form-group" style="width: 300px; margin-bottom: 0;">
-            <label>Nombre del Área</label>
+            <label>Nombre del Área <span class="text-error">*</span></label>
             <input type="text" [(ngModel)]="area.name" class="form-control" placeholder="Ej. Cocina, Baño">
           </div>
           <button type="button" class="btn-icon text-error" (click)="removeArea(aIndex)">🗑️ Eliminar Área</button>
@@ -362,7 +379,7 @@
           <div *ngFor="let furn of area.furniture; let fIndex = index" class="furniture-card">
             <div class="form-grid">
               <div class="form-group">
-                <label>Nombre del Mueble</label>
+                <label>Nombre del Mueble <span class="text-error">*</span></label>
                 <input type="text" [(ngModel)]="furn.name" class="form-control">
               </div>
               <div class="form-group">
@@ -390,8 +407,13 @@
 
     <!-- PASO 4: PRESUPUESTO MATEMÁTICO (was step 3) -->
     <div *ngIf="currentStep === 4">
-      <h2>Presupuesto Detallado</h2>
-      <p class="text-muted">Ingresa los insumos y rubros para cada mueble. Los totales se calcularán automáticamente.</p>
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+        <h2 style="margin: 0;">Presupuesto Detallado</h2>
+        <button type="button" class="btn-icon" (click)="showTip[4] = !showTip[4]" title="Ver ayuda de este paso">💡</button>
+      </div>
+      <div class="wizard-tip" *ngIf="showTip[4]">
+        <strong>💡 Objetivo:</strong> Este es el motor matemático. Audita mueble por mueble agregando los insumos requeridos; las bases de datos de proveedores cruzarán los costos automáticamente en tiempo real.
+      </div>
       
       <div *ngFor="let area of activeQuotation.areas" class="mt-4">
         <h3 class="area-title">{{ area.name }}</h3>
@@ -655,7 +677,13 @@
 
     <!-- PASO 5: RESUMEN Y TOTALES GLOBALES (was step 4) -->
     <div *ngIf="currentStep === 5" class="summary-section">
-      <h2>Resumen de Cotización <span *ngIf="activeQuotation.number">No. {{ activeQuotation.number }}</span></h2>
+      <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
+        <h2 style="margin: 0;">Resumen de Cotización <span *ngIf="activeQuotation.number">No. {{ activeQuotation.number }}</span></h2>
+        <button type="button" class="btn-icon" (click)="showTip[5] = !showTip[5]" title="Ver ayuda de este paso">💡</button>
+      </div>
+      <div class="wizard-tip" *ngIf="showTip[5]">
+        <strong>💡 Objetivo:</strong> Verifica los costos base operacionales calculados y ajusta de ser necesario el AIU para obtener el Precio de Venta final con IVA. Cuando esté listo, guarda y genera tu PDF.
+      </div>
 
 
       <div class="grid-2">
@@ -713,7 +741,7 @@
   <div class="wizard-footer mt-4">
     <button type="button" class="btn-secondary" *ngIf="currentStep > 1" (click)="prevStep()">← Anterior</button>
     <button type="button" class="btn-primary" *ngIf="currentStep === TOTAL_STEPS" (click)="generatePdf()" style="margin-left: 10px; background-color: #6366f1;">📄 Generar PDF</button>
-    <button type="button" class="btn-primary ml-auto" *ngIf="currentStep < TOTAL_STEPS" (click)="nextStep()">Siguiente →</button>
-    <button type="button" class="btn-success ml-auto" *ngIf="currentStep === TOTAL_STEPS" (click)="saveQuotation()" [disabled]="isLoading">Guardar Cotización</button>
+    <button type="button" class="btn-primary ml-auto" *ngIf="currentStep < TOTAL_STEPS" (click)="nextStep()" [disabled]="!isStepValid(currentStep)">Siguiente →</button>
+    <button type="button" class="btn-success ml-auto" *ngIf="currentStep === TOTAL_STEPS" (click)="saveQuotation()" [disabled]="isLoading || !isStepValid(currentStep)">Guardar Cotización</button>
   </div>
 </div>

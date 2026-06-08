@@ -24,6 +24,29 @@ export class QuotationWizardComponent implements OnInit {
   isLoading = false;
   validationReport: QuotationValidationReport | null = null;
   readonly reference2604 = QUOTATION_2604_REFERENCE;
+  showTip: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false, 5: false };
+
+  isStepValid(step: number): boolean {
+    if (step === 1) return this.quotationForm.valid;
+    if (step === 2) return this.activeQuotation.wizardConfig.wizardCompleted;
+    if (step === 3) {
+      // Must have at least one area with a name, and each area must have at least one furniture with a name.
+      if (!this.activeQuotation.areas || this.activeQuotation.areas.length === 0) return false;
+      return this.activeQuotation.areas.every(a => 
+        a.name && a.name.trim() !== '' && 
+        a.furniture && a.furniture.length > 0 && 
+        a.furniture.every(f => f.name && f.name.trim() !== '')
+      );
+    }
+    if (step === 4) {
+      // Budget: furniture is already created, but we can ensure quantities > 0
+      if (!this.activeQuotation.areas) return false;
+      return this.activeQuotation.areas.every(a => 
+        a.furniture.every(f => f.quantity > 0)
+      );
+    }
+    return true; // Step 5 is always valid if we reached it
+  }
 
   // Default wizard config
   readonly defaultWizardConfig: WizardConfig = {
