@@ -583,6 +583,7 @@
               <thead>
                 <tr>
                   <th>Descripción</th>
+                  <th>Medida</th>
                   <th>Cant.</th>
                   <th>Hrs</th>
                   <th>Operarios</th>
@@ -593,6 +594,7 @@
               <tbody>
                 <tr *ngFor="let asm of furn.assembly; let i = index">
                   <td><input type="text" [(ngModel)]="asm.description" class="form-control-sm"></td>
+                  <td><input type="text" [(ngModel)]="asm.measurement" class="form-control-sm" placeholder="ej. 1.72 × 0.36"></td>
                   <td><input type="number" [(ngModel)]="asm.totalQuantity" (change)="recalculate()" class="form-control-sm num-input"></td>
                   <td><input type="number" [(ngModel)]="asm.assemblyHours" (change)="recalculate()" class="form-control-sm num-input"></td>
                   <td><input type="number" [(ngModel)]="asm.persons" (change)="recalculate()" class="form-control-sm num-input"></td>
@@ -614,6 +616,7 @@
                 <tr>
                   <th>Descripción</th>
                   <th>Medida</th>
+                  <th>Cant.</th>
                   <th>Hrs</th>
                   <th>Operarios</th>
                   <th>Total</th>
@@ -623,6 +626,7 @@
               <tbody>
                 <tr *ngFor="let inst of furn.installation; let i = index">
                   <td><input type="text" [(ngModel)]="inst.description" class="form-control-sm"></td>
+                  <td><input type="text" [(ngModel)]="inst.measurement" class="form-control-sm" placeholder="ej. 2.10 × 0.60"></td>
                   <td><input type="number" [(ngModel)]="inst.totalQuantity" (change)="recalculate()" class="form-control-sm num-input"></td>
                   <td><input type="number" [(ngModel)]="inst.installHours" (change)="recalculate()" class="form-control-sm num-input"></td>
                   <td><input type="number" [(ngModel)]="inst.persons" (change)="recalculate()" class="form-control-sm num-input"></td>
