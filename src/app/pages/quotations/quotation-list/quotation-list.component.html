@@ -4,7 +4,6 @@
     <p>Historial y gestión de cotizaciones.</p>
   </div>
   <div class="header-actions">
-    <button class="btn-secondary" routerLink="/quotations/new" [queryParams]="{ demo: '2604' }">Ejemplo No. 2604</button>
     <button class="btn-primary" routerLink="/quotations/new">➕ Nueva Cotización</button>
   </div>
 </div>
@@ -40,6 +39,7 @@
         <td>
           <button class="btn-icon" title="Ver / Editar" (click)="editQuotation(q._id)">👁️</button>
           <button class="btn-icon" title="Descargar PDF" (click)="downloadPdf(q)">📄</button>
+          <button class="btn-icon" title="Eliminar" (click)="deleteQuotation(q._id, q.number)" style="color: #ff6b6b;">🗑️</button>
         </td>
       </tr>
       <tr *ngIf="quotations.length === 0">

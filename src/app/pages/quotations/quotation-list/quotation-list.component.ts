@@ -48,4 +48,20 @@ export class QuotationListComponent implements OnInit {
   downloadPdf(quotation: Quotation) {
     this.pdfGenerator.generateQuotationPdf(quotation, null);
   }
+
+  deleteQuotation(id: string | undefined, number: number) {
+    if (!id) return;
+    if (confirm(`¿Estás seguro de que deseas eliminar la cotización No. ${number}? Esta acción no se puede deshacer.`)) {
+      this.quotationService.deleteQuotation(id).subscribe({
+        next: (res: any) => {
+          if (res.success) {
+            this.loadQuotations(); // Recargar lista
+          }
+        },
+        error: (err: any) => {
+          alert('Error al eliminar: ' + (err.error?.message || err.message));
+        }
+      });
+    }
+  }
 }

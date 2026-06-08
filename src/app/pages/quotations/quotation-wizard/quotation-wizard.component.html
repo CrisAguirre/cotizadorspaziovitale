@@ -12,7 +12,6 @@
     <form *ngIf="currentStep === 1" [formGroup]="quotationForm">
       <div class="flex-between mb-2">
         <h2>Información del Proyecto y Cliente</h2>
-        <button type="button" class="btn-secondary" (click)="loadSample2604()">Cargar ejemplo No. 2604</button>
       </div>
       <div class="form-grid">
         <div class="form-group">
@@ -658,18 +657,6 @@
     <div *ngIf="currentStep === 5" class="summary-section">
       <h2>Resumen de Cotización <span *ngIf="activeQuotation.number">No. {{ activeQuotation.number }}</span></h2>
 
-      <div *ngIf="validationReport" class="validation-banner" [class.ok]="validationReport.ok" [class.warn]="!validationReport.ok">
-        <strong *ngIf="validationReport.ok">Validación 2604: totales alineados con Excel (±{{ reference2604.toleranceAmount | number }} COP)</strong>
-        <ng-container *ngIf="!validationReport.ok">
-          <strong>Validación 2604: revisar diferencias</strong>
-          <ul>
-            <li *ngFor="let r of validationReport.results">
-              {{ r.field }}: app {{ r.actual | currency:'COP':'symbol':'1.0-0' }} vs Excel {{ r.expected | currency:'COP':'symbol':'1.0-0' }}
-              <span *ngIf="!r.ok"> (Δ {{ r.diff | currency:'COP':'symbol':'1.0-0' }})</span>
-            </li>
-          </ul>
-        </ng-container>
-      </div>
 
       <div class="grid-2">
         <div class="totals-card">
@@ -724,9 +711,9 @@
 
   <!-- BOTONERA -->
   <div class="wizard-footer mt-4">
-    <button type="button" class="btn-secondary" *ngIf="currentStep > 1" (click)="prevStep()">Anterior</button>
+    <button type="button" class="btn-secondary" *ngIf="currentStep > 1" (click)="prevStep()">← Anterior</button>
     <button type="button" class="btn-primary" *ngIf="currentStep === TOTAL_STEPS" (click)="generatePdf()" style="margin-left: 10px; background-color: #6366f1;">📄 Generar PDF</button>
-    <button type="button" class="btn-primary ml-auto" *ngIf="currentStep < TOTAL_STEPS" (click)="nextStep()">Siguiente</button>
+    <button type="button" class="btn-primary ml-auto" *ngIf="currentStep < TOTAL_STEPS" (click)="nextStep()">Siguiente →</button>
     <button type="button" class="btn-success ml-auto" *ngIf="currentStep === TOTAL_STEPS" (click)="saveQuotation()" [disabled]="isLoading">Guardar Cotización</button>
   </div>
 </div>
