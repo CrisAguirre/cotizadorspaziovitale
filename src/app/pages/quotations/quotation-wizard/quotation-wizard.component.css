@@ -93,18 +93,7 @@
   color: var(--text-muted);
   font-size: 14px;
 }
-.form-control {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-card);
-  color: var(--text-main);
-  border-radius: 6px;
-}
-.form-control:focus {
-  border-color: var(--primary-color);
-  outline: none;
-}
+
 .mt-2 { margin-top: 10px; }
 .mt-4 { margin-top: 20px; }
 .flex-between {
