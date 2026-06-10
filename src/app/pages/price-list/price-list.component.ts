@@ -25,10 +25,18 @@ export class PriceListComponent implements OnInit {
     { value: 'canto', label: 'Cantos' },
     { value: 'herraje', label: 'Herrajes' },
     { value: 'accesorio', label: 'Accesorios' },
-    { value: 'meson', label: 'Mesones' }
+    { value: 'meson', label: 'Mesones' },
+    { value: 'vidrio', label: 'Vidrios' },
+    { value: 'otro', label: 'Otros' }
   ];
   filterCategory = '';
   searchTerm = '';
+
+  // Pagination
+  currentPage = 1;
+  totalPages = 1;
+  totalItems = 0;
+  readonly pageSize = 50;
 
   formatOptions: { value: SupplierImportFormat; label: string }[] = [
     { value: 'hejercol', label: 'Hejercol (portafolio herrajes)' },
@@ -48,13 +56,22 @@ export class PriceListComponent implements OnInit {
 
   loadMaterials(): void {
     this.isLoading = true;
-    const params: Record<string, string | number> = { limit: 200 };
+    const params: Record<string, string | number> = {
+      limit: this.pageSize,
+      page: this.currentPage
+    };
     if (this.filterCategory) params['category'] = this.filterCategory;
     if (this.searchTerm.trim()) params['search'] = this.searchTerm.trim();
 
     this.materialService.getMaterials(params).subscribe({
-      next: (res) => {
-        if (res.success) this.materials = res.data;
+      next: (res: any) => {
+        if (res.success) {
+          this.materials = res.data;
+          if (res.pagination) {
+            this.totalPages = res.pagination.pages || 1;
+            this.totalItems = res.pagination.total || 0;
+          }
+        }
         this.isLoading = false;
       },
       error: () => {
@@ -64,7 +81,29 @@ export class PriceListComponent implements OnInit {
   }
 
   onSearch(): void {
+    this.currentPage = 1;
     this.loadMaterials();
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadMaterials();
+    }
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadMaterials();
+    }
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadMaterials();
+    }
   }
 
   async onFileSelected(event: Event): Promise<void> {
@@ -104,6 +143,7 @@ export class PriceListComponent implements OnInit {
         if (res.success && res.data) {
           this.importMessage = res.message || `Importados ${res.data.total} materiales.`;
           this.preview = null;
+          this.currentPage = 1;
           this.loadMaterials();
         }
       },
@@ -119,3 +159,4 @@ export class PriceListComponent implements OnInit {
     this.importMessage = '';
   }
 }
+

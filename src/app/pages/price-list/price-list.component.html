@@ -84,6 +84,10 @@
     <p>Cargando materiales...</p>
   </div>
 
+  <div *ngIf="!isLoading && totalItems > 0" class="results-info">
+    <span>Mostrando {{ (currentPage - 1) * pageSize + 1 }}–{{ currentPage * pageSize > totalItems ? totalItems : currentPage * pageSize }} de <strong>{{ totalItems }}</strong> materiales</span>
+  </div>
+
   <table class="data-table" *ngIf="!isLoading">
     <thead>
       <tr>
@@ -109,4 +113,16 @@
       </tr>
     </tbody>
   </table>
+
+  <!-- Pagination -->
+  <div class="pagination-bar" *ngIf="!isLoading && totalPages > 1">
+    <button class="btn-secondary btn-sm" [disabled]="currentPage === 1" (click)="prevPage()">← Anterior</button>
+    <div class="page-numbers">
+      <button *ngFor="let p of [].constructor(totalPages); let i = index"
+              class="page-btn" [class.active]="currentPage === i + 1"
+              (click)="goToPage(i + 1)">{{ i + 1 }}</button>
+    </div>
+    <button class="btn-secondary btn-sm" [disabled]="currentPage === totalPages" (click)="nextPage()">Siguiente →</button>
+  </div>
 </div>
+
