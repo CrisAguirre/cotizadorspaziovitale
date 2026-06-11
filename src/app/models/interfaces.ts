@@ -19,6 +19,19 @@ export interface Material {
   updatedAt?: string;
 }
 
+// ===== LABOR TIME =====
+export interface LaborTime {
+  _id?: string;
+  code: string;
+  activityName: string;
+  timeHours: number;
+  unit: string;
+  isService: boolean;
+  notes: string;
+  active: boolean;
+}
+
+
 // ===== CONFIG =====
 export interface WasteRange {
   minMl: number;

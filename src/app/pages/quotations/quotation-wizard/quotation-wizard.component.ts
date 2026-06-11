@@ -6,7 +6,8 @@ import { QuotationCalculatorService } from '../../../services/quotation-calculat
 import { PdfGeneratorService } from '../../../services/pdf-generator.service';
 import { QuotationValidationService, QuotationValidationReport } from '../../../services/quotation-validation.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AppConfig, Quotation, Area, Furniture, Material, SupplyItem, EdgeBandItem, AccessoryItem, WizardConfig } from '../../../models/interfaces';
+import { AppConfig, Quotation, Area, Furniture, Material, SupplyItem, EdgeBandItem, AccessoryItem, WizardConfig, LaborTime } from '../../../models/interfaces';
+import { LaborTimeService } from '../../../services/labor-time.service';
 import { buildQuotation2604Sample } from '../../../data/quotation-2604.sample';
 import { QUOTATION_2604_REFERENCE } from '../../../data/quotation-2604.reference';
 
@@ -26,6 +27,8 @@ export class QuotationWizardComponent implements OnInit {
   readonly reference2604 = QUOTATION_2604_REFERENCE;
   showTip: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false, 5: false };
   showTipConfig: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false };
+
+  availableLaborTimes: LaborTime[] = [];
 
   isStepValid(step: number): boolean {
     if (step === 1) return this.quotationForm.valid;
@@ -109,6 +112,7 @@ export class QuotationWizardComponent implements OnInit {
     public calcService: QuotationCalculatorService,
     private pdfGenerator: PdfGeneratorService,
     private validationService: QuotationValidationService,
+    private laborTimeService: LaborTimeService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -130,12 +134,24 @@ export class QuotationWizardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadConfig();
+    this.loadLaborTimes();
     this.route.queryParams.subscribe((params) => {
       if (params['demo'] === '2604') {
         this.loadSample2604();
       } else if (!this.activeQuotation.areas?.length) {
         this.addArea();
       }
+    });
+  }
+
+  loadLaborTimes() {
+    this.laborTimeService.getLaborTimes({ limit: 200, active: true }).subscribe({
+      next: (res: any) => {
+        if (res.success && res.data) {
+          this.availableLaborTimes = res.data;
+        }
+      },
+      error: (err: any) => console.error('Error loading labor times:', err)
     });
   }
 
@@ -379,6 +395,23 @@ export class QuotationWizardComponent implements OnInit {
     item.code = material.code;
     item.unitPrice = material.unitPrice;
     item.unit = material.unit || 'UNIDAD';
+    this.recalculate();
+  }
+
+  onLaborTimeSelect(item: any, laborTimeCode: string, type: string) {
+    const laborTime = this.availableLaborTimes.find(lt => lt.code === laborTimeCode);
+    if (!laborTime) return;
+    
+    if (type === 'cuts') {
+      item.description = laborTime.activityName;
+      item.timeHours = laborTime.timeHours;
+    } else if (type === 'assembly') {
+      item.description = laborTime.activityName;
+      item.assemblyHours = laborTime.timeHours;
+    } else if (type === 'installation') {
+      item.description = laborTime.activityName;
+      item.installHours = laborTime.timeHours;
+    }
     this.recalculate();
   }
 
