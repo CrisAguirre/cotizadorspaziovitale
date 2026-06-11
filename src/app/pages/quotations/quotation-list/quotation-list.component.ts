@@ -11,7 +11,23 @@ import { PdfGeneratorService } from '../../../services/pdf-generator.service';
 })
 export class QuotationListComponent implements OnInit {
   quotations: Quotation[] = [];
+  archivedQuotations: Quotation[] = [];
   isLoading = true;
+  activeTab: 'activas' | 'archivo' = 'activas';
+
+  statusLabels: Record<string, string> = {
+    'nuevo': 'NUEVO',
+    'en_revision': 'EN REVISIÓN',
+    'aceptada': 'ACEPTADA',
+    'rechazada': 'RECHAZADA',
+    'archivada_aceptada': 'ARCHIVADA ✅',
+    'archivada_rechazada': 'ARCHIVADA ❌',
+    // Legacy mappings
+    'borrador': 'NUEVO',
+    'auditada': 'EN REVISIÓN',
+    'enviada': 'EN REVISIÓN',
+    'aprobada': 'ACEPTADA'
+  };
 
   constructor(
     private quotationService: QuotationService,
@@ -25,16 +41,53 @@ export class QuotationListComponent implements OnInit {
 
   loadQuotations() {
     this.isLoading = true;
-    this.quotationService.getQuotations({ limit: 50 }).subscribe({
+    this.quotationService.getQuotations({ limit: 200 }).subscribe({
       next: (res: any) => {
         if (res.success) {
-          this.quotations = res.data;
+          const all = res.data as Quotation[];
+          this.quotations = all.filter((q: any) =>
+            !q.status?.startsWith('archivada')
+          );
+          this.archivedQuotations = all.filter((q: any) =>
+            q.status?.startsWith('archivada')
+          );
         }
         this.isLoading = false;
       },
       error: (err: any) => {
         console.error(err);
         this.isLoading = false;
+      }
+    });
+  }
+
+  getDisplayList(): Quotation[] {
+    return this.activeTab === 'activas' ? this.quotations : this.archivedQuotations;
+  }
+
+  getStatusLabel(status: string): string {
+    return this.statusLabels[status] || status?.toUpperCase() || 'NUEVO';
+  }
+
+  getStatusClass(status: string): string {
+    if (status === 'borrador') return 'nuevo';
+    if (status === 'auditada' || status === 'enviada') return 'en_revision';
+    if (status === 'aprobada') return 'aceptada';
+    return status || 'nuevo';
+  }
+
+  changeStatus(quotation: any, newStatus: string) {
+    const id = quotation._id;
+    if (!id) return;
+
+    this.quotationService.updateQuotation(id, { status: newStatus }).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.loadQuotations();
+        }
+      },
+      error: (err: any) => {
+        alert('Error al cambiar estado: ' + (err.error?.message || err.message));
       }
     });
   }
@@ -55,7 +108,7 @@ export class QuotationListComponent implements OnInit {
       this.quotationService.deleteQuotation(id).subscribe({
         next: (res: any) => {
           if (res.success) {
-            this.loadQuotations(); // Recargar lista
+            this.loadQuotations();
           }
         },
         error: (err: any) => {

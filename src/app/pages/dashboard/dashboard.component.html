@@ -27,18 +27,34 @@
     </div>
 
     <div class="stat-card glass-panel">
-      <div class="stat-icon warning">⏳</div>
+      <div class="stat-icon warning">🟡</div>
       <div class="stat-info">
-        <h3>Borradores</h3>
-        <span class="stat-value">{{ stats.statusCounts['borrador'] || 0 }}</span>
+        <h3>Nuevas</h3>
+        <span class="stat-value">{{ (stats.statusCounts['nuevo'] || 0) + (stats.statusCounts['borrador'] || 0) }}</span>
       </div>
     </div>
 
     <div class="stat-card glass-panel">
-      <div class="stat-icon info">✅</div>
+      <div class="stat-icon info">🔵</div>
       <div class="stat-info">
-        <h3>Auditadas</h3>
-        <span class="stat-value">{{ stats.statusCounts['auditada'] || 0 }}</span>
+        <h3>En Revisión</h3>
+        <span class="stat-value">{{ (stats.statusCounts['en_revision'] || 0) + (stats.statusCounts['auditada'] || 0) + (stats.statusCounts['enviada'] || 0) }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card glass-panel">
+      <div class="stat-icon success">✅</div>
+      <div class="stat-info">
+        <h3>Aceptadas</h3>
+        <span class="stat-value">{{ (stats.statusCounts['aceptada'] || 0) + (stats.statusCounts['aprobada'] || 0) }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card glass-panel">
+      <div class="stat-icon danger">❌</div>
+      <div class="stat-info">
+        <h3>Rechazadas</h3>
+        <span class="stat-value">{{ stats.statusCounts['rechazada'] || 0 }}</span>
       </div>
     </div>
   </div>

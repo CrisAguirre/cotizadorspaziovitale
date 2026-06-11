@@ -8,6 +8,16 @@
   </div>
 </div>
 
+<!-- Tabs -->
+<div class="tabs-bar">
+  <button class="tab-btn" [class.active]="activeTab === 'activas'" (click)="activeTab = 'activas'">
+    📋 Activas ({{ quotations.length }})
+  </button>
+  <button class="tab-btn" [class.active]="activeTab === 'archivo'" (click)="activeTab = 'archivo'">
+    🗄️ Archivo ({{ archivedQuotations.length }})
+  </button>
+</div>
+
 <div class="card glass-panel">
   <div *ngIf="isLoading" class="loading-state">
     <div class="loader"></div>
@@ -23,18 +33,61 @@
         <th>Ciudad</th>
         <th>Total</th>
         <th>Estado</th>
+        <th>Ciclo de Vida</th>
         <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let q of quotations">
+      <tr *ngFor="let q of getDisplayList()">
         <td>{{ q.number }}</td>
         <td>{{ q.date | date:'dd/MM/yyyy' }}</td>
         <td>{{ q.client.name }}</td>
         <td>{{ q.city }}</td>
         <td>{{ q.totals.grandTotal | currency:'COP':'symbol':'1.0-0' }}</td>
         <td>
-          <span class="badge" [ngClass]="q.status">{{ q.status | uppercase }}</span>
+          <span class="badge" [ngClass]="getStatusClass(q.status)">{{ getStatusLabel(q.status) }}</span>
+        </td>
+        <td class="lifecycle-actions">
+          <!-- Estado: Nuevo → Enviar a revisión -->
+          <button *ngIf="q.status === 'nuevo' || q.status === 'borrador'"
+                  class="btn-lifecycle send"
+                  title="Marcar como enviada al cliente"
+                  (click)="changeStatus(q, 'en_revision')">
+            📤 Enviar
+          </button>
+
+          <!-- Estado: En Revisión → Aceptar / Rechazar / Devolver -->
+          <ng-container *ngIf="q.status === 'en_revision' || q.status === 'auditada' || q.status === 'enviada'">
+            <button class="btn-lifecycle accept"
+                    title="Cliente aceptó la cotización"
+                    (click)="changeStatus(q, 'aceptada')">
+              ✅ Aceptar
+            </button>
+            <button class="btn-lifecycle reject"
+                    title="Cliente rechazó la cotización"
+                    (click)="changeStatus(q, 'rechazada')">
+              ❌ Rechazar
+            </button>
+            <button class="btn-lifecycle retry"
+                    title="Cliente solicita ajustes"
+                    (click)="changeStatus(q, 'nuevo')">
+              🔄 Ajustes
+            </button>
+          </ng-container>
+
+          <!-- Estado: Aceptada o Rechazada → Archivar -->
+          <button *ngIf="q.status === 'aceptada' || q.status === 'aprobada'"
+                  class="btn-lifecycle archive"
+                  title="Archivar como aceptada"
+                  (click)="changeStatus(q, 'archivada_aceptada')">
+            🗄️ Archivar
+          </button>
+          <button *ngIf="q.status === 'rechazada'"
+                  class="btn-lifecycle archive"
+                  title="Archivar como rechazada"
+                  (click)="changeStatus(q, 'archivada_rechazada')">
+            🗄️ Archivar
+          </button>
         </td>
         <td>
           <button class="btn-icon" title="Ver / Editar" (click)="editQuotation(q._id)">👁️</button>
@@ -42,8 +95,10 @@
           <button class="btn-icon" title="Eliminar" (click)="deleteQuotation(q._id, q.number)" style="color: #ff6b6b;">🗑️</button>
         </td>
       </tr>
-      <tr *ngIf="quotations.length === 0">
-        <td colspan="7" class="text-center">No hay cotizaciones registradas.</td>
+      <tr *ngIf="getDisplayList().length === 0">
+        <td colspan="8" class="text-center">
+          {{ activeTab === 'activas' ? 'No hay cotizaciones activas.' : 'No hay cotizaciones archivadas.' }}
+        </td>
       </tr>
     </tbody>
   </table>
