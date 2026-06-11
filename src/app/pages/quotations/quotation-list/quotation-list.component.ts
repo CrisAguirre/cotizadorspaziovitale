@@ -80,7 +80,7 @@ export class QuotationListComponent implements OnInit {
     const id = quotation._id;
     if (!id) return;
 
-    this.quotationService.updateQuotation(id, { status: newStatus }).subscribe({
+    this.quotationService.updateQuotation(id, { status: newStatus as Quotation['status'] }).subscribe({
       next: (res: any) => {
         if (res.success) {
           this.loadQuotations();

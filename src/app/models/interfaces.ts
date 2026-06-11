@@ -242,7 +242,7 @@ export interface Quotation {
   areas: Area[];
   totals: QuotationTotals;
   wizardConfig: WizardConfig;
-  status: 'borrador' | 'auditada' | 'enviada' | 'aprobada';
+  status: 'nuevo' | 'en_revision' | 'aceptada' | 'rechazada' | 'archivada_aceptada' | 'archivada_rechazada' | 'borrador' | 'auditada' | 'enviada' | 'aprobada';
   paymentTerms: string;
   validityDays: number;
   notes: string;
