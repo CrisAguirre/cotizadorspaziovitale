@@ -1,0 +1,100 @@
+<div class="view-container">
+  <div class="header-actions">
+    <button class="btn-secondary" (click)="goBack()">← Volver al Listado</button>
+    <button class="btn-primary" (click)="downloadPdf()" [disabled]="!quotation">📄 Descargar PDF</button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state glass-panel">
+    <div class="loader"></div>
+    <p>Cargando cotización...</p>
+  </div>
+
+  <div *ngIf="error" class="error-state glass-panel">
+    <p>{{ error }}</p>
+  </div>
+
+  <div *ngIf="!isLoading && quotation" class="quotation-card glass-panel">
+    <!-- Header info -->
+    <div class="header-info">
+      <div>
+        <h2>Cotización No. {{ quotation.number }}</h2>
+        <p class="text-muted">{{ quotation.title }}</p>
+      </div>
+      <div class="status-badge" [ngClass]="quotation.status || 'nuevo'">
+        {{ (quotation.status || 'nuevo') | uppercase }}
+      </div>
+    </div>
+
+    <!-- Client info -->
+    <div class="client-info mt-4">
+      <h3>Información del Cliente</h3>
+      <div class="grid-2">
+        <p><strong>Nombre:</strong> {{ quotation.client.name }}</p>
+        <p><strong>Ciudad:</strong> {{ quotation.client.city || 'N/A' }}</p>
+        <p><strong>Teléfono:</strong> {{ quotation.client.phone || 'N/A' }}</p>
+        <p><strong>Email:</strong> {{ quotation.client.email || 'N/A' }}</p>
+      </div>
+    </div>
+
+    <!-- Areas & Furniture -->
+    <div class="areas-section mt-4">
+      <h3>Detalle de Muebles</h3>
+      <div *ngFor="let area of quotation.areas" class="area-card mt-3">
+        <h4 class="area-title">{{ area.name }}</h4>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Mueble</th>
+                <th>Descripción / Medidas</th>
+                <th>Cant.</th>
+                <th>Tipo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let furn of area.furniture">
+                <td><strong>{{ furn.name }}</strong></td>
+                <td>
+                  {{ furn.description || 'Sin descripción' }}<br>
+                  <small class="text-muted">{{ furn.measurements || 'Sin medidas' }}</small>
+                </td>
+                <td>{{ furn.quantity }}</td>
+                <td>{{ furn.type === 'custom' ? 'A Medida' : 'Línea' }}</td>
+              </tr>
+              <tr *ngIf="!area.furniture || area.furniture.length === 0">
+                <td colspan="4" class="text-center text-muted">No hay muebles en esta área.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Totals -->
+    <div class="totals-section mt-4">
+      <h3>Resumen Financiero</h3>
+      <div class="totals-box">
+        <div class="total-row">
+          <span>Subtotal antes de IVA:</span>
+          <strong>{{ (quotation.totals?.subtotal || 0) | currency:'COP':'symbol':'1.0-0' }}</strong>
+        </div>
+        <div class="total-row">
+          <span>IVA:</span>
+          <span>{{ (quotation.totals?.taxAmount || 0) | currency:'COP':'symbol':'1.0-0' }}</span>
+        </div>
+        <div class="total-row grand-total mt-2">
+          <span>VALOR TOTAL:</span>
+          <span>{{ (quotation.totals?.grandTotal || 0) | currency:'COP':'symbol':'1.0-0' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Commercial Conditions -->
+    <div class="conditions-section mt-4">
+      <h3>Condiciones Comerciales</h3>
+      <p><strong>Forma de pago:</strong> {{ quotation.paymentTerms || 'No especificada' }}</p>
+      <p><strong>Validez de la oferta:</strong> {{ quotation.validityDays || 15 }} días</p>
+      <p *ngIf="quotation.notes"><strong>Notas adicionales:</strong> {{ quotation.notes }}</p>
+    </div>
+  </div>
+</div>

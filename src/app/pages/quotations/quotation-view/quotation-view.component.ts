@@ -1,0 +1,61 @@
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { QuotationService } from '../../../services/quotation.service';
+import { PdfGeneratorService } from '../../../services/pdf-generator.service';
+import { Quotation } from '../../../models/interfaces';
+
+@Component({
+  selector: 'app-quotation-view',
+  templateUrl: './quotation-view.component.html',
+  styleUrls: ['./quotation-view.component.css']
+})
+export class QuotationViewComponent implements OnInit {
+  quotation: Quotation | null = null;
+  isLoading = true;
+  error = '';
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private quotationService: QuotationService,
+    private pdfGenerator: PdfGeneratorService
+  ) {}
+
+  ngOnInit() {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.loadQuotation(id);
+    } else {
+      this.error = 'No se proporcionó ID de cotización.';
+      this.isLoading = false;
+    }
+  }
+
+  loadQuotation(id: string) {
+    this.quotationService.getQuotationById(id).subscribe({
+      next: (res: any) => {
+        if (res.success && res.data) {
+          this.quotation = res.data;
+        } else {
+          this.error = 'Cotización no encontrada.';
+        }
+        this.isLoading = false;
+      },
+      error: (err: any) => {
+        console.error(err);
+        this.error = 'Error al cargar la cotización.';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  downloadPdf() {
+    if (this.quotation) {
+      this.pdfGenerator.generateQuotationPdf(this.quotation, null);
+    }
+  }
+
+  goBack() {
+    this.router.navigate(['/quotations']);
+  }
+}

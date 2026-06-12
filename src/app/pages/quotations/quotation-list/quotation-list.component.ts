@@ -92,6 +92,12 @@ export class QuotationListComponent implements OnInit {
     });
   }
 
+  viewQuotation(id?: string) {
+    if (id) {
+      this.router.navigate(['/quotations/view', id]);
+    }
+  }
+
   editQuotation(id?: string) {
     if (id) {
       this.router.navigate(['/quotations', id]);

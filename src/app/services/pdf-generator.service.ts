@@ -15,38 +15,63 @@ export class PdfGeneratorService {
 
   constructor() { }
 
-  generateQuotationPdf(quotation: Quotation, appConfig: AppConfig | null) {
-    const docDef: TDocumentDefinitions = {
-      content: this.buildContent(quotation, appConfig),
-      styles: this.getStyles(),
-      defaultStyle: {
-        fontSize: 10,
-        color: '#333333'
-      },
-      pageMargins: [40, 60, 40, 60],
-      header: (currentPage, pageCount) => {
-        return {
-          text: `Cotización No. ${quotation.number} - Página ${currentPage} de ${pageCount}`,
-          alignment: 'right',
-          margin: [0, 20, 40, 0],
-          fontSize: 8,
-          color: '#999999'
-        };
-      }
-    };
-    pdfMake.createPdf(docDef).download(`Cotizacion_${quotation.number}_${quotation.client.name.replace(/\s+/g, '_')}.pdf`);
+  async generateQuotationPdf(quotation: Quotation, appConfig: AppConfig | null) {
+    try {
+      const logoDataUrl = await this.getBase64ImageFromURL('/assets/logo.png');
+      
+      const docDef: TDocumentDefinitions = {
+        content: this.buildContent(quotation, appConfig, logoDataUrl),
+        styles: this.getStyles(),
+        defaultStyle: {
+          fontSize: 10,
+          color: '#333333'
+        },
+        pageMargins: [40, 60, 40, 60],
+        header: (currentPage, pageCount) => {
+          return {
+            text: `Cotización No. ${quotation.number} - Página ${currentPage} de ${pageCount}`,
+            alignment: 'right',
+            margin: [0, 20, 40, 0],
+            fontSize: 8,
+            color: '#999999'
+          };
+        }
+      };
+      pdfMake.createPdf(docDef).download(`Cotizacion_${quotation.number}_${quotation.client.name.replace(/\s+/g, '_')}.pdf`);
+    } catch (err) {
+      console.error('Error al generar PDF:', err);
+      alert('Error al generar PDF. Verifica la consola para más detalles.');
+    }
   }
 
-  private buildContent(quotation: Quotation, appConfig: AppConfig | null): Content[] {
+  private getBase64ImageFromURL(url: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.setAttribute('crossOrigin', 'anonymous');
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0);
+        const dataURL = canvas.toDataURL('image/png');
+        resolve(dataURL);
+      };
+      img.onerror = error => reject(error);
+      img.src = url;
+    });
+  }
+
+  private buildContent(quotation: Quotation, appConfig: AppConfig | null, logoDataUrl: string): Content[] {
     const content: Content[] = [];
 
     // Header
     content.push({
       columns: [
         {
-          text: 'SPAZIO VITALE',
-          style: 'headerCompany',
-          width: '*'
+          image: logoDataUrl,
+          width: 120,
+          margin: [0, 0, 0, 0]
         },
         {
           text: [
@@ -84,9 +109,18 @@ export class PdfGeneratorService {
       margin: [0, 0, 0, 20]
     });
 
-    // Mapeo lógico de configuración
-    const wConfig = quotation.wizardConfig;
-    const markupFactor = quotation.totals.totalCost > 0 ? quotation.totals.grandTotal / quotation.totals.totalCost : 1;
+    // Mapeo lógico de configuración con fallback
+    const wConfig = quotation.wizardConfig || {
+      clientPriceMode: 'proportional',
+      hardwareDisplayMode: 'table',
+      areaDisplayMode: 'subtotals'
+    };
+    
+    // Totales fallback
+    const totals = quotation.totals || {
+      totalCost: 0, grandTotal: 0, subtotal: 0, taxAmount: 0, discountAmount: 0, pricePerSqm: 0
+    };
+    const markupFactor = totals.totalCost > 0 ? totals.grandTotal / totals.totalCost : 1;
     const allAccessories: { furnName: string, acc: AccessoryItem, clientPrice: number }[] = [];
 
     // Muebles y Áreas
@@ -121,7 +155,7 @@ export class PdfGeneratorService {
         if (wConfig.clientPriceMode === 'proportional') {
           furnClientPrice = furnBaseCost * markupFactor;
         } else if (wConfig.clientPriceMode === 'sqm') {
-          furnClientPrice = (furn.areaSqm || 0) * quotation.totals.pricePerSqm;
+          furnClientPrice = (furn.areaSqm || 0) * (totals.pricePerSqm || 0);
         } else {
           // Manual fallback (if not input, fallback to proportional)
           furnClientPrice = furnBaseCost * markupFactor; 
@@ -217,12 +251,12 @@ export class PdfGeneratorService {
           table: {
             widths: ['*', 'auto'],
             body: [
-              ['Costo Total Materiales/Operación:', { text: this.formatCurrency(quotation.totals.totalCost), alignment: 'right' as 'right' }],
-              ['AIU (Imprevistos, Utilidad, Indirectos):', { text: this.formatCurrency(quotation.totals.subtotal - quotation.totals.totalCost), alignment: 'right' as 'right' }],
-              [{ text: 'SUBTOTAL ANTES DE IVA:', bold: true }, { text: this.formatCurrency(quotation.totals.subtotal), alignment: 'right' as 'right', bold: true }],
-              ['IVA:', { text: this.formatCurrency(quotation.totals.taxAmount), alignment: 'right' as 'right' }],
-              ...(quotation.totals.discountAmount > 0 ? [['Recargo / Otros:', { text: this.formatCurrency(quotation.totals.discountAmount), alignment: 'right' as 'right' }]] : []),
-              [{ text: 'VALOR TOTAL:', style: 'grandTotalLabel' }, { text: this.formatCurrency(quotation.totals.grandTotal), style: 'grandTotalValue', alignment: 'right' as 'right' }]
+              ['Costo Total Materiales/Operación:', { text: this.formatCurrency(totals.totalCost), alignment: 'right' as 'right' }],
+              ['AIU (Imprevistos, Utilidad, Indirectos):', { text: this.formatCurrency(totals.subtotal - totals.totalCost), alignment: 'right' as 'right' }],
+              [{ text: 'SUBTOTAL ANTES DE IVA:', bold: true }, { text: this.formatCurrency(totals.subtotal), alignment: 'right' as 'right', bold: true }],
+              ['IVA:', { text: this.formatCurrency(totals.taxAmount), alignment: 'right' as 'right' }],
+              ...(totals.discountAmount > 0 ? [['Recargo / Otros:', { text: this.formatCurrency(totals.discountAmount), alignment: 'right' as 'right' }]] : []),
+              [{ text: 'VALOR TOTAL:', style: 'grandTotalLabel' }, { text: this.formatCurrency(totals.grandTotal), style: 'grandTotalValue', alignment: 'right' as 'right' }]
             ]
           },
           layout: 'noBorders'
@@ -250,55 +284,55 @@ export class PdfGeneratorService {
       headerCompany: {
         fontSize: 24,
         bold: true,
-        color: '#1a1a1a'
+        color: '#0B4249'
       },
       headerTitle: {
-        fontSize: 14,
+        fontSize: 16,
         bold: true,
-        color: '#666666'
+        color: '#0B4249'
       },
       clientBox: {
-        fillColor: '#f8f9fa',
+        fillColor: '#f0f4f5',
         margin: [0, 5, 0, 5]
       },
       projectTitle: {
-        fontSize: 16,
+        fontSize: 18,
         bold: true,
         alignment: 'center',
-        color: '#111827'
+        color: '#D5A052'
       },
       areaTitle: {
         fontSize: 14,
         bold: true,
-        color: '#374151',
+        color: '#0B4249',
         decoration: 'underline'
       },
       tableHeader: {
         bold: true,
-        color: '#4b5563',
-        fillColor: '#f3f4f6'
+        color: '#FFFFFF',
+        fillColor: '#0B4249'
       },
       areaSubtotal: {
         fontSize: 11,
         bold: true,
-        color: '#374151'
+        color: '#0B4249'
       },
       grandTotalLabel: {
         fontSize: 14,
         bold: true,
-        color: '#111827',
+        color: '#0B4249',
         margin: [0, 10, 0, 0]
       },
       grandTotalValue: {
         fontSize: 14,
         bold: true,
-        color: '#2563eb',
+        color: '#D5A052',
         margin: [0, 10, 0, 0]
       },
       sectionTitle: {
         fontSize: 12,
         bold: true,
-        color: '#111827',
+        color: '#0B4249',
         margin: [0, 10, 0, 5]
       }
     };

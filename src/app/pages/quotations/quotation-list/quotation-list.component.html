@@ -90,7 +90,8 @@
           </button>
         </td>
         <td>
-          <button class="btn-icon" title="Ver / Editar" (click)="editQuotation(q._id)">👁️</button>
+          <button class="btn-icon" title="Ver Resumen" (click)="viewQuotation(q._id)">👁️</button>
+          <button class="btn-icon" title="Editar" (click)="editQuotation(q._id)">✏️</button>
           <button class="btn-icon" title="Descargar PDF" (click)="downloadPdf(q)">📄</button>
           <button class="btn-icon" title="Eliminar" (click)="deleteQuotation(q._id, q.number)" style="color: #ff6b6b;">🗑️</button>
         </td>

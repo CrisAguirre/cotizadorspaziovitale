@@ -1,0 +1,129 @@
+.view-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.quotation-card {
+  padding: 30px;
+}
+
+.header-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 20px;
+}
+
+.header-info h2 {
+  color: var(--primary-color);
+  margin-bottom: 5px;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.nuevo { background: rgba(250, 204, 21, 0.15); color: #facc15; }
+.status-badge.en_revision { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+.status-badge.aceptada { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
+.status-badge.rechazada { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+.status-badge.archivada_aceptada { background: rgba(74, 222, 128, 0.08); color: #6ee7a0; }
+.status-badge.archivada_rechazada { background: rgba(248, 113, 113, 0.08); color: #fca5a5; }
+
+.mt-3 { margin-top: 15px; }
+.mt-4 { margin-top: 30px; }
+
+h3 {
+  color: var(--primary-color);
+  margin-bottom: 15px;
+  font-size: 18px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  background: rgba(0,0,0,0.2);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.grid-2 p {
+  margin: 0;
+}
+
+.area-card {
+  background: rgba(0,0,0,0.1);
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.area-title {
+  color: var(--text-main);
+  margin-bottom: 15px;
+  font-size: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 5px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th, .data-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 14px;
+}
+
+.data-table th {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.totals-box {
+  background: rgba(0,0,0,0.2);
+  padding: 20px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+  margin-left: auto;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.grand-total {
+  font-size: 18px;
+  color: var(--primary-color);
+  font-weight: bold;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 10px;
+}
+
+.conditions-section p {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.text-muted { color: var(--text-muted); }
+.text-center { text-align: center; }

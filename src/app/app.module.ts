@@ -11,6 +11,7 @@ import { PriceListComponent } from './pages/price-list/price-list.component';
 import { SettingsComponent } from './pages/settings/settings.component';
 import { QuotationListComponent } from './pages/quotations/quotation-list/quotation-list.component';
 import { QuotationWizardComponent } from './pages/quotations/quotation-wizard/quotation-wizard.component';
+import { QuotationViewComponent } from './pages/quotations/quotation-view/quotation-view.component';
 import { authGuard } from './guards/auth.guard';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
@@ -31,6 +32,7 @@ const routes: Routes = [
       { path: 'settings', component: SettingsComponent },
       { path: 'quotations', component: QuotationListComponent },
       { path: 'quotations/new', component: QuotationWizardComponent },
+      { path: 'quotations/view/:id', component: QuotationViewComponent },
       { path: 'quotations/:id', component: QuotationWizardComponent },
       { path: 'activity', component: ActivityComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
@@ -48,6 +50,7 @@ const routes: Routes = [
     SettingsComponent,
     QuotationListComponent,
     QuotationWizardComponent,
+    QuotationViewComponent,
     MainLayoutComponent,
     SidebarComponent,
     HeaderComponent,
