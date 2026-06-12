@@ -123,9 +123,9 @@ export class QuotationWizardComponent implements OnInit {
       title: ['VENTA, ELABORACIÓN E INSTALACIÓN DE MOBILIARIO', Validators.required],
       client: this.fb.group({
         name: ['', Validators.required],
-        city: [''],
-        phone: [''],
-        email: ['', Validators.email]
+        city: ['', Validators.required],
+        phone: ['', Validators.required],
+        email: ['', [Validators.required, Validators.email]]
       }),
       paymentTerms: [''],
       validityDays: [15]
