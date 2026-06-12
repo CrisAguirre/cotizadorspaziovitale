@@ -9,6 +9,22 @@
   border-right: none;
   border-left: none;
   z-index: 10;
+  animation: headerPulse 6s infinite;
+}
+
+@keyframes headerPulse {
+  0% {
+    border-bottom-color: var(--border-color);
+    box-shadow: var(--shadow);
+  }
+  50% {
+    border-bottom-color: rgba(255, 255, 255, 0.6);
+    box-shadow: var(--shadow), 4px 4px 12px rgba(255, 255, 255, 0.4);
+  }
+  100% {
+    border-bottom-color: var(--border-color);
+    box-shadow: var(--shadow);
+  }
 }
 
 .user-info {

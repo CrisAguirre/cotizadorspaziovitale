@@ -8,6 +8,22 @@
   border-top: none;
   border-bottom: none;
   transition: all 0.3s ease-in-out;
+  animation: sidebarPulse 6s infinite;
+}
+
+@keyframes sidebarPulse {
+  0% {
+    border-right-color: var(--border-color);
+    box-shadow: var(--shadow);
+  }
+  50% {
+    border-right-color: rgba(255, 255, 255, 0.6);
+    box-shadow: var(--shadow), 4px 4px 12px rgba(255, 255, 255, 0.4);
+  }
+  100% {
+    border-right-color: var(--border-color);
+    box-shadow: var(--shadow);
+  }
 }
 
 .sidebar.closed {
@@ -20,6 +36,20 @@
   justify-content: center;
   align-items: center;
   border-bottom: 1px solid var(--border-color);
+  animation: brandPulse 6s infinite;
+}
+
+@keyframes brandPulse {
+  0% {
+    border-bottom-color: var(--border-color);
+  }
+  50% {
+    border-bottom-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 4px 4px 12px -2px rgba(255, 255, 255, 0.4);
+  }
+  100% {
+    border-bottom-color: var(--border-color);
+  }
 }
 
 .brand-logo-css {
@@ -75,6 +105,20 @@
 .logout-container {
   padding: 20px;
   border-top: 1px solid var(--border-color);
+  animation: logoutPulse 6s infinite;
+}
+
+@keyframes logoutPulse {
+  0% {
+    border-top-color: var(--border-color);
+  }
+  50% {
+    border-top-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 4px -4px 12px -2px rgba(255, 255, 255, 0.4);
+  }
+  100% {
+    border-top-color: var(--border-color);
+  }
 }
 
 @media (max-width: 768px) {

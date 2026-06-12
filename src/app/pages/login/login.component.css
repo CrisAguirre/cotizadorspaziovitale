@@ -10,7 +10,22 @@
   width: 100%;
   max-width: 420px;
   padding: 45px 40px;
-  animation: fadeIn 0.8s ease-out;
+  animation: fadeIn 0.8s ease-out, loginCardPulse 6s infinite;
+}
+
+@keyframes loginCardPulse {
+  0% {
+    border-color: var(--border-color);
+    box-shadow: var(--shadow);
+  }
+  50% {
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: var(--shadow), 4px 4px 12px rgba(255, 255, 255, 0.4);
+  }
+  100% {
+    border-color: var(--border-color);
+    box-shadow: var(--shadow);
+  }
 }
 
 @keyframes fadeIn {
