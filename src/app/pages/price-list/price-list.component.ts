@@ -38,6 +38,10 @@ export class PriceListComponent implements OnInit {
   totalItems = 0;
   readonly pageSize = 50;
 
+  // Sorting
+  sortColumn: string = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
   formatOptions: { value: SupplierImportFormat; label: string }[] = [
     { value: 'hejercol', label: 'Hejercol (portafolio herrajes)' },
     { value: 'ferramenta', label: 'Ferramenta Italiana' },
@@ -62,6 +66,9 @@ export class PriceListComponent implements OnInit {
     };
     if (this.filterCategory) params['category'] = this.filterCategory;
     if (this.searchTerm.trim()) params['search'] = this.searchTerm.trim();
+    if (this.sortColumn) {
+      params['sort'] = this.sortDirection === 'desc' ? `-${this.sortColumn}` : this.sortColumn;
+    }
 
     this.materialService.getMaterials(params).subscribe({
       next: (res: any) => {
@@ -104,6 +111,17 @@ export class PriceListComponent implements OnInit {
       this.currentPage = page;
       this.loadMaterials();
     }
+  }
+
+  sortBy(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+    this.currentPage = 1;
+    this.loadMaterials();
   }
 
   async onFileSelected(event: Event): Promise<void> {

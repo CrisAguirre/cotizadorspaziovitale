@@ -168,3 +168,5 @@
   border-color: var(--primary-color);
   font-weight: 700;
 }
+.sortable { cursor: pointer; user-select: none; }
+.sortable:hover { background-color: rgba(0,0,0,0.05); }

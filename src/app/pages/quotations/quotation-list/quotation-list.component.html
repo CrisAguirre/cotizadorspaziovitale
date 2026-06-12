@@ -27,12 +27,30 @@
   <table class="data-table" *ngIf="!isLoading">
     <thead>
       <tr>
-        <th>N°</th>
-        <th>Fecha</th>
-        <th>Cliente</th>
-        <th>Ciudad</th>
-        <th>Total</th>
-        <th>Estado</th>
+        <th (click)="sortBy('number')" class="sortable">
+          N°
+          <span *ngIf="sortColumn === 'number'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+        </th>
+        <th (click)="sortBy('date')" class="sortable">
+          Fecha
+          <span *ngIf="sortColumn === 'date'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+        </th>
+        <th (click)="sortBy('client.name')" class="sortable">
+          Cliente
+          <span *ngIf="sortColumn === 'client.name'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+        </th>
+        <th (click)="sortBy('city')" class="sortable">
+          Ciudad
+          <span *ngIf="sortColumn === 'city'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+        </th>
+        <th (click)="sortBy('totals.grandTotal')" class="sortable">
+          Total
+          <span *ngIf="sortColumn === 'totals.grandTotal'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+        </th>
+        <th (click)="sortBy('status')" class="sortable">
+          Estado
+          <span *ngIf="sortColumn === 'status'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+        </th>
         <th>Ciclo de Vida</th>
         <th>Acciones</th>
       </tr>

@@ -91,12 +91,27 @@
   <table class="data-table" *ngIf="!isLoading">
     <thead>
       <tr>
-        <th>Categoría</th>
-        <th>Proveedor</th>
-        <th>Código</th>
-        <th>Descripción</th>
+        <th (click)="sortBy('category')" class="sortable">
+          Categoría
+          <span *ngIf="sortColumn === 'category'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+        </th>
+        <th (click)="sortBy('provider')" class="sortable">
+          Proveedor
+          <span *ngIf="sortColumn === 'provider'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+        </th>
+        <th (click)="sortBy('code')" class="sortable">
+          Código
+          <span *ngIf="sortColumn === 'code'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+        </th>
+        <th (click)="sortBy('description')" class="sortable">
+          Descripción
+          <span *ngIf="sortColumn === 'description'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+        </th>
         <th>Unidad</th>
-        <th>Precio s/ IVA</th>
+        <th (click)="sortBy('unitPrice')" class="sortable">
+          Precio s/ IVA
+          <span *ngIf="sortColumn === 'unitPrice'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+        </th>
       </tr>
     </thead>
     <tbody>

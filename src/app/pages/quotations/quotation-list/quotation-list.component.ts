@@ -15,6 +15,10 @@ export class QuotationListComponent implements OnInit {
   isLoading = true;
   activeTab: 'activas' | 'archivo' = 'activas';
 
+  // Sorting
+  sortColumn: string = '';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
   statusLabels: Record<string, string> = {
     'nuevo': 'NUEVO',
     'en_revision': 'EN REVISIÓN',
@@ -62,7 +66,41 @@ export class QuotationListComponent implements OnInit {
   }
 
   getDisplayList(): Quotation[] {
-    return this.activeTab === 'activas' ? this.quotations : this.archivedQuotations;
+    let list = this.activeTab === 'activas' ? this.quotations : this.archivedQuotations;
+    
+    if (this.sortColumn) {
+      list = [...list].sort((a: any, b: any) => {
+        let valA = a[this.sortColumn];
+        let valB = b[this.sortColumn];
+
+        // Manejar sub-propiedades
+        if (this.sortColumn === 'client.name') {
+          valA = a.client?.name;
+          valB = b.client?.name;
+        } else if (this.sortColumn === 'totals.grandTotal') {
+          valA = a.totals?.grandTotal;
+          valB = b.totals?.grandTotal;
+        }
+
+        if (typeof valA === 'string') valA = valA.toLowerCase();
+        if (typeof valB === 'string') valB = valB.toLowerCase();
+
+        if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return list;
+  }
+
+  sortBy(column: string): void {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
   }
 
   getStatusLabel(status: string): string {
