@@ -105,7 +105,8 @@ export class PdfGeneratorService {
     const allAccessories: { furnName: string, acc: AccessoryItem, clientPrice: number }[] = [];
 
     // Muebles y Áreas
-    quotation.areas.forEach(area => {
+    const areas = quotation.areas || [];
+    areas.forEach(area => {
       if (wConfig.areaDisplayMode !== 'single') {
         content.push({ text: `Área: ${area.name}`, style: 'areaTitle', margin: [0, 10, 0, 10] });
       }
@@ -116,7 +117,8 @@ export class PdfGeneratorService {
         [{ text: 'Ítem', style: 'tableHeader' }, { text: 'Descripción / Medidas', style: 'tableHeader' }, { text: 'Cant', style: 'tableHeader' }, { text: 'Valor Unit.', style: 'tableHeader', alignment: 'right' as 'right' }, { text: 'Valor Total', style: 'tableHeader', alignment: 'right' as 'right' }]
       ];
 
-      area.furniture.forEach((furn, index) => {
+      const furnitureList = area.furniture || [];
+      furnitureList.forEach((furn, index) => {
         let furnBaseCost = furn.totalCost;
 
         // Q2: Herrajes
@@ -202,8 +204,8 @@ export class PdfGeneratorService {
         accTotal += item.clientPrice;
         accBody.push([
           { text: item.furnName, fontSize: 9 },
-          { text: item.acc.description },
-          { text: item.acc.quantity.toString() },
+          { text: item.acc.description || 'Accesorio / Herraje' },
+          { text: (item.acc.quantity || 1).toString() },
           { text: this.formatCurrency(item.clientPrice), alignment: 'right' as 'right' }
         ]);
       });
