@@ -11,7 +11,20 @@ export class SidebarComponent {
   constructor(public authService: AuthService, private router: Router) {}
 
   logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    if (this.authService.isAuthenticated()) {
+      this.authService.logoutApi().subscribe({
+        next: () => {
+          this.authService.logout();
+          this.router.navigate(['/login']);
+        },
+        error: () => {
+          this.authService.logout();
+          this.router.navigate(['/login']);
+        }
+      });
+    } else {
+      this.authService.logout();
+      this.router.navigate(['/login']);
+    }
   }
 }

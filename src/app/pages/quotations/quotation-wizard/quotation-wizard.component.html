@@ -800,7 +800,7 @@
   <!-- BOTONERA -->
   <div class="wizard-footer mt-4">
     <button type="button" class="btn-secondary" *ngIf="currentStep > 1" (click)="prevStep()">← Anterior</button>
-    <button type="button" class="btn-primary" *ngIf="currentStep === TOTAL_STEPS" (click)="generatePdf()" style="margin-left: 10px; background-color: #6366f1;">📄 Generar PDF</button>
+    <button type="button" class="btn-primary" *ngIf="currentStep === TOTAL_STEPS" (click)="generatePdf()" style="margin-left: 10px;">📄 Generar PDF</button>
     <button type="button" class="btn-primary ml-auto" *ngIf="currentStep < TOTAL_STEPS" (click)="nextStep()" [disabled]="!isStepValid(currentStep)">Siguiente →</button>
     <button type="button" class="btn-success ml-auto" *ngIf="currentStep === TOTAL_STEPS" (click)="saveQuotation()" [disabled]="isLoading || !isStepValid(currentStep)">Guardar Cotización</button>
   </div>

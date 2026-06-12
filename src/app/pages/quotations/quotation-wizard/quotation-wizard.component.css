@@ -110,8 +110,6 @@
 .text-error { color: var(--error-color); }
 .text-muted { color: var(--text-muted); }
 .text-sm { font-size: 12px; }
-.btn-icon { background: transparent; border: none; cursor: pointer; opacity: 0.7; }
-.btn-icon:hover { opacity: 1; }
 
 .area-title {
   margin-bottom: 15px;

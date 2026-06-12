@@ -21,9 +21,12 @@
     <a *ngIf="authService.getUser()?.role === 'admin'" routerLink="/settings" routerLinkActive="active" class="nav-item">
       <span>⚙️ Configuración</span>
     </a>
+    <a *ngIf="authService.getUser()?.role === 'admin'" routerLink="/activity" routerLinkActive="active" class="nav-item">
+      <span>📋 Actividad</span>
+    </a>
   </nav>
-  <div class="logout-container">
-    <button class="nav-item logout-btn" (click)="logout()">
+  <div class="logout-container" style="display: flex; justify-content: center; padding-bottom: 20px;">
+    <button class="btn-danger" style="width: 90%;" (click)="logout()">
       <span>🚪 Cerrar Sesión</span>
     </button>
   </div>

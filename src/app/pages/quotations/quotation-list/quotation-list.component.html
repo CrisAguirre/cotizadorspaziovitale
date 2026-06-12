@@ -10,10 +10,10 @@
 
 <!-- Tabs -->
 <div class="tabs-bar">
-  <button class="tab-btn" [class.active]="activeTab === 'activas'" (click)="activeTab = 'activas'">
+  <button class="btn-tab" [class.active]="activeTab === 'activas'" (click)="activeTab = 'activas'">
     📋 Activas ({{ quotations.length }})
   </button>
-  <button class="tab-btn" [class.active]="activeTab === 'archivo'" (click)="activeTab = 'archivo'">
+  <button class="btn-tab" [class.active]="activeTab === 'archivo'" (click)="activeTab = 'archivo'">
     🗄️ Archivo ({{ archivedQuotations.length }})
   </button>
 </div>
@@ -50,7 +50,7 @@
         <td class="lifecycle-actions">
           <!-- Estado: Nuevo → Enviar a revisión -->
           <button *ngIf="q.status === 'nuevo' || q.status === 'borrador'"
-                  class="btn-lifecycle send"
+                  class="btn-primary btn-sm"
                   title="Marcar como enviada al cliente"
                   (click)="changeStatus(q, 'en_revision')">
             📤 Enviar
@@ -58,35 +58,35 @@
 
           <!-- Estado: En Revisión → Aceptar / Rechazar / Devolver -->
           <ng-container *ngIf="q.status === 'en_revision' || q.status === 'auditada' || q.status === 'enviada'">
-            <button class="btn-lifecycle accept"
-                    title="Cliente aceptó la cotización"
+            <button class="btn-success btn-sm"
+                    title="Aceptar" 
                     (click)="changeStatus(q, 'aceptada')">
               ✅ Aceptar
             </button>
-            <button class="btn-lifecycle reject"
-                    title="Cliente rechazó la cotización"
+            <button class="btn-danger btn-sm"
+                    title="Rechazar" 
                     (click)="changeStatus(q, 'rechazada')">
               ❌ Rechazar
             </button>
-            <button class="btn-lifecycle retry"
-                    title="Cliente solicita ajustes"
-                    (click)="changeStatus(q, 'nuevo')">
-              🔄 Ajustes
+            <button class="btn-secondary btn-sm"
+                    title="Retomar/Editar" 
+                    (click)="editQuotation(q._id)">
+              ✏️ Retomar
             </button>
           </ng-container>
 
           <!-- Estado: Aceptada o Rechazada → Archivar -->
           <button *ngIf="q.status === 'aceptada' || q.status === 'aprobada'"
-                  class="btn-lifecycle archive"
-                  title="Archivar como aceptada"
+                  class="btn-secondary btn-sm"
+                  title="Archivar" 
                   (click)="changeStatus(q, 'archivada_aceptada')">
-            🗄️ Archivar
+            📁 Archivar
           </button>
           <button *ngIf="q.status === 'rechazada'"
-                  class="btn-lifecycle archive"
-                  title="Archivar como rechazada"
+                  class="btn-secondary btn-sm"
+                  title="Archivar" 
                   (click)="changeStatus(q, 'archivada_rechazada')">
-            🗄️ Archivar
+            📁 Archivar
           </button>
         </td>
         <td>

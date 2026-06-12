@@ -36,4 +36,12 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
   }
+
+  logoutApi(): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/logout`, {});
+  }
+
+  getActivities(): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/activities`);
+  }
 }

@@ -1,0 +1,47 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.table td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.badge-designer {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+}
+
+.action-badge {
+  min-width: 70px;
+  text-align: center;
+  display: inline-block;
+}
+
+.badge-login {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.badge-logout {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}

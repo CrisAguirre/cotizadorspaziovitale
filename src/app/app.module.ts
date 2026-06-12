@@ -17,6 +17,7 @@ import { MainLayoutComponent } from './layouts/main-layout/main-layout.component
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { HeaderComponent } from './components/header/header.component';
 import { MaterialPickerComponent } from './components/material-picker/material-picker.component';
+import { ActivityComponent } from './pages/activity/activity.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -31,6 +32,7 @@ const routes: Routes = [
       { path: 'quotations', component: QuotationListComponent },
       { path: 'quotations/new', component: QuotationWizardComponent },
       { path: 'quotations/:id', component: QuotationWizardComponent },
+      { path: 'activity', component: ActivityComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
@@ -49,7 +51,8 @@ const routes: Routes = [
     MainLayoutComponent,
     SidebarComponent,
     HeaderComponent,
-    MaterialPickerComponent
+    MaterialPickerComponent,
+    ActivityComponent
   ],
   imports: [
     BrowserModule,

@@ -71,17 +71,3 @@
   padding: 20px;
   border-top: 1px solid var(--border-color);
 }
-
-.logout-btn {
-  width: 100%;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  text-align: left;
-  font-size: inherit;
-  font-family: inherit;
-}
-.logout-btn:hover {
-  color: var(--error-color);
-  background: rgba(255, 107, 107, 0.1);
-}
