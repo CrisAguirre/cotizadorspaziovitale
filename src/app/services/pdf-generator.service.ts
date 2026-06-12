@@ -3,6 +3,7 @@ import { Quotation, AppConfig, Area, Furniture, AccessoryItem } from '../models/
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { TDocumentDefinitions, Content, TableCell, StyleDictionary } from 'pdfmake/interfaces';
+import { LOGO_BASE64 } from './logo-base64';
 
 // Safe assignment for vfs fonts
 const fonts = (pdfFonts as any);
@@ -15,12 +16,10 @@ export class PdfGeneratorService {
 
   constructor() { }
 
-  async generateQuotationPdf(quotation: Quotation, appConfig: AppConfig | null) {
+  generateQuotationPdf(quotation: Quotation, appConfig: AppConfig | null) {
     try {
-      const logoDataUrl = await this.getBase64ImageFromURL('/assets/logo.png');
-      
       const docDef: TDocumentDefinitions = {
-        content: this.buildContent(quotation, appConfig, logoDataUrl),
+        content: this.buildContent(quotation, appConfig, LOGO_BASE64),
         styles: this.getStyles(),
         defaultStyle: {
           fontSize: 10,
@@ -42,24 +41,6 @@ export class PdfGeneratorService {
       console.error('Error al generar PDF:', err);
       alert('Error al generar PDF. Verifica la consola para más detalles.');
     }
-  }
-
-  private getBase64ImageFromURL(url: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.setAttribute('crossOrigin', 'anonymous');
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx?.drawImage(img, 0, 0);
-        const dataURL = canvas.toDataURL('image/png');
-        resolve(dataURL);
-      };
-      img.onerror = error => reject(error);
-      img.src = url;
-    });
   }
 
   private buildContent(quotation: Quotation, appConfig: AppConfig | null, logoDataUrl: string): Content[] {
