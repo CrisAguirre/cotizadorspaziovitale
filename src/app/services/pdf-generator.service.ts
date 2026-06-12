@@ -121,14 +121,16 @@ export class PdfGeneratorService {
 
         // Q2: Herrajes
         if (wConfig.hardwareDisplayMode === 'table') {
-          furnBaseCost -= furn.totalAccessories; // Restamos accesorios del mueble
-          furn.accessories.forEach(acc => {
-            allAccessories.push({
-              furnName: furn.name,
-              acc,
-              clientPrice: acc.totalPrice * markupFactor
+          furnBaseCost -= (furn.totalAccessories || 0); // Restamos accesorios del mueble
+          if (furn.accessories && Array.isArray(furn.accessories)) {
+            furn.accessories.forEach(acc => {
+              allAccessories.push({
+                furnName: furn.name,
+                acc,
+                clientPrice: (acc.totalPrice || 0) * markupFactor
+              });
             });
-          });
+          }
         }
 
         // Q1: Precio Cliente
