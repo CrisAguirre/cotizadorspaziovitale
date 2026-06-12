@@ -21,24 +21,7 @@
 }
 
 /* Table */
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.data-table th, .data-table td {
-  padding: 12px 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--border-color);
-}
-.data-table th {
-  color: var(--text-muted);
-  font-weight: 500;
-  font-size: 13px;
-}
-.data-table td {
-  font-size: 14px;
-  color: var(--text-main);
-}
+/* .data-table is now globally defined in styles.css */
 
 /* Badges */
 .badge {

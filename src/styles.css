@@ -255,6 +255,26 @@ select.form-control option {
 .card { padding: 24px; }
 .card h3, .glass-panel h3, .glass-panel h2 { color: var(--primary-color); margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
 
+/* Global Data Table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.data-table th, .data-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+.data-table th {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 14px;
+}
+.data-table td {
+  font-size: 14px;
+  color: var(--text-main);
+}
+
 /* Responsive Utilities */
 .table-responsive {
   width: 100%;

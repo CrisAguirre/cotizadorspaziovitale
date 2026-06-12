@@ -15,27 +15,7 @@
   color: var(--text-muted);
 }
 
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.data-table th, .data-table td {
-  padding: 12px 16px;
-  text-align: left;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.data-table th {
-  color: var(--text-muted);
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.data-table td {
-  font-size: 14px;
-  color: var(--text-main);
-}
+/* The .data-table is now globally defined in styles.css */
 
 .badge {
   background: rgba(212, 175, 55, 0.1);

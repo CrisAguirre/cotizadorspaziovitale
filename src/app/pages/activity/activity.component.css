@@ -23,3 +23,44 @@
   background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
 }
+
+/* Responsive Table as Cards for Mobile & iPad (up to 1024px) */
+@media (max-width: 1024px) {
+  .table-responsive {
+    border: none;
+    background: transparent;
+  }
+  .data-table thead {
+    display: none;
+  }
+  .data-table, .data-table tbody, .data-table tr, .data-table td {
+    display: block;
+    width: 100%;
+  }
+  .data-table tr {
+    margin-bottom: 16px;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .data-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+  .data-table td:last-child {
+    border-bottom: none;
+  }
+  .data-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 13px;
+    text-align: left;
+    margin-right: 15px;
+  }
+}

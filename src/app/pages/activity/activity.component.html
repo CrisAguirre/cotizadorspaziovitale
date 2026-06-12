@@ -7,7 +7,7 @@
   </p>
 </div>
 
-<div class="glass-panel">
+<div class="card glass-panel">
   <div *ngIf="isLoading" class="text-center p-4">
     Cargando actividades...
   </div>
@@ -28,18 +28,18 @@
       </thead>
       <tbody>
         <tr *ngFor="let act of activities">
-          <td>{{ act.userEmail }}</td>
-          <td>
+          <td data-label="Usuario">{{ act.userEmail }}</td>
+          <td data-label="Rol">
             <span class="badge" [class.badge-designer]="act.role === 'designer'" [class.badge-admin]="act.role === 'admin'">
               {{ act.role === 'designer' ? 'Diseñador' : act.role | uppercase }}
             </span>
           </td>
-          <td>
+          <td data-label="Acción">
             <span class="badge action-badge" [class.badge-login]="act.action === 'login'" [class.badge-logout]="act.action === 'logout'">
               {{ act.action === 'login' ? 'Entrada' : 'Salida' }}
             </span>
           </td>
-          <td>{{ act.timestamp | date:'medium' }}</td>
+          <td data-label="Fecha y Hora">{{ act.timestamp | date:'medium' }}</td>
         </tr>
       </tbody>
     </table>
