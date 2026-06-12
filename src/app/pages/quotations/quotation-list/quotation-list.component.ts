@@ -105,7 +105,20 @@ export class QuotationListComponent implements OnInit {
   }
 
   downloadPdf(quotation: Quotation) {
-    this.pdfGenerator.generateQuotationPdf(quotation, null);
+    if (!quotation._id) return;
+    this.quotationService.getQuotationById(quotation._id).subscribe({
+      next: (res: any) => {
+        if (res.success && res.data) {
+          this.pdfGenerator.generateQuotationPdf(res.data, null);
+        } else {
+          alert('Error al obtener la cotización completa para el PDF.');
+        }
+      },
+      error: (err: any) => {
+        console.error('Error fetching full quotation:', err);
+        alert('Error al descargar el PDF.');
+      }
+    });
   }
 
   deleteQuotation(id: string | undefined, number: number) {
