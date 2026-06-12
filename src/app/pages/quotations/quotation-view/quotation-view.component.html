@@ -40,7 +40,12 @@
     <div class="areas-section mt-4">
       <h3>Detalle de Muebles</h3>
       <div *ngFor="let area of quotation.areas" class="area-card mt-3">
-        <h4 class="area-title">{{ area.name }}</h4>
+        <h4 class="area-title">
+          {{ area.name }}
+          <span *ngIf="quotation.wizardConfig?.areaDisplayMode === 'subtotals'" style="float: right; color: var(--primary-color);">
+            Subtotal: {{ getAreaSubtotal(area) | currency:'COP':'symbol':'1.0-0' }}
+          </span>
+        </h4>
         <div class="table-responsive">
           <table class="data-table">
             <thead>
@@ -48,7 +53,8 @@
                 <th>Mueble</th>
                 <th>Descripción / Medidas</th>
                 <th>Cant.</th>
-                <th>Tipo</th>
+                <th>Valor Unit.</th>
+                <th>Valor Total</th>
               </tr>
             </thead>
             <tbody>
@@ -59,10 +65,11 @@
                   <small class="text-muted">{{ furn.measurements || 'Sin medidas' }}</small>
                 </td>
                 <td>{{ furn.quantity }}</td>
-                <td>{{ furn.type === 'custom' ? 'A Medida' : 'Línea' }}</td>
+                <td>{{ (getFurnitureClientPrice(furn) / (furn.quantity || 1)) | currency:'COP':'symbol':'1.0-0' }}</td>
+                <td style="font-weight: 500;">{{ getFurnitureClientPrice(furn) | currency:'COP':'symbol':'1.0-0' }}</td>
               </tr>
               <tr *ngIf="!area.furniture || area.furniture.length === 0">
-                <td colspan="4" class="text-center text-muted">No hay muebles en esta área.</td>
+                <td colspan="5" class="text-center text-muted">No hay muebles en esta área.</td>
               </tr>
             </tbody>
           </table>

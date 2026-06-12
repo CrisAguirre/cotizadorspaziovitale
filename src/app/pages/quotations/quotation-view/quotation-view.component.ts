@@ -58,4 +58,34 @@ export class QuotationViewComponent implements OnInit {
   goBack() {
     this.router.navigate(['/quotations']);
   }
+
+  getMarkupFactor(): number {
+    if (!this.quotation) return 1;
+    const totals = this.quotation.totals;
+    if (!totals || !totals.totalCost || totals.totalCost === 0) return 1;
+    return totals.grandTotal / totals.totalCost;
+  }
+
+  getFurnitureClientPrice(furn: any): number {
+    if (!this.quotation) return 0;
+    const wConfig = this.quotation.wizardConfig || { clientPriceMode: 'proportional', hardwareDisplayMode: 'table' };
+    const totals = this.quotation.totals || { pricePerSqm: 0 };
+    
+    let furnBaseCost = furn.totalCost || 0;
+    if (wConfig.hardwareDisplayMode === 'table') {
+      furnBaseCost -= (furn.totalAccessories || 0);
+    }
+
+    if (wConfig.clientPriceMode === 'proportional') {
+      return furnBaseCost * this.getMarkupFactor();
+    } else if (wConfig.clientPriceMode === 'sqm') {
+      return (furn.areaSqm || 0) * (totals.pricePerSqm || 0);
+    }
+    return furnBaseCost * this.getMarkupFactor();
+  }
+
+  getAreaSubtotal(area: any): number {
+    if (!area.furniture) return 0;
+    return area.furniture.reduce((sum: number, f: any) => sum + this.getFurnitureClientPrice(f), 0);
+  }
 }
