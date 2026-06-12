@@ -7,6 +7,11 @@
   border-left: none;
   border-top: none;
   border-bottom: none;
+  transition: all 0.3s ease-in-out;
+}
+
+.sidebar.closed {
+  margin-left: -250px;
 }
 
 .brand {
@@ -70,4 +75,24 @@
 .logout-container {
   padding: 20px;
   border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    margin-left: 0 !important;
+    z-index: 100;
+    transition: left 0.3s ease-in-out;
+    background-color: var(--bg-color); /* solid background for mobile */
+    background-image: var(--bg-gradient);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-right: 1px solid var(--border-color);
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
 }

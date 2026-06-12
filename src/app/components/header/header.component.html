@@ -1,11 +1,16 @@
 <header class="header glass-panel">
-  <div class="user-info">
+  <div class="header-left">
+    <button class="mobile-menu-btn" (click)="onToggleSidebar()">
+      <span class="hamburger-icon">☰</span>
+    </button>
+    <div class="user-info">
     <div class="avatar">
       {{ (authService.getUser()?.email?.charAt(0) || 'U') | uppercase }}
     </div>
     <div class="user-details">
       <span class="user-email">{{ authService.getUser()?.email || 'Usuario' }}</span>
       <span class="user-role">{{ authService.getUser()?.role === 'admin' ? 'Administrador' : 'Diseñador' }}</span>
+    </div>
     </div>
   </div>
   

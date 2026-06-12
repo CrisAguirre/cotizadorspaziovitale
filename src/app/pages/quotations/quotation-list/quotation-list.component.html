@@ -24,101 +24,103 @@
     <p>Cargando...</p>
   </div>
 
-  <table class="data-table" *ngIf="!isLoading">
-    <thead>
-      <tr>
-        <th (click)="sortBy('number')" class="sortable">
-          N°
-          <span *ngIf="sortColumn === 'number'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-        </th>
-        <th (click)="sortBy('date')" class="sortable">
-          Fecha
-          <span *ngIf="sortColumn === 'date'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-        </th>
-        <th (click)="sortBy('client.name')" class="sortable">
-          Cliente
-          <span *ngIf="sortColumn === 'client.name'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-        </th>
-        <th (click)="sortBy('city')" class="sortable">
-          Ciudad
-          <span *ngIf="sortColumn === 'city'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-        </th>
-        <th (click)="sortBy('totals.grandTotal')" class="sortable">
-          Total
-          <span *ngIf="sortColumn === 'totals.grandTotal'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-        </th>
-        <th (click)="sortBy('status')" class="sortable">
-          Estado
-          <span *ngIf="sortColumn === 'status'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-        </th>
-        <th>Ciclo de Vida</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let q of getDisplayList()">
-        <td>{{ q.number }}</td>
-        <td>{{ q.date | date:'dd/MM/yyyy' }}</td>
-        <td>{{ q.client.name }}</td>
-        <td>{{ q.city }}</td>
-        <td>{{ q.totals.grandTotal | currency:'COP':'symbol':'1.0-0' }}</td>
-        <td>
-          <span class="badge" [ngClass]="getStatusClass(q.status)">{{ getStatusLabel(q.status) }}</span>
-        </td>
-        <td class="lifecycle-actions">
-          <!-- Estado: Nuevo → Enviar a revisión -->
-          <button *ngIf="q.status === 'nuevo' || q.status === 'borrador'"
-                  class="btn-primary btn-sm"
-                  title="Marcar como enviada al cliente"
-                  (click)="changeStatus(q, 'en_revision')">
-            📤 Enviar
-          </button>
-
-          <!-- Estado: En Revisión → Aceptar / Rechazar / Devolver -->
-          <ng-container *ngIf="q.status === 'en_revision' || q.status === 'auditada' || q.status === 'enviada'">
-            <button class="btn-success btn-sm"
-                    title="Aceptar" 
-                    (click)="changeStatus(q, 'aceptada')">
-              ✅ Aceptar
+  <div class="table-responsive" *ngIf="!isLoading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th (click)="sortBy('number')" class="sortable">
+            N°
+            <span *ngIf="sortColumn === 'number'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th (click)="sortBy('date')" class="sortable">
+            Fecha
+            <span *ngIf="sortColumn === 'date'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th (click)="sortBy('client.name')" class="sortable">
+            Cliente
+            <span *ngIf="sortColumn === 'client.name'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th (click)="sortBy('city')" class="sortable">
+            Ciudad
+            <span *ngIf="sortColumn === 'city'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th (click)="sortBy('totals.grandTotal')" class="sortable">
+            Total
+            <span *ngIf="sortColumn === 'totals.grandTotal'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th (click)="sortBy('status')" class="sortable">
+            Estado
+            <span *ngIf="sortColumn === 'status'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th>Ciclo de Vida</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let q of getDisplayList()">
+          <td data-label="N°">{{ q.number }}</td>
+          <td data-label="Fecha">{{ q.date | date:'dd/MM/yyyy' }}</td>
+          <td data-label="Cliente">{{ q.client.name }}</td>
+          <td data-label="Ciudad">{{ q.city }}</td>
+          <td data-label="Total">{{ q.totals.grandTotal | currency:'COP':'symbol':'1.0-0' }}</td>
+          <td data-label="Estado">
+            <span class="badge" [ngClass]="getStatusClass(q.status)">{{ getStatusLabel(q.status) }}</span>
+          </td>
+          <td data-label="Ciclo de Vida" class="lifecycle-actions">
+            <!-- Estado: Nuevo → Enviar a revisión -->
+            <button *ngIf="q.status === 'nuevo' || q.status === 'borrador'"
+                    class="btn-primary btn-sm"
+                    title="Marcar como enviada al cliente"
+                    (click)="changeStatus(q, 'en_revision')">
+              📤 Enviar
             </button>
-            <button class="btn-danger btn-sm"
-                    title="Rechazar" 
-                    (click)="changeStatus(q, 'rechazada')">
-              ❌ Rechazar
+  
+            <!-- Estado: En Revisión → Aceptar / Rechazar / Devolver -->
+            <ng-container *ngIf="q.status === 'en_revision' || q.status === 'auditada' || q.status === 'enviada'">
+              <button class="btn-success btn-sm"
+                      title="Aceptar" 
+                      (click)="changeStatus(q, 'aceptada')">
+                ✅ Aceptar
+              </button>
+              <button class="btn-danger btn-sm"
+                      title="Rechazar" 
+                      (click)="changeStatus(q, 'rechazada')">
+                ❌ Rechazar
+              </button>
+              <button class="btn-secondary btn-sm"
+                      title="Retomar/Editar" 
+                      (click)="editQuotation(q._id)">
+                ✏️ Retomar
+              </button>
+            </ng-container>
+  
+            <!-- Estado: Aceptada o Rechazada → Archivar -->
+            <button *ngIf="q.status === 'aceptada' || q.status === 'aprobada'"
+                    class="btn-secondary btn-sm"
+                    title="Archivar" 
+                    (click)="changeStatus(q, 'archivada_aceptada')">
+              📁 Archivar
             </button>
-            <button class="btn-secondary btn-sm"
-                    title="Retomar/Editar" 
-                    (click)="editQuotation(q._id)">
-              ✏️ Retomar
+            <button *ngIf="q.status === 'rechazada'"
+                    class="btn-secondary btn-sm"
+                    title="Archivar" 
+                    (click)="changeStatus(q, 'archivada_rechazada')">
+              📁 Archivar
             </button>
-          </ng-container>
-
-          <!-- Estado: Aceptada o Rechazada → Archivar -->
-          <button *ngIf="q.status === 'aceptada' || q.status === 'aprobada'"
-                  class="btn-secondary btn-sm"
-                  title="Archivar" 
-                  (click)="changeStatus(q, 'archivada_aceptada')">
-            📁 Archivar
-          </button>
-          <button *ngIf="q.status === 'rechazada'"
-                  class="btn-secondary btn-sm"
-                  title="Archivar" 
-                  (click)="changeStatus(q, 'archivada_rechazada')">
-            📁 Archivar
-          </button>
-        </td>
-        <td>
-          <button class="btn-icon" title="Ver Resumen" (click)="viewQuotation(q._id)">👁️</button>
-          <button class="btn-icon" title="Editar" (click)="editQuotation(q._id)">✏️</button>
-          <button class="btn-icon" title="Descargar PDF" (click)="downloadPdf(q)">📄</button>
-          <button class="btn-icon" title="Eliminar" (click)="deleteQuotation(q._id, q.number)" style="color: #ff6b6b;">🗑️</button>
-        </td>
-      </tr>
-      <tr *ngIf="getDisplayList().length === 0">
-        <td colspan="8" class="text-center">
-          {{ activeTab === 'activas' ? 'No hay cotizaciones activas.' : 'No hay cotizaciones archivadas.' }}
-        </td>
-      </tr>
-    </tbody>
-  </table>
+          </td>
+          <td data-label="Acciones" class="actions-cell">
+            <button class="btn-icon" title="Ver Resumen" (click)="viewQuotation(q._id)">👁️</button>
+            <button class="btn-icon" title="Editar" (click)="editQuotation(q._id)">✏️</button>
+            <button class="btn-icon" title="Descargar PDF" (click)="downloadPdf(q)">📄</button>
+            <button class="btn-icon" title="Eliminar" (click)="deleteQuotation(q._id, q.number)" style="color: #ff6b6b;">🗑️</button>
+          </td>
+        </tr>
+        <tr *ngIf="getDisplayList().length === 0">
+          <td colspan="8" class="text-center">
+            {{ activeTab === 'activas' ? 'No hay cotizaciones activas.' : 'No hay cotizaciones archivadas.' }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>

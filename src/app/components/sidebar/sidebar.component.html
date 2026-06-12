@@ -1,4 +1,4 @@
-<aside class="sidebar glass-panel">
+<aside class="sidebar glass-panel" [class.open]="isOpen" [class.closed]="!isOpen">
   <div class="brand">
     <div class="brand-logo-css">
       <div class="logo-main">
@@ -17,12 +17,12 @@
     <a routerLink="/price-list" routerLinkActive="active" class="nav-item">
       <span>💰 Lista de Precios</span>
     </a>
+    <a *ngIf="authService.getUser()?.role === 'admin'" routerLink="/activity" routerLinkActive="active" class="nav-item">
+      <span>📋 Actividad</span>
+    </a>
     <!-- Solo admin ve configuración -->
     <a *ngIf="authService.getUser()?.role === 'admin'" routerLink="/settings" routerLinkActive="active" class="nav-item">
       <span>⚙️ Configuración</span>
-    </a>
-    <a *ngIf="authService.getUser()?.role === 'admin'" routerLink="/activity" routerLinkActive="active" class="nav-item">
-      <span>📋 Actividad</span>
     </a>
   </nav>
   <div class="logout-container" style="display: flex; justify-content: center; padding-bottom: 20px;">

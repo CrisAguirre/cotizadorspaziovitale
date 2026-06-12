@@ -20,12 +20,13 @@
       <label>Archivo .xlsx</label>
       <input type="file" accept=".xlsx" (change)="onFileSelected($event)" class="form-control" />
     </div>
-    <div class="form-group checkbox-row">
-      <label>
-        <input type="checkbox" [(ngModel)]="replaceProviderOnImport" />
-        Reemplazar todos los ítems del proveedor antes de importar
-      </label>
-    </div>
+  </div>
+  
+  <div class="form-group checkbox-row" style="margin-bottom: 16px;">
+    <label>
+      <input type="checkbox" [(ngModel)]="replaceProviderOnImport" />
+      Reemplazar todos los ítems del proveedor antes de importar
+    </label>
   </div>
 
   <div *ngIf="importMessage" class="alert ok">{{ importMessage }}</div>
@@ -36,24 +37,26 @@
       <strong>{{ preview.fileName }}</strong> — {{ preview.materials.length }} materiales
       <span *ngIf="preview.skipped"> ({{ preview.skipped }} filas omitidas)</span>
     </p>
-    <table class="data-table compact">
-      <thead>
-        <tr>
-          <th>Código</th>
-          <th>Descripción</th>
-          <th>Unidad</th>
-          <th>Precio</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let m of preview.materials | slice:0:8">
-          <td>{{ m.code }}</td>
-          <td>{{ m.description }}</td>
-          <td>{{ m.unit }}</td>
-          <td>{{ m.unitPrice | currency:'COP':'symbol':'1.0-0' }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="data-table compact">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Unidad</th>
+            <th>Precio</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let m of preview.materials | slice:0:8">
+            <td data-label="Código">{{ m.code }}</td>
+            <td data-label="Descripción">{{ m.description }}</td>
+            <td data-label="Unidad">{{ m.unit }}</td>
+            <td data-label="Precio">{{ m.unitPrice | currency:'COP':'symbol':'1.0-0' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <p *ngIf="preview.materials.length > 8" class="text-muted">… y {{ preview.materials.length - 8 }} más</p>
     <div class="preview-actions">
       <button type="button" class="btn-secondary" (click)="cancelPreview()">Cancelar</button>
@@ -88,46 +91,48 @@
     <span>Mostrando {{ (currentPage - 1) * pageSize + 1 }}–{{ currentPage * pageSize > totalItems ? totalItems : currentPage * pageSize }} de <strong>{{ totalItems }}</strong> materiales</span>
   </div>
 
-  <table class="data-table" *ngIf="!isLoading">
-    <thead>
-      <tr>
-        <th (click)="sortBy('category')" class="sortable">
-          Categoría
-          <span *ngIf="sortColumn === 'category'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-        </th>
-        <th (click)="sortBy('provider')" class="sortable">
-          Proveedor
-          <span *ngIf="sortColumn === 'provider'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-        </th>
-        <th (click)="sortBy('code')" class="sortable">
-          Código
-          <span *ngIf="sortColumn === 'code'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-        </th>
-        <th (click)="sortBy('description')" class="sortable">
-          Descripción
-          <span *ngIf="sortColumn === 'description'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-        </th>
-        <th>Unidad</th>
-        <th (click)="sortBy('unitPrice')" class="sortable">
-          Precio s/ IVA
-          <span *ngIf="sortColumn === 'unitPrice'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let m of materials">
-        <td><span class="badge">{{ m.category }}</span></td>
-        <td>{{ m.provider }}</td>
-        <td>{{ m.code }}</td>
-        <td>{{ m.description }}</td>
-        <td>{{ m.unit }}</td>
-        <td>{{ m.unitPrice | currency:'COP':'symbol':'1.0-0' }}</td>
-      </tr>
-      <tr *ngIf="materials.length === 0">
-        <td colspan="6" class="text-center">No hay materiales. Importe un Excel de proveedor.</td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="table-responsive" *ngIf="!isLoading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th (click)="sortBy('category')" class="sortable">
+            Categoría
+            <span *ngIf="sortColumn === 'category'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th (click)="sortBy('provider')" class="sortable">
+            Proveedor
+            <span *ngIf="sortColumn === 'provider'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th (click)="sortBy('code')" class="sortable">
+            Código
+            <span *ngIf="sortColumn === 'code'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th (click)="sortBy('description')" class="sortable">
+            Descripción
+            <span *ngIf="sortColumn === 'description'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th>Unidad</th>
+          <th (click)="sortBy('unitPrice')" class="sortable">
+            Precio s/ IVA
+            <span *ngIf="sortColumn === 'unitPrice'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let m of materials">
+          <td data-label="Categoría"><span class="badge">{{ m.category }}</span></td>
+          <td data-label="Proveedor">{{ m.provider }}</td>
+          <td data-label="Código">{{ m.code }}</td>
+          <td data-label="Descripción">{{ m.description }}</td>
+          <td data-label="Unidad">{{ m.unit }}</td>
+          <td data-label="Precio s/ IVA">{{ m.unitPrice | currency:'COP':'symbol':'1.0-0' }}</td>
+        </tr>
+        <tr *ngIf="materials.length === 0">
+          <td colspan="6" class="text-center">No hay materiales. Importe un Excel de proveedor.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <!-- Pagination -->
   <div class="pagination-bar" *ngIf="!isLoading && totalPages > 1">

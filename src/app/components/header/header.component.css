@@ -58,3 +58,18 @@
 .theme-toggle-header:hover {
   background-color: var(--border-color);
 }
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.mobile-menu-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 5px;
+}

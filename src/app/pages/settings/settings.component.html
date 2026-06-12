@@ -86,26 +86,28 @@
       <button type="button" class="btn-secondary btn-sm" (click)="addWasteRange()">+ Agregar Rango</button>
     </div>
     
-    <table class="data-table mt-2">
-      <thead>
-        <tr>
-          <th>Mínimo (ML)</th>
-          <th>Máximo (ML)</th>
-          <th>Factor de Desperdicio (Ej: 0.35 para 35%)</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody formArrayName="wasteTable">
-        <tr *ngFor="let control of wasteTable.controls; let i=index" [formGroupName]="i">
-          <td><input type="number" formControlName="minMl" class="form-control table-input"></td>
-          <td><input type="number" formControlName="maxMl" class="form-control table-input"></td>
-          <td><input type="number" step="0.01" formControlName="factor" class="form-control table-input"></td>
-          <td>
-            <button type="button" class="btn-icon" (click)="removeWasteRange(i)" title="Eliminar Rango">🗑️</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="data-table mt-2">
+        <thead>
+          <tr>
+            <th>Mínimo (ML)</th>
+            <th>Máximo (ML)</th>
+            <th>Factor de Desperdicio (Ej: 0.35 para 35%)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody formArrayName="wasteTable">
+          <tr *ngFor="let control of wasteTable.controls; let i=index" [formGroupName]="i">
+            <td><input type="number" formControlName="minMl" class="form-control table-input"></td>
+            <td><input type="number" formControlName="maxMl" class="form-control table-input"></td>
+            <td><input type="number" step="0.01" formControlName="factor" class="form-control table-input"></td>
+            <td>
+              <button type="button" class="btn-icon" (click)="removeWasteRange(i)" title="Eliminar Rango">🗑️</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <div class="actions-footer mt-4">

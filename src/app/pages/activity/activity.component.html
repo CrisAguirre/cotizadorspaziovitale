@@ -1,10 +1,10 @@
-<div class="dashboard-header mb-4">
+<div class="page-header mb-4">
   <div style="display: flex; align-items: center; gap: 15px;">
     <h1>📋 Historial de Actividad</h1>
   </div>
-  <div class="user-info text-muted">
+  <p class="text-muted">
     Monitoreo de entradas y salidas de usuarios
-  </div>
+  </p>
 </div>
 
 <div class="glass-panel">
@@ -17,7 +17,7 @@
   </div>
 
   <div class="table-responsive" *ngIf="!isLoading && activities.length > 0">
-    <table class="table w-100">
+    <table class="data-table w-100">
       <thead>
         <tr>
           <th>Usuario</th>
@@ -30,8 +30,8 @@
         <tr *ngFor="let act of activities">
           <td>{{ act.userEmail }}</td>
           <td>
-            <span class="badge" [class.badge-designer]="act.role === 'designer'">
-              {{ act.role === 'designer' ? 'Diseñador' : act.role }}
+            <span class="badge" [class.badge-designer]="act.role === 'designer'" [class.badge-admin]="act.role === 'admin'">
+              {{ act.role === 'designer' ? 'Diseñador' : act.role | uppercase }}
             </span>
           </td>
           <td>
