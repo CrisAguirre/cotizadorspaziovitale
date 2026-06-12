@@ -1,12 +1,18 @@
 <div class="app-layout">
   <!-- Overlay para móviles -->
   <div class="sidebar-overlay" *ngIf="isSidebarOpen" (click)="closeSidebar()"></div>
-  
+
   <app-sidebar [isOpen]="isSidebarOpen" (click)="closeSidebar()"></app-sidebar>
   <div class="main-content">
     <app-header (toggleSidebar)="toggleSidebar()"></app-header>
     <div class="page-content">
       <router-outlet></router-outlet>
+
+      <footer class="app-footer">
+        <p>Sistema de gestión de cotizaciones Spazio Vitale 2026 - Todos los derechos Reservados</p>
+        <p>Desarrollado por <a href="https://deploy-agency.vercel.app/" target="_blank"
+            rel="noopener noreferrer">Agencia Deploy</a></p>
+      </footer>
     </div>
   </div>
 </div>

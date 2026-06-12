@@ -14,7 +14,7 @@
 <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
 
 <form [formGroup]="configForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading">
-  <div class="form-grid">
+  <div class="settings-grid">
     <!-- Costos y Valores -->
     <div class="card glass-panel">
       <h3>Costos Base</h3>
@@ -72,41 +72,46 @@
         <label>Validez Cotización (Días)</label>
         <input type="number" formControlName="validityDays" class="form-control">
       </div>
-      <div class="form-group">
-        <label>Forma de Pago (Texto por defecto)</label>
-        <textarea formControlName="paymentTerms" class="form-control" rows="3"></textarea>
+      
+      <div class="payment-terms-section">
+        <div class="section-header">
+          <span class="icon">📄</span>
+          <label>Términos y Forma de Pago por Defecto</label>
+        </div>
+        <p class="helper-text">Este texto aparecerá en todas las cotizaciones nuevas como las condiciones predeterminadas.</p>
+        <textarea formControlName="paymentTerms" class="form-control premium-textarea" rows="4" placeholder="Ej: 50% de anticipo, 50% contra entrega..."></textarea>
       </div>
     </div>
-  </div>
 
-  <!-- Tabla de Desperdicios para Cantos -->
-  <div class="card glass-panel mt-4">
-    <div class="flex-between">
-      <h3>Tabla de Desperdicios (Cantos en ML)</h3>
-      <button type="button" class="btn-secondary btn-sm" (click)="addWasteRange()">+ Agregar Rango</button>
-    </div>
-    
-    <div class="table-responsive">
-      <table class="data-table mt-2">
-        <thead>
-          <tr>
-            <th>Mínimo (ML)</th>
-            <th>Máximo (ML)</th>
-            <th>Factor de Desperdicio (Ej: 0.35 para 35%)</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody formArrayName="wasteTable">
-          <tr *ngFor="let control of wasteTable.controls; let i=index" [formGroupName]="i">
-            <td><input type="number" formControlName="minMl" class="form-control table-input"></td>
-            <td><input type="number" formControlName="maxMl" class="form-control table-input"></td>
-            <td><input type="number" step="0.01" formControlName="factor" class="form-control table-input"></td>
-            <td>
-              <button type="button" class="btn-icon" (click)="removeWasteRange(i)" title="Eliminar Rango">🗑️</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Tabla de Desperdicios para Cantos -->
+    <div class="card glass-panel">
+      <div class="flex-between">
+        <h3>Tabla de Desperdicios (Cantos en ML)</h3>
+        <button type="button" class="btn-secondary btn-sm" (click)="addWasteRange()">+ Agregar</button>
+      </div>
+      
+      <div class="table-responsive">
+        <table class="data-table mt-2">
+          <thead>
+            <tr>
+              <th>Mínimo (ML)</th>
+              <th>Máximo (ML)</th>
+              <th>Factor (Ej: 0.35)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody formArrayName="wasteTable">
+            <tr *ngFor="let control of wasteTable.controls; let i=index" [formGroupName]="i">
+              <td><input type="number" formControlName="minMl" class="form-control table-input"></td>
+              <td><input type="number" formControlName="maxMl" class="form-control table-input"></td>
+              <td><input type="number" step="0.01" formControlName="factor" class="form-control table-input"></td>
+              <td>
+                <button type="button" class="btn-icon" (click)="removeWasteRange(i)" title="Eliminar Rango">🗑️</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
