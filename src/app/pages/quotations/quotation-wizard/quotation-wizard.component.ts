@@ -18,15 +18,15 @@ import { QUOTATION_2604_REFERENCE } from '../../../data/quotation-2604.reference
 })
 export class QuotationWizardComponent implements OnInit {
   currentStep = 1;
-  wizardStep = 1; // Sub-step within the configuration wizard (1-6)
+  wizardStep = 1; // Sub-step within the configuration wizard (1-4)
   readonly TOTAL_STEPS = 5;
-  readonly TOTAL_WIZARD_QUESTIONS = 6;
+  readonly TOTAL_WIZARD_QUESTIONS = 4;
   quotationForm: FormGroup;
   isLoading = false;
   validationReport: QuotationValidationReport | null = null;
   readonly reference2604 = QUOTATION_2604_REFERENCE;
   showTip: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false, 5: false };
-  showTipConfig: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false };
+  showTipConfig: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false };
 
   availableLaborTimes: LaborTime[] = [];
 
@@ -35,10 +35,7 @@ export class QuotationWizardComponent implements OnInit {
     if (step === 2) {
       const c = this.activeQuotation.wizardConfig;
       if (!c.clientPriceMode) return false;
-      if (!c.hardwareDisplayMode) return false;
-      if (!c.moTimeMode) return false;
       if (c.requiresDesignFiles === null) return false;
-      if (c.requiresDesignFiles && c.designFilesInternal === null) return false;
       if (!c.areaDisplayMode) return false;
       if (!c.mesonMode) return false;
       return true;
@@ -65,8 +62,8 @@ export class QuotationWizardComponent implements OnInit {
   // Default wizard config
   readonly defaultWizardConfig: WizardConfig = {
     clientPriceMode: '',
-    hardwareDisplayMode: '',
-    moTimeMode: '',
+    hardwareDisplayMode: 'table',   // default, configurable en Paso 3
+    moTimeMode: 'mixed',            // default, configurable en Paso 3
     requiresDesignFiles: null,
     designFilesInternal: null,
     areaDisplayMode: '',
@@ -94,13 +91,13 @@ export class QuotationWizardComponent implements OnInit {
   };
 
   // Labels for the wizard questions
+  // Preguntas del wizard — Reunión 17-jun: 6→4 preguntas
+  // Q2 (Herrajes) y Q3 (Tiempos MO) migradas al Paso 3 Muebles
   readonly wizardQuestions = [
-    { step: 1, title: 'Precio visible al cliente', icon: '💰' },
-    { step: 2, title: 'Herrajes en la cotización', icon: '🔩' },
-    { step: 3, title: 'Tiempos de mano de obra', icon: '⏱️' },
-    { step: 4, title: 'Despiece gráfico', icon: '📐' },
-    { step: 5, title: 'Estructura de áreas', icon: '🏠' },
-    { step: 6, title: 'Mesones', icon: '🍽️' }
+    { step: 1, title: 'Modo de precio', icon: '💰' },
+    { step: 2, title: 'Diseño y medidas', icon: '📐' },
+    { step: 3, title: 'Estructura de áreas', icon: '🏠' },
+    { step: 4, title: 'Mesones', icon: '🍽️' }
   ];
 
   appConfig!: AppConfig;
@@ -252,15 +249,14 @@ export class QuotationWizardComponent implements OnInit {
     return this.wizardStep === this.TOTAL_WIZARD_QUESTIONS;
   }
 
-  setDesignFilesMode(mode: 'attach' | 'none' | 'internal') {
-    this.activeQuotation.wizardConfig.requiresDesignFiles = mode !== 'none';
-    this.activeQuotation.wizardConfig.designFilesInternal = mode === 'internal';
+  setDesignFilesMode(mode: 'attach' | 'none') {
+    this.activeQuotation.wizardConfig.requiresDesignFiles = mode === 'attach';
+    this.activeQuotation.wizardConfig.designFilesInternal = false;
   }
 
   getDesignFilesMode(): string {
-    if (!this.activeQuotation.wizardConfig.requiresDesignFiles) return 'none';
-    if (this.activeQuotation.wizardConfig.designFilesInternal) return 'internal';
-    return 'attach';
+    if (this.activeQuotation.wizardConfig.requiresDesignFiles) return 'attach';
+    return 'none';
   }
 
   addArea() {

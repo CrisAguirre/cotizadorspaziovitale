@@ -222,13 +222,18 @@ export interface QuotationClient {
 
 // ===== WIZARD CONFIG (FASE 0.5) =====
 export interface WizardConfig {
-  clientPriceMode: 'proportional' | 'sqm' | 'manual' | '';
+  /** Modo de precio: unit_sqm = Precio unitario x M²/Lineal (básica), manual = Ingreso manual (Premium), outsource = Tercerización */
+  clientPriceMode: 'unit_sqm' | 'manual' | 'outsource' | '';
+  /** Modo herrajes — migrado al Paso 3 (Muebles) desde reunión 17-jun */
   hardwareDisplayMode: 'table' | 'included' | 'selective' | '';
+  /** Modo tiempos MO — migrado al Paso 3 (Muebles) desde reunión 17-jun */
   moTimeMode: 'manual' | 'table' | 'mixed' | '';
+  /** Adjuntar archivos de diseño y medidas */
   requiresDesignFiles: boolean | null;
   designFilesInternal: boolean | null;
   areaDisplayMode: 'subtotals' | 'global_only' | 'single' | '';
-  mesonMode: 'special' | 'standard' | 'none' | '';
+  /** Mesones: includes_meson = Sí (granito, quarztone, piedra sinterizada, compactos), no_meson = No */
+  mesonMode: 'includes_meson' | 'no_meson' | '';
   wizardCompleted: boolean;
 }
 

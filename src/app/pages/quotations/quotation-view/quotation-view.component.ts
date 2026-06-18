@@ -76,10 +76,10 @@ export class QuotationViewComponent implements OnInit {
       furnBaseCost -= (furn.totalAccessories || 0);
     }
 
-    if (wConfig.clientPriceMode === 'proportional') {
-      return furnBaseCost * this.getMarkupFactor();
-    } else if (wConfig.clientPriceMode === 'sqm') {
+    if (wConfig.clientPriceMode === 'unit_sqm') {
       return (furn.areaSqm || 0) * (totals.pricePerSqm || 0);
+    } else if (wConfig.clientPriceMode === 'manual' || wConfig.clientPriceMode === 'outsource') {
+      return furnBaseCost * this.getMarkupFactor();
     }
     return furnBaseCost * this.getMarkupFactor();
   }

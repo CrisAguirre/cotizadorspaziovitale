@@ -92,7 +92,7 @@ export class PdfGeneratorService {
 
     // Mapeo lógico de configuración con fallback
     const wConfig = quotation.wizardConfig || {
-      clientPriceMode: 'proportional',
+      clientPriceMode: 'unit_sqm',
       hardwareDisplayMode: 'table',
       areaDisplayMode: 'subtotals'
     };
@@ -137,12 +137,12 @@ export class PdfGeneratorService {
 
         // Q1: Precio Cliente
         let furnClientPrice = 0;
-        if (wConfig.clientPriceMode === 'proportional') {
-          furnClientPrice = furnBaseCost * markupFactor;
-        } else if (wConfig.clientPriceMode === 'sqm') {
+        if (wConfig.clientPriceMode === 'unit_sqm') {
           furnClientPrice = (furn.areaSqm || 0) * (totals.pricePerSqm || 0);
+        } else if (wConfig.clientPriceMode === 'manual' || wConfig.clientPriceMode === 'outsource') {
+          furnClientPrice = furnBaseCost * markupFactor;
         } else {
-          // Manual fallback (if not input, fallback to proportional)
+          // Fallback
           furnClientPrice = furnBaseCost * markupFactor; 
         }
 

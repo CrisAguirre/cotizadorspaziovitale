@@ -58,7 +58,8 @@
       </div>
     </form>
 
-    <!-- PASO 2: WIZARD DE CONFIGURACIÓN INICIAL (FASE 0.5) -->
+    <!-- PASO 2: WIZARD DE CONFIGURACIÓN INICIAL (Reunión 17-jun: 6→4 preguntas) -->
+    <!-- NOTA: Q2 Herrajes y Q3 Tiempos MO fueron migradas al Paso 3 (Muebles) -->
     <div *ngIf="currentStep === 2">
       <div class="config-wizard-header">
         <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
@@ -66,7 +67,7 @@
           <button type="button" class="btn-icon" (click)="showTip[2] = !showTip[2]" title="Ver ayuda de este paso">💡</button>
         </div>
         <div class="wizard-tip" *ngIf="showTip[2]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>💡 Objetivo:</strong> Responde estas preguntas clave para definir la estrategia comercial del proyecto. Tus respuestas habilitarán o inhabilitarán rubros (como render 3D u obras civiles) en el presupuesto final.
+          <strong>💡 Objetivo:</strong> Responde estas 4 preguntas clave para definir la estrategia comercial del proyecto. Las opciones de Herrajes y Tiempos de M.O. se configuran en el siguiente paso (Muebles).
         </div>
         <div class="wizard-progress">
           <div class="wizard-progress-bar" [style.width.%]="(wizardStep / TOTAL_WIZARD_QUESTIONS) * 100"></div>
@@ -82,38 +83,27 @@
         </div>
       </div>
 
-      <!-- Q1: Precio visible al cliente -->
+      <!-- Q1: Modo de precio (Reunión 17-jun: 3 opciones nuevas) -->
       <div *ngIf="wizardStep === 1" class="config-question">
         <div class="question-header">
-          <span class="question-number">1 / 6</span>
+          <span class="question-number">1 / 4</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
             <h3 style="margin: 0;">💰 ¿Cómo se calculará el precio de cada mueble que verá el cliente?</h3>
             <button type="button" class="btn-icon" (click)="showTipConfig[1] = !showTipConfig[1]" title="Ver ayuda de esta pregunta">💡</button>
           </div>
         </div>
         <div class="wizard-tip" *ngIf="showTipConfig[1]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>💡 Objetivo:</strong> Define si el cliente verá un precio "por mueble" que se calcula repartiendo el costo total equitativamente según su peso, o si usarás otra metodología. Selecciona la opción que mejor se adapte a este cliente.
+          <strong>💡 Objetivo:</strong> Define la metodología de cálculo del precio visible para el cliente según el tipo de proyecto: cocinas básicas usan precio por M²/Lineal, cocinas Premium requieren ingreso manual, y los trabajos tercerizados (tapizados/pinturas) tienen su propia lógica.
         </div>
         <div class="option-cards">
-          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.clientPriceMode === 'proportional'">
-            <input type="radio" name="clientPriceMode" value="proportional"
+          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.clientPriceMode === 'unit_sqm'">
+            <input type="radio" name="clientPriceMode" value="unit_sqm"
                    [(ngModel)]="activeQuotation.wizardConfig.clientPriceMode">
             <div class="option-content">
               <span class="option-letter">A</span>
               <div>
-                <strong>Automático proporcional</strong>
-                <p>El precio del mueble = su porcentaje del costo total × Total Final</p>
-              </div>
-            </div>
-          </label>
-          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.clientPriceMode === 'sqm'">
-            <input type="radio" name="clientPriceMode" value="sqm"
-                   [(ngModel)]="activeQuotation.wizardConfig.clientPriceMode">
-            <div class="option-content">
-              <span class="option-letter">B</span>
-              <div>
-                <strong>Precio unitario × M²</strong>
-                <p>El precio = Precio/M² global × M² del mueble</p>
+                <strong>Precio unitario × M² o Lineal</strong>
+                <p>Úselo para construir una cocina básica</p>
               </div>
             </div>
           </label>
@@ -121,126 +111,39 @@
             <input type="radio" name="clientPriceMode" value="manual"
                    [(ngModel)]="activeQuotation.wizardConfig.clientPriceMode">
             <div class="option-content">
-              <span class="option-letter">C</span>
+              <span class="option-letter">B</span>
               <div>
                 <strong>Ingreso manual</strong>
-                <p>El cotizador escribe el precio de cada mueble a mano</p>
+                <p>Para elaboración de cocinas Premium</p>
+              </div>
+            </div>
+          </label>
+          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.clientPriceMode === 'outsource'">
+            <input type="radio" name="clientPriceMode" value="outsource"
+                   [(ngModel)]="activeQuotation.wizardConfig.clientPriceMode">
+            <div class="option-content">
+              <span class="option-letter">C</span>
+              <div>
+                <strong>Tercerización</strong>
+                <p>Tapizados y pinturas</p>
               </div>
             </div>
           </label>
         </div>
       </div>
 
-      <!-- Q2: Herrajes en la cotización -->
+      <!-- Q2: Diseño y medidas (Reunión 17-jun: reemplaza despiece gráfico, 2 opciones) -->
       <div *ngIf="wizardStep === 2" class="config-question">
         <div class="question-header">
-          <span class="question-number">2 / 6</span>
-          <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <h3 style="margin: 0;">🔩 ¿Cómo quieres que aparezcan los herrajes y accesorios en la cotización del cliente?</h3>
+          <span class="question-number">2 / 4</span>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px;">
+            <h3 style="margin: 0;">📐 ¿Desea adjuntar archivos de diseño y medidas?</h3>
             <button type="button" class="btn-icon" (click)="showTipConfig[2] = !showTipConfig[2]" title="Ver ayuda de esta pregunta">💡</button>
           </div>
+          <p class="text-muted">Los archivos de diseño y medidas respaldan la cotización y permiten auditar los despieces.</p>
         </div>
         <div class="wizard-tip" *ngIf="showTipConfig[2]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>💡 Objetivo:</strong> Decide si prefieres transparencia total mostrando los herrajes en una tabla aparte con su respectivo precio, o si prefieres ocultarlos y absorber su costo en el valor general del mueble para simplificar la propuesta.
-        </div>
-        <div class="option-cards">
-          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.hardwareDisplayMode === 'table'">
-            <input type="radio" name="hardwareDisplayMode" value="table"
-                   [(ngModel)]="activeQuotation.wizardConfig.hardwareDisplayMode">
-            <div class="option-content">
-              <span class="option-letter">A</span>
-              <div>
-                <strong>Tabla separada con precios</strong>
-                <p>El cliente ve una tabla detallada de herrajes con precio por ítem</p>
-              </div>
-            </div>
-          </label>
-          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.hardwareDisplayMode === 'included'">
-            <input type="radio" name="hardwareDisplayMode" value="included"
-                   [(ngModel)]="activeQuotation.wizardConfig.hardwareDisplayMode">
-            <div class="option-content">
-              <span class="option-letter">B</span>
-              <div>
-                <strong>Incluidos en el precio del mueble</strong>
-                <p>Los herrajes NO aparecen por separado, están absorbidos en el valor del mueble</p>
-              </div>
-            </div>
-          </label>
-          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.hardwareDisplayMode === 'selective'">
-            <input type="radio" name="hardwareDisplayMode" value="selective"
-                   [(ngModel)]="activeQuotation.wizardConfig.hardwareDisplayMode">
-            <div class="option-content">
-              <span class="option-letter">C</span>
-              <div>
-                <strong>Los selecciono manualmente</strong>
-                <p>Elijo cuáles herrajes mostrar al cliente y cuáles ocultar</p>
-              </div>
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <!-- Q3: Tiempos de mano de obra -->
-      <div *ngIf="wizardStep === 3" class="config-question">
-        <div class="question-header">
-          <span class="question-number">3 / 6</span>
-          <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <h3 style="margin: 0;">⏱️ Para calcular las horas de armado e instalación, ¿cómo prefieres trabajar?</h3>
-            <button type="button" class="btn-icon" (click)="showTipConfig[3] = !showTipConfig[3]" title="Ver ayuda de esta pregunta">💡</button>
-          </div>
-        </div>
-        <div class="wizard-tip" *ngIf="showTipConfig[3]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>💡 Objetivo:</strong> Las horas de Mano de Obra (MO) impactan directamente en el costo final. Elige si prefieres estimarlas tú mismo por cada mueble o usar una tabla predefinida para automatizar el cálculo.
-        </div>
-        <div class="option-cards">
-          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.moTimeMode === 'manual'">
-            <input type="radio" name="moTimeMode" value="manual"
-                   [(ngModel)]="activeQuotation.wizardConfig.moTimeMode">
-            <div class="option-content">
-              <span class="option-letter">A</span>
-              <div>
-                <strong>Ingreso manual cada vez</strong>
-                <p>Escribo las horas por mueble basándome en mi experiencia</p>
-              </div>
-            </div>
-          </label>
-          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.moTimeMode === 'table'">
-            <input type="radio" name="moTimeMode" value="table"
-                   [(ngModel)]="activeQuotation.wizardConfig.moTimeMode">
-            <div class="option-content">
-              <span class="option-letter">B</span>
-              <div>
-                <strong>Tabla de referencia interna</strong>
-                <p>La app muestra tiempos sugeridos por tipo de mueble (configurada por el admin)</p>
-              </div>
-            </div>
-          </label>
-          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.moTimeMode === 'mixed'">
-            <input type="radio" name="moTimeMode" value="mixed"
-                   [(ngModel)]="activeQuotation.wizardConfig.moTimeMode">
-            <div class="option-content">
-              <span class="option-letter">C</span>
-              <div>
-                <strong>Mixto</strong>
-                <p>Usar la tabla como punto de partida y permitir ajustes manuales</p>
-              </div>
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <!-- Q4: Despiece gráfico -->
-      <div *ngIf="wizardStep === 4" class="config-question">
-        <div class="question-header">
-          <span class="question-number">4 / 6</span>
-          <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px;">
-            <h3 style="margin: 0;">📐 ¿Quieres adjuntar archivos de despiece a esta cotización?</h3>
-            <button type="button" class="btn-icon" (click)="showTipConfig[4] = !showTipConfig[4]" title="Ver ayuda de esta pregunta">💡</button>
-          </div>
-          <p class="text-muted">El proceso estándar exige que la cantidad de láminas esté respaldada por una hoja de despieces.</p>
-        </div>
-        <div class="wizard-tip" *ngIf="showTipConfig[4]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>💡 Objetivo:</strong> Los archivos de diseño permiten que el área de producción audite tu trabajo. Si decides adjuntarlos, el sistema los guardará junto con el presupuesto. Puedes decidir si se muestran o no al cliente en el PDF.
+          <strong>💡 Objetivo:</strong> Si adjunta archivos, el sistema los guardará junto con el presupuesto como evidencia de los planos y medidas usados para la cotización.
         </div>
         <div class="option-cards">
           <label class="option-card" [class.selected]="getDesignFilesMode() === 'attach'">
@@ -250,8 +153,8 @@
             <div class="option-content">
               <span class="option-letter">A</span>
               <div>
-                <strong>Sí, adjuntar archivos</strong>
-                <p>Permitir subir PDFs o imágenes de planos por mueble</p>
+                <strong>Adjuntar archivos</strong>
+                <p>Sí, adjuntar archivos de diseño, planos y medidas del proyecto</p>
               </div>
             </div>
           </label>
@@ -262,36 +165,24 @@
             <div class="option-content">
               <span class="option-letter">B</span>
               <div>
-                <strong>No por ahora</strong>
-                <p>No se adjuntan archivos en esta cotización</p>
-              </div>
-            </div>
-          </label>
-          <label class="option-card" [class.selected]="getDesignFilesMode() === 'internal'">
-            <input type="radio" name="designFilesMode" value="internal"
-                   [checked]="getDesignFilesMode() === 'internal'"
-                   (change)="setDesignFilesMode('internal')">
-            <div class="option-content">
-              <span class="option-letter">C</span>
-              <div>
-                <strong>Solo como referencia interna</strong>
-                <p>Los archivos se guardan pero NO aparecen en el PDF del cliente</p>
+                <strong>Declinar opción</strong>
+                <p>No adjuntar archivos de diseño en esta cotización</p>
               </div>
             </div>
           </label>
         </div>
       </div>
 
-      <!-- Q5: Estructura de áreas -->
-      <div *ngIf="wizardStep === 5" class="config-question">
+      <!-- Q3: Estructura de áreas (sin cambios, era Q5) -->
+      <div *ngIf="wizardStep === 3" class="config-question">
         <div class="question-header">
-          <span class="question-number">5 / 6</span>
+          <span class="question-number">3 / 4</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
             <h3 style="margin: 0;">🏠 ¿Esta cotización tiene más de un espacio o área?</h3>
-            <button type="button" class="btn-icon" (click)="showTipConfig[5] = !showTipConfig[5]" title="Ver ayuda de esta pregunta">💡</button>
+            <button type="button" class="btn-icon" (click)="showTipConfig[3] = !showTipConfig[3]" title="Ver ayuda de esta pregunta">💡</button>
           </div>
         </div>
-        <div class="wizard-tip" *ngIf="showTipConfig[5]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
+        <div class="wizard-tip" *ngIf="showTipConfig[3]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
           <strong>💡 Objetivo:</strong> Organiza visualmente el presupuesto. Si agrupas los muebles por áreas (Cocina, Baño, Vestier), puedes mostrarle al cliente el subtotal de cada zona por separado para mayor claridad.
         </div>
         <div class="option-cards">
@@ -331,49 +222,38 @@
         </div>
       </div>
 
-      <!-- Q6: Mesones -->
-      <div *ngIf="wizardStep === 6" class="config-question">
+      <!-- Q4: Mesones (Reunión 17-jun: simplificado a 2 opciones) -->
+      <div *ngIf="wizardStep === 4" class="config-question">
         <div class="question-header">
-          <span class="question-number">6 / 6</span>
+          <span class="question-number">4 / 4</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <h3 style="margin: 0;">🍽️ ¿Esta cotización incluye mesones (encimeras, superficies de trabajo)?</h3>
-            <button type="button" class="btn-icon" (click)="showTipConfig[6] = !showTipConfig[6]" title="Ver ayuda de esta pregunta">💡</button>
+            <h3 style="margin: 0;">🍽️ ¿Esta cotización incluye mesones o superficies de trabajo?</h3>
+            <button type="button" class="btn-icon" (click)="showTipConfig[4] = !showTipConfig[4]" title="Ver ayuda de esta pregunta">💡</button>
           </div>
         </div>
-        <div class="wizard-tip" *ngIf="showTipConfig[6]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>💡 Objetivo:</strong> Los mesones (granito, cuarzo, etc.) usualmente se tercerizan y tienen una lógica de cobro especial (por metro lineal o metro cuadrado). Define si necesitas activar este módulo de cálculo independiente.
+        <div class="wizard-tip" *ngIf="showTipConfig[4]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
+          <strong>💡 Objetivo:</strong> Indica si la cotización incluye mesones de materiales como granito, quarztone, piedra sinterizada o compactos. Esto activará la lógica de cálculo especial para mesonería.
         </div>
         <div class="option-cards">
-          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.mesonMode === 'special'">
-            <input type="radio" name="mesonMode" value="special"
+          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.mesonMode === 'includes_meson'">
+            <input type="radio" name="mesonMode" value="includes_meson"
                    [(ngModel)]="activeQuotation.wizardConfig.mesonMode">
             <div class="option-content">
               <span class="option-letter">A</span>
               <div>
-                <strong>Sí, con lógica especial de mesonería</strong>
-                <p>Los mesones se cotizan por ML con precio por proveedor externo</p>
+                <strong>Sí, incluye mesón</strong>
+                <p>Granito, quarztone, piedra sinterizada y compactos</p>
               </div>
             </div>
           </label>
-          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.mesonMode === 'standard'">
-            <input type="radio" name="mesonMode" value="standard"
+          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.mesonMode === 'no_meson'">
+            <input type="radio" name="mesonMode" value="no_meson"
                    [(ngModel)]="activeQuotation.wizardConfig.mesonMode">
             <div class="option-content">
               <span class="option-letter">B</span>
               <div>
-                <strong>Sí, pero como mueble normal</strong>
-                <p>El mesón se ingresa igual que cualquier otro mueble</p>
-              </div>
-            </div>
-          </label>
-          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.mesonMode === 'none'">
-            <input type="radio" name="mesonMode" value="none"
-                   [(ngModel)]="activeQuotation.wizardConfig.mesonMode">
-            <div class="option-content">
-              <span class="option-letter">C</span>
-              <div>
-                <strong>No incluye mesones</strong>
-                <p>Esta cotización no tiene mesones</p>
+                <strong>No incluye mesones o superficies de trabajo</strong>
+                <p>Esta cotización no incluye mesonería</p>
               </div>
             </div>
           </label>
@@ -399,6 +279,43 @@
       </div>
       <div class="wizard-tip" *ngIf="showTip[3]">
         <strong>💡 Objetivo:</strong> Estructura físicamente el proyecto dividiéndolo por áreas (Ej. Cocina, Baños) y lista los muebles que componen cada una. 
+      </div>
+
+      <!-- MIGRACIÓN: Configuración global de Muebles (Desde Paso 2) -->
+      <div class="global-furniture-config mt-4" style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; border: 1px dashed rgba(255, 255, 255, 0.2);">
+        <h4 style="margin-top: 0; margin-bottom: 15px;">⚙️ Configuración Global de Muebles</h4>
+        
+        <div class="form-grid">
+          <!-- Configuración Herrajes -->
+          <div class="form-group">
+            <label>🔩 Visualización de Herrajes</label>
+            <select [(ngModel)]="activeQuotation.wizardConfig.hardwareDisplayMode" class="form-control">
+              <option value="table">Tabla separada con precios</option>
+              <option value="included">Incluidos en el precio del mueble</option>
+              <option value="selective">Selección manual (ocultar/mostrar)</option>
+            </select>
+            <small class="text-muted" style="display: block; margin-top: 5px;">
+              <span *ngIf="activeQuotation.wizardConfig.hardwareDisplayMode === 'table'">El cliente verá una tabla detallada con precios por ítem.</span>
+              <span *ngIf="activeQuotation.wizardConfig.hardwareDisplayMode === 'included'">Los herrajes no aparecen por separado, su costo se suma al mueble.</span>
+              <span *ngIf="activeQuotation.wizardConfig.hardwareDisplayMode === 'selective'">Podrá elegir qué herrajes mostrar y cuáles ocultar.</span>
+            </small>
+          </div>
+
+          <!-- Configuración Tiempos M.O. -->
+          <div class="form-group">
+            <label>⏱️ Método Tiempos de Mano de Obra</label>
+            <select [(ngModel)]="activeQuotation.wizardConfig.moTimeMode" class="form-control">
+              <option value="manual">Ingreso manual cada vez</option>
+              <option value="table">Usar tabla de referencia interna</option>
+              <option value="mixed">Mixto (Tabla + Ajuste manual)</option>
+            </select>
+            <small class="text-muted" style="display: block; margin-top: 5px;">
+              <span *ngIf="activeQuotation.wizardConfig.moTimeMode === 'manual'">Deberá escribir las horas manualmente por mueble.</span>
+              <span *ngIf="activeQuotation.wizardConfig.moTimeMode === 'table'">La app sugerirá tiempos basados en el tipo de mueble.</span>
+              <span *ngIf="activeQuotation.wizardConfig.moTimeMode === 'mixed'">La tabla es el punto de partida pero permite modificaciones.</span>
+            </small>
+          </div>
+        </div>
       </div>
 
       <div *ngFor="let area of activeQuotation.areas; let aIndex = index" class="area-card mt-4">

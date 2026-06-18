@@ -104,13 +104,13 @@ export function buildQuotation2604Sample(): Quotation {
       pricePerSqm: 0
     },
     wizardConfig: {
-      clientPriceMode: 'proportional',
+      clientPriceMode: 'unit_sqm',
       hardwareDisplayMode: 'table',
       moTimeMode: 'manual',
       requiresDesignFiles: false,
       designFilesInternal: false,
       areaDisplayMode: 'subtotals',
-      mesonMode: 'none',
+      mesonMode: 'no_meson',
       wizardCompleted: true
     },
     status: 'borrador',
