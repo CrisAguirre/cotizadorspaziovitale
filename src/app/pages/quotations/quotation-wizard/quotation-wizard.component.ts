@@ -11,6 +11,60 @@ import { LaborTimeService } from '../../../services/labor-time.service';
 import { buildQuotation2604Sample } from '../../../data/quotation-2604.sample';
 import { QUOTATION_2604_REFERENCE } from '../../../data/quotation-2604.reference';
 
+interface FurnitureType {
+  name: string;
+  unit: 'ML' | 'M2' | 'UNIDAD';
+}
+
+const FURNITURE_HIERARCHY: { [area: string]: FurnitureType[] } = {
+  'COCINA': [
+    { name: 'MUEBLE ALTO PRINCIPAL', unit: 'ML' },
+    { name: 'MUEBLE ALTO SECUNDARIO', unit: 'ML' },
+    { name: 'MUEBLE BAJO', unit: 'ML' },
+    { name: 'TORRE DE HORNOS', unit: 'M2' },
+    { name: 'TORRE DE ENTREPAÑOS', unit: 'M2' },
+    { name: 'ALACENA PARA HERRAJE', unit: 'M2' },
+    { name: 'ALACENA DE ENTREPAÑOS', unit: 'M2' },
+    { name: 'MUEBLE NEVERA', unit: 'ML' },
+    { name: 'MUEBLE BARRA', unit: 'ML' },
+    { name: 'MUEBLE ISLA', unit: 'ML' },
+    { name: 'APERGOLADO', unit: 'M2' },
+    { name: 'SOMBREROS DE ISLA ( ESTRUCTURAS ALTAS )', unit: 'M2' },
+    { name: 'FACHADAS O RECUBRIMIENTOS', unit: 'M2' }
+  ],
+  'CLOSET': [
+    { name: 'PUERTAS ABATIBLES', unit: 'M2' },
+    { name: 'SISTEMAS CORREDISOS', unit: 'M2' }
+  ],
+  'MUEBLES DE BAÑO': [
+    { name: 'MUEBLE FLOTANTE', unit: 'ML' },
+    { name: 'TORRE DE ENTREPAÑOS', unit: 'M2' }
+  ],
+  'PUERTAS': [
+    { name: 'ENTAMBORADAS', unit: 'UNIDAD' },
+    { name: 'MASISAS (36 MM)', unit: 'UNIDAD' }
+  ],
+  'BIBLIOTECA': [
+    { name: 'BIBLIOTECA', unit: 'M2' },
+    { name: 'TORRE DE ENTREPAÑOS', unit: 'M2' },
+    { name: 'ESCRITORIO', unit: 'ML' },
+    { name: 'APERGOLADO', unit: 'M2' },
+    { name: 'MUEBLE ALTO', unit: 'ML' },
+    { name: 'MUEBLE BAJO', unit: 'ML' }
+  ],
+  'ESCRITORIO': [
+    { name: 'ESCRITORIO', unit: 'ML' },
+    { name: 'MESONES', unit: 'ML' },
+    { name: 'APERGOLADOS', unit: 'ML' }
+  ],
+  'CENTRO DE ENTRETENIMIENTO': [
+    { name: 'MUEBLE FLOTANTE', unit: 'ML' },
+    { name: 'MUEBLE BAJO', unit: 'ML' },
+    { name: 'APERGOLADO', unit: 'M2' },
+    { name: 'TORRE DE ENTREPAÑOS', unit: 'M2' }
+  ]
+};
+
 @Component({
   selector: 'app-quotation-wizard',
   templateUrl: './quotation-wizard.component.html',
@@ -29,6 +83,12 @@ export class QuotationWizardComponent implements OnInit {
   showTipConfig: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false };
 
   availableLaborTimes: LaborTime[] = [];
+  
+  // Variables para la jerarquía de selects
+  areaCategories = Object.keys(FURNITURE_HIERARCHY);
+  furnitureHierarchy = FURNITURE_HIERARCHY;
+  customAreaFlags: { [index: number]: boolean } = {};
+  customFurnFlags: { [areaIndex: number]: { [furnIndex: number]: boolean } } = {};
 
   isStepValid(step: number): boolean {
     if (step === 1) return this.quotationForm.valid;
@@ -272,6 +332,96 @@ export class QuotationWizardComponent implements OnInit {
 
   removeArea(index: number) {
     this.activeQuotation.areas?.splice(index, 1);
+    delete this.customAreaFlags[index];
+    delete this.customFurnFlags[index];
+    this.recalculate();
+  }
+
+  onAreaSelectChange(area: Area, index: number) {
+    if (area.name === 'Otra / Personalizada') {
+      this.customAreaFlags[index] = true;
+      area.name = ''; // Limpiar para que escriba
+    } else {
+      this.customAreaFlags[index] = false;
+    }
+  }
+
+  isAreaCustom(area: Area, index: number): boolean {
+    if (this.customAreaFlags[index]) return true;
+    if (!area.name) return false; // si esta vacio, mostrar select
+    return !this.areaCategories.includes(area.name);
+  }
+
+  getFurnitureOptionsForArea(areaName: string): FurnitureType[] {
+    return this.furnitureHierarchy[areaName] || [];
+  }
+
+  onFurnitureSelectChange(furn: Furniture, area: Area, aIndex: number, fIndex: number) {
+    if (!this.customFurnFlags[aIndex]) this.customFurnFlags[aIndex] = {};
+
+    if (furn.name === 'Otro / Personalizado') {
+      this.customFurnFlags[aIndex][fIndex] = true;
+      furn.name = ''; 
+    } else {
+      this.customFurnFlags[aIndex][fIndex] = false;
+      // Autocompletar unidad de medida
+      const options = this.getFurnitureOptionsForArea(area.name);
+      const selectedDef = options.find(o => o.name === furn.name);
+      if (selectedDef) {
+        // Guardamos la unidad en algún campo. Dado que 'AreaSqm' se usaba genéricamente para la métrica principal,
+        // vamos a añadir un campo "unitOfMeasure" temporal o usarlo para la vista. 
+        // El campo en Furniture.unit es 'SERVICIO' por defecto, pero podemos ponerle la métrica allí
+        furn.unit = selectedDef.unit;
+      }
+      this.autoAssignHardwareAndLabor(furn, area);
+    }
+  }
+
+  isFurnCustom(area: Area, furn: Furniture, aIndex: number, fIndex: number): boolean {
+    if (this.customFurnFlags[aIndex] && this.customFurnFlags[aIndex][fIndex]) return true;
+    const options = this.getFurnitureOptionsForArea(area.name);
+    if (options.length === 0) return true; // Si el área no tiene opciones, es custom por defecto
+    if (!furn.name) return false;
+    return !options.some(o => o.name === furn.name);
+  }
+
+  autoAssignHardwareAndLabor(furn: Furniture, area: Area) {
+    // Arquitectura lista para asignar automáticamente herrajes según el mueble
+    // TODO: Conectar a BD. Por ahora agregamos un herraje genérico de prueba y un tiempo M.O. si está activo
+    furn.accessories = []; // reset
+    if (furn.name.includes('PUERTAS ABATIBLES')) {
+      furn.accessories.push({
+        description: 'Bisagra cierre lento (Autogenerada)',
+        quantity: 4,
+        unit: 'UNIDAD',
+        unitPrice: 0,
+        totalPrice: 0,
+        code: '', dimension: '', timeHours: 0, totalTime: 0, laborRate: 0
+      });
+    } else if (furn.name.includes('CORREDISOS')) {
+      furn.accessories.push({
+        description: 'Kit Riel Corredizo (Autogenerado)',
+        quantity: 1,
+        unit: 'UNIDAD',
+        unitPrice: 0,
+        totalPrice: 0,
+        code: '', dimension: '', timeHours: 0, totalTime: 0, laborRate: 0
+      });
+    }
+
+    if (this.activeQuotation.wizardConfig.moTimeMode !== 'manual') {
+      // Auto-asignación de M.O.
+      furn.installation = [{
+        description: 'M.O. Instalación ' + furn.name,
+        installHours: 2,
+        persons: 1,
+        totalQuantity: furn.quantity || 1,
+        laborRate: this.appConfig?.laborRatePerHour || 0,
+        totalPrice: 0,
+        measurement: '', unitOfMeasure: furn.unit || 'UNIDAD'
+      }];
+    }
+    
     this.recalculate();
   }
 

@@ -322,7 +322,19 @@
         <div class="flex-between area-header">
           <div class="form-group" style="width: 300px; margin-bottom: 0;">
             <label>Nombre del Área <span class="text-error">*</span></label>
-            <input type="text" [(ngModel)]="area.name" class="form-control" placeholder="Ej. Cocina, Baño">
+            <ng-container *ngIf="!isAreaCustom(area, aIndex)">
+              <select [(ngModel)]="area.name" class="form-control" (change)="onAreaSelectChange(area, aIndex)">
+                <option value="" disabled selected>Seleccione un Área...</option>
+                <option *ngFor="let cat of areaCategories" [value]="cat">{{ cat }}</option>
+                <option value="Otra / Personalizada">Otra / Personalizada</option>
+              </select>
+            </ng-container>
+            <ng-container *ngIf="isAreaCustom(area, aIndex)">
+              <div style="display: flex; gap: 5px;">
+                <input type="text" [(ngModel)]="area.name" class="form-control" placeholder="Escriba el nombre del área">
+                <button type="button" class="btn-icon" (click)="customAreaFlags[aIndex] = false; area.name = ''" title="Volver a la lista">↩️</button>
+              </div>
+            </ng-container>
           </div>
           <button type="button" class="btn-icon text-error" (click)="removeArea(aIndex)">🗑️ Eliminar Área</button>
         </div>
@@ -333,14 +345,26 @@
             <div class="form-grid">
               <div class="form-group">
                 <label>Nombre del Mueble <span class="text-error">*</span></label>
-                <input type="text" [(ngModel)]="furn.name" class="form-control">
+                <ng-container *ngIf="!isFurnCustom(area, furn, aIndex, fIndex)">
+                  <select [(ngModel)]="furn.name" class="form-control" (change)="onFurnitureSelectChange(furn, area, aIndex, fIndex)">
+                    <option value="" disabled selected>Seleccione un Mueble...</option>
+                    <option *ngFor="let opt of getFurnitureOptionsForArea(area.name)" [value]="opt.name">{{ opt.name }}</option>
+                    <option value="Otro / Personalizado">Otro / Personalizado</option>
+                  </select>
+                </ng-container>
+                <ng-container *ngIf="isFurnCustom(area, furn, aIndex, fIndex)">
+                  <div style="display: flex; gap: 5px;">
+                    <input type="text" [(ngModel)]="furn.name" class="form-control" placeholder="Nombre del mueble">
+                    <button *ngIf="getFurnitureOptionsForArea(area.name).length > 0" type="button" class="btn-icon" (click)="customFurnFlags[aIndex][fIndex] = false; furn.name = ''" title="Volver a la lista">↩️</button>
+                  </div>
+                </ng-container>
               </div>
               <div class="form-group">
-                <label>Medidas</label>
-                <input type="text" [(ngModel)]="furn.measurements" class="form-control" placeholder="Ej. 2.08 x 2.1">
+                <label>Medidas <small *ngIf="furn.unit === 'M2'">(Ancho x Alto)</small><small *ngIf="furn.unit === 'ML'">(Longitud)</small></label>
+                <input type="text" [(ngModel)]="furn.measurements" class="form-control" [placeholder]="furn.unit === 'M2' ? 'Ej. 2.0 x 1.5' : (furn.unit === 'ML' ? 'Ej. 2.5' : 'Ej. Opcional')">
               </div>
               <div class="form-group">
-                <label>M² (precio/M²)</label>
+                <label>Metraje <small *ngIf="furn.unit">({{ furn.unit }})</small></label>
                 <input type="number" [(ngModel)]="furn.areaSqm" (change)="recalculate()" class="form-control" step="0.001">
               </div>
               <div class="form-group">
