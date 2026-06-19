@@ -13,11 +13,13 @@
       <div class="flex-between mb-2">
         <div style="display: flex; align-items: center; gap: 10px;">
           <h2>Información del Proyecto y Cliente</h2>
-          <button type="button" class="btn-icon" (click)="showTip[1] = !showTip[1]" title="Ver ayuda de este paso">💡</button>
+          <button type="button" class="btn-icon" (click)="showTip[1] = !showTip[1]"
+            title="Ver ayuda de este paso">💡</button>
         </div>
       </div>
       <div class="wizard-tip" *ngIf="showTip[1]">
-        <strong>💡 Objetivo:</strong> Ingresa los datos corporativos obligatorios del cliente y el consecutivo de la cotización para inicializar el documento de forma oficial.
+        <strong>💡 Objetivo:</strong> Ingresa los datos corporativos obligatorios del cliente y el consecutivo de la
+        cotización para inicializar el documento de forma oficial.
       </div>
       <div class="form-grid">
         <div class="form-group">
@@ -37,7 +39,7 @@
           <input type="text" formControlName="city" class="form-control">
         </div>
       </div>
-      
+
       <div formGroupName="client" class="form-grid mt-4">
         <div class="form-group">
           <label>Nombre del Cliente <span class="text-error">*</span></label>
@@ -64,20 +66,19 @@
       <div class="config-wizard-header">
         <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
           <h2 style="margin: 0;">⚙️ Configuración de la Cotización</h2>
-          <button type="button" class="btn-icon" (click)="showTip[2] = !showTip[2]" title="Ver ayuda de este paso">💡</button>
+          <button type="button" class="btn-icon" (click)="showTip[2] = !showTip[2]"
+            title="Ver ayuda de este paso">💡</button>
         </div>
         <div class="wizard-tip" *ngIf="showTip[2]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>💡 Objetivo:</strong> Responde estas 4 preguntas clave para definir la estrategia comercial del proyecto. Las opciones de Herrajes y Tiempos de M.O. se configuran en el siguiente paso (Muebles).
+          <strong>💡 Objetivo:</strong> Responde estas 4 preguntas clave para definir la estrategia comercial del
+          proyecto. Las opciones de Herrajes y Tiempos de M.O. se configuran en el siguiente paso (Muebles).
         </div>
         <div class="wizard-progress">
           <div class="wizard-progress-bar" [style.width.%]="(wizardStep / TOTAL_WIZARD_QUESTIONS) * 100"></div>
         </div>
         <div class="wizard-dots">
-          <span *ngFor="let q of wizardQuestions"
-                class="wizard-dot"
-                [class.active]="wizardStep === q.step"
-                [class.completed]="wizardStep > q.step"
-                (click)="wizardStep = q.step">
+          <span *ngFor="let q of wizardQuestions" class="wizard-dot" [class.active]="wizardStep === q.step"
+            [class.completed]="wizardStep > q.step" (click)="wizardStep = q.step">
             {{ q.icon }}
           </span>
         </div>
@@ -89,16 +90,20 @@
           <span class="question-number">1 / 4</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
             <h3 style="margin: 0;">💰 ¿Cómo se calculará el precio de cada mueble que verá el cliente?</h3>
-            <button type="button" class="btn-icon" (click)="showTipConfig[1] = !showTipConfig[1]" title="Ver ayuda de esta pregunta">💡</button>
+            <button type="button" class="btn-icon" (click)="showTipConfig[1] = !showTipConfig[1]"
+              title="Ver ayuda de esta pregunta">💡</button>
           </div>
         </div>
-        <div class="wizard-tip" *ngIf="showTipConfig[1]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>💡 Objetivo:</strong> Define la metodología de cálculo del precio visible para el cliente según el tipo de proyecto: cocinas básicas usan precio por M²/Lineal, cocinas Premium requieren ingreso manual, y los trabajos tercerizados (tapizados/pinturas) tienen su propia lógica.
+        <div class="wizard-tip" *ngIf="showTipConfig[1]"
+          style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
+          <strong>💡 Objetivo:</strong> Define la metodología de cálculo del precio visible para el cliente según el
+          tipo de proyecto: cocinas básicas usan precio por M²/Lineal, cocinas Premium requieren ingreso manual, y los
+          trabajos tercerizados (tapizados/pinturas/sillas/accesorios/electrodomisticos ) tienen su propia lógica.
         </div>
         <div class="option-cards">
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.clientPriceMode === 'unit_sqm'">
             <input type="radio" name="clientPriceMode" value="unit_sqm"
-                   [(ngModel)]="activeQuotation.wizardConfig.clientPriceMode">
+              [(ngModel)]="activeQuotation.wizardConfig.clientPriceMode">
             <div class="option-content">
               <span class="option-letter">A</span>
               <div>
@@ -109,7 +114,7 @@
           </label>
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.clientPriceMode === 'manual'">
             <input type="radio" name="clientPriceMode" value="manual"
-                   [(ngModel)]="activeQuotation.wizardConfig.clientPriceMode">
+              [(ngModel)]="activeQuotation.wizardConfig.clientPriceMode">
             <div class="option-content">
               <span class="option-letter">B</span>
               <div>
@@ -120,12 +125,12 @@
           </label>
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.clientPriceMode === 'outsource'">
             <input type="radio" name="clientPriceMode" value="outsource"
-                   [(ngModel)]="activeQuotation.wizardConfig.clientPriceMode">
+              [(ngModel)]="activeQuotation.wizardConfig.clientPriceMode">
             <div class="option-content">
               <span class="option-letter">C</span>
               <div>
                 <strong>Tercerización</strong>
-                <p>Tapizados y pinturas</p>
+                <p>Incluye: tapizados, pinturas, sillas, accesorios y electrodomésticos</p>
               </div>
             </div>
           </label>
@@ -138,18 +143,21 @@
           <span class="question-number">2 / 4</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px;">
             <h3 style="margin: 0;">📐 ¿Desea adjuntar archivos de diseño y medidas?</h3>
-            <button type="button" class="btn-icon" (click)="showTipConfig[2] = !showTipConfig[2]" title="Ver ayuda de esta pregunta">💡</button>
+            <button type="button" class="btn-icon" (click)="showTipConfig[2] = !showTipConfig[2]"
+              title="Ver ayuda de esta pregunta">💡</button>
           </div>
-          <p class="text-muted">Los archivos de diseño y medidas respaldan la cotización y permiten auditar los despieces.</p>
+          <p class="text-muted">Los archivos de diseño y medidas respaldan la cotización y permiten auditar los
+            despieces.</p>
         </div>
-        <div class="wizard-tip" *ngIf="showTipConfig[2]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>💡 Objetivo:</strong> Si adjunta archivos, el sistema los guardará junto con el presupuesto como evidencia de los planos y medidas usados para la cotización.
+        <div class="wizard-tip" *ngIf="showTipConfig[2]"
+          style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
+          <strong>💡 Objetivo:</strong> Si adjunta archivos, el sistema los guardará junto con el presupuesto como
+          evidencia de los planos y medidas usados para la cotización.
         </div>
         <div class="option-cards">
           <label class="option-card" [class.selected]="getDesignFilesMode() === 'attach'">
-            <input type="radio" name="designFilesMode" value="attach"
-                   [checked]="getDesignFilesMode() === 'attach'"
-                   (change)="setDesignFilesMode('attach')">
+            <input type="radio" name="designFilesMode" value="attach" [checked]="getDesignFilesMode() === 'attach'"
+              (change)="setDesignFilesMode('attach')">
             <div class="option-content">
               <span class="option-letter">A</span>
               <div>
@@ -159,9 +167,8 @@
             </div>
           </label>
           <label class="option-card" [class.selected]="getDesignFilesMode() === 'none'">
-            <input type="radio" name="designFilesMode" value="none"
-                   [checked]="getDesignFilesMode() === 'none'"
-                   (change)="setDesignFilesMode('none')">
+            <input type="radio" name="designFilesMode" value="none" [checked]="getDesignFilesMode() === 'none'"
+              (change)="setDesignFilesMode('none')">
             <div class="option-content">
               <span class="option-letter">B</span>
               <div>
@@ -179,16 +186,19 @@
           <span class="question-number">3 / 4</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
             <h3 style="margin: 0;">🏠 ¿Esta cotización tiene más de un espacio o área?</h3>
-            <button type="button" class="btn-icon" (click)="showTipConfig[3] = !showTipConfig[3]" title="Ver ayuda de esta pregunta">💡</button>
+            <button type="button" class="btn-icon" (click)="showTipConfig[3] = !showTipConfig[3]"
+              title="Ver ayuda de esta pregunta">💡</button>
           </div>
         </div>
-        <div class="wizard-tip" *ngIf="showTipConfig[3]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>💡 Objetivo:</strong> Organiza visualmente el presupuesto. Si agrupas los muebles por áreas (Cocina, Baño, Vestier), puedes mostrarle al cliente el subtotal de cada zona por separado para mayor claridad.
+        <div class="wizard-tip" *ngIf="showTipConfig[3]"
+          style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
+          <strong>💡 Objetivo:</strong> Organiza visualmente el presupuesto. Si agrupas los muebles por áreas (Cocina,
+          Baño, Vestier), puedes mostrarle al cliente el subtotal de cada zona por separado para mayor claridad.
         </div>
         <div class="option-cards">
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.areaDisplayMode === 'subtotals'">
             <input type="radio" name="areaDisplayMode" value="subtotals"
-                   [(ngModel)]="activeQuotation.wizardConfig.areaDisplayMode">
+              [(ngModel)]="activeQuotation.wizardConfig.areaDisplayMode">
             <div class="option-content">
               <span class="option-letter">A</span>
               <div>
@@ -199,7 +209,7 @@
           </label>
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.areaDisplayMode === 'global_only'">
             <input type="radio" name="areaDisplayMode" value="global_only"
-                   [(ngModel)]="activeQuotation.wizardConfig.areaDisplayMode">
+              [(ngModel)]="activeQuotation.wizardConfig.areaDisplayMode">
             <div class="option-content">
               <span class="option-letter">B</span>
               <div>
@@ -210,7 +220,7 @@
           </label>
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.areaDisplayMode === 'single'">
             <input type="radio" name="areaDisplayMode" value="single"
-                   [(ngModel)]="activeQuotation.wizardConfig.areaDisplayMode">
+              [(ngModel)]="activeQuotation.wizardConfig.areaDisplayMode">
             <div class="option-content">
               <span class="option-letter">C</span>
               <div>
@@ -228,16 +238,19 @@
           <span class="question-number">4 / 4</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
             <h3 style="margin: 0;">🍽️ ¿Esta cotización incluye mesones o superficies de trabajo?</h3>
-            <button type="button" class="btn-icon" (click)="showTipConfig[4] = !showTipConfig[4]" title="Ver ayuda de esta pregunta">💡</button>
+            <button type="button" class="btn-icon" (click)="showTipConfig[4] = !showTipConfig[4]"
+              title="Ver ayuda de esta pregunta">💡</button>
           </div>
         </div>
-        <div class="wizard-tip" *ngIf="showTipConfig[4]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>💡 Objetivo:</strong> Indica si la cotización incluye mesones de materiales como granito, quarztone, piedra sinterizada o compactos. Esto activará la lógica de cálculo especial para mesonería.
+        <div class="wizard-tip" *ngIf="showTipConfig[4]"
+          style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
+          <strong>💡 Objetivo:</strong> Indica si la cotización incluye mesones de materiales como granito, quarztone,
+          piedra sinterizada o compactos. Esto activará la lógica de cálculo especial para mesonería.
         </div>
         <div class="option-cards">
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.mesonMode === 'includes_meson'">
             <input type="radio" name="mesonMode" value="includes_meson"
-                   [(ngModel)]="activeQuotation.wizardConfig.mesonMode">
+              [(ngModel)]="activeQuotation.wizardConfig.mesonMode">
             <div class="option-content">
               <span class="option-letter">A</span>
               <div>
@@ -247,8 +260,7 @@
             </div>
           </label>
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.mesonMode === 'no_meson'">
-            <input type="radio" name="mesonMode" value="no_meson"
-                   [(ngModel)]="activeQuotation.wizardConfig.mesonMode">
+            <input type="radio" name="mesonMode" value="no_meson" [(ngModel)]="activeQuotation.wizardConfig.mesonMode">
             <div class="option-content">
               <span class="option-letter">B</span>
               <div>
@@ -262,9 +274,12 @@
 
       <!-- Config wizard sub-navigation -->
       <div class="wizard-sub-footer mt-4">
-        <button type="button" class="btn-secondary" *ngIf="wizardStep > 1" (click)="prevWizardQuestion()">← Anterior</button>
-        <button type="button" class="btn-primary ml-auto" *ngIf="wizardStep < TOTAL_WIZARD_QUESTIONS" (click)="nextWizardQuestion()">Siguiente →</button>
-        <span class="config-ready" *ngIf="wizardStep === TOTAL_WIZARD_QUESTIONS">✅ Configuración lista — presiona <strong>Siguiente</strong> arriba para continuar</span>
+        <button type="button" class="btn-secondary" *ngIf="wizardStep > 1" (click)="prevWizardQuestion()">←
+          Anterior</button>
+        <button type="button" class="btn-primary ml-auto" *ngIf="wizardStep < TOTAL_WIZARD_QUESTIONS"
+          (click)="nextWizardQuestion()">Siguiente →</button>
+        <span class="config-ready" *ngIf="wizardStep === TOTAL_WIZARD_QUESTIONS">✅ Configuración lista — presiona
+          <strong>Siguiente</strong> arriba para continuar</span>
       </div>
     </div>
 
@@ -273,18 +288,21 @@
       <div class="flex-between mb-4">
         <div style="display: flex; align-items: center; gap: 10px;">
           <h2>Áreas y Muebles del Proyecto</h2>
-          <button type="button" class="btn-icon" (click)="showTip[3] = !showTip[3]" title="Ver ayuda de este paso">💡</button>
+          <button type="button" class="btn-icon" (click)="showTip[3] = !showTip[3]"
+            title="Ver ayuda de este paso">💡</button>
         </div>
         <button type="button" class="btn-secondary" (click)="addArea()">+ Agregar Área</button>
       </div>
       <div class="wizard-tip" *ngIf="showTip[3]">
-        <strong>💡 Objetivo:</strong> Estructura físicamente el proyecto dividiéndolo por áreas (Ej. Cocina, Baños) y lista los muebles que componen cada una. 
+        <strong>💡 Objetivo:</strong> Estructura físicamente el proyecto dividiéndolo por áreas (Ej. Cocina, Baños) y
+        lista los muebles que componen cada una.
       </div>
 
       <!-- MIGRACIÓN: Configuración global de Muebles (Desde Paso 2) -->
-      <div class="global-furniture-config mt-4" style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; border: 1px dashed rgba(255, 255, 255, 0.2);">
+      <div class="global-furniture-config mt-4"
+        style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; border: 1px dashed rgba(255, 255, 255, 0.2);">
         <h4 style="margin-top: 0; margin-bottom: 15px;">⚙️ Configuración Global de Muebles</h4>
-        
+
         <div class="form-grid">
           <!-- Configuración Herrajes -->
           <div class="form-group">
@@ -295,9 +313,12 @@
               <option value="selective">Selección manual (ocultar/mostrar)</option>
             </select>
             <small class="text-muted" style="display: block; margin-top: 5px;">
-              <span *ngIf="activeQuotation.wizardConfig.hardwareDisplayMode === 'table'">El cliente verá una tabla detallada con precios por ítem.</span>
-              <span *ngIf="activeQuotation.wizardConfig.hardwareDisplayMode === 'included'">Los herrajes no aparecen por separado, su costo se suma al mueble.</span>
-              <span *ngIf="activeQuotation.wizardConfig.hardwareDisplayMode === 'selective'">Podrá elegir qué herrajes mostrar y cuáles ocultar.</span>
+              <span *ngIf="activeQuotation.wizardConfig.hardwareDisplayMode === 'table'">El cliente verá una tabla
+                detallada con precios por ítem.</span>
+              <span *ngIf="activeQuotation.wizardConfig.hardwareDisplayMode === 'included'">Los herrajes no aparecen por
+                separado, su costo se suma al mueble.</span>
+              <span *ngIf="activeQuotation.wizardConfig.hardwareDisplayMode === 'selective'">Podrá elegir qué herrajes
+                mostrar y cuáles ocultar.</span>
             </small>
           </div>
 
@@ -310,9 +331,12 @@
               <option value="mixed">Mixto (Tabla + Ajuste manual)</option>
             </select>
             <small class="text-muted" style="display: block; margin-top: 5px;">
-              <span *ngIf="activeQuotation.wizardConfig.moTimeMode === 'manual'">Deberá escribir las horas manualmente por mueble.</span>
-              <span *ngIf="activeQuotation.wizardConfig.moTimeMode === 'table'">La app sugerirá tiempos basados en el tipo de mueble.</span>
-              <span *ngIf="activeQuotation.wizardConfig.moTimeMode === 'mixed'">La tabla es el punto de partida pero permite modificaciones.</span>
+              <span *ngIf="activeQuotation.wizardConfig.moTimeMode === 'manual'">Deberá escribir las horas manualmente
+                por mueble.</span>
+              <span *ngIf="activeQuotation.wizardConfig.moTimeMode === 'table'">La app sugerirá tiempos basados en el
+                tipo de mueble.</span>
+              <span *ngIf="activeQuotation.wizardConfig.moTimeMode === 'mixed'">La tabla es el punto de partida pero
+                permite modificaciones.</span>
             </small>
           </div>
         </div>
@@ -331,8 +355,10 @@
             </ng-container>
             <ng-container *ngIf="isAreaCustom(area, aIndex)">
               <div style="display: flex; gap: 5px;">
-                <input type="text" [(ngModel)]="area.name" class="form-control" placeholder="Escriba el nombre del área">
-                <button type="button" class="btn-icon" (click)="customAreaFlags[aIndex] = false; area.name = ''" title="Volver a la lista">↩️</button>
+                <input type="text" [(ngModel)]="area.name" class="form-control"
+                  placeholder="Escriba el nombre del área">
+                <button type="button" class="btn-icon" (click)="customAreaFlags[aIndex] = false; area.name = ''"
+                  title="Volver a la lista">↩️</button>
               </div>
             </ng-container>
           </div>
@@ -346,26 +372,33 @@
               <div class="form-group">
                 <label>Nombre del Mueble <span class="text-error">*</span></label>
                 <ng-container *ngIf="!isFurnCustom(area, furn, aIndex, fIndex)">
-                  <select [(ngModel)]="furn.name" class="form-control" (change)="onFurnitureSelectChange(furn, area, aIndex, fIndex)">
+                  <select [(ngModel)]="furn.name" class="form-control"
+                    (change)="onFurnitureSelectChange(furn, area, aIndex, fIndex)">
                     <option value="" disabled selected>Seleccione un Mueble...</option>
-                    <option *ngFor="let opt of getFurnitureOptionsForArea(area.name)" [value]="opt.name">{{ opt.name }}</option>
+                    <option *ngFor="let opt of getFurnitureOptionsForArea(area.name)" [value]="opt.name">{{ opt.name }}
+                    </option>
                     <option value="Otro / Personalizado">Otro / Personalizado</option>
                   </select>
                 </ng-container>
                 <ng-container *ngIf="isFurnCustom(area, furn, aIndex, fIndex)">
                   <div style="display: flex; gap: 5px;">
                     <input type="text" [(ngModel)]="furn.name" class="form-control" placeholder="Nombre del mueble">
-                    <button *ngIf="getFurnitureOptionsForArea(area.name).length > 0" type="button" class="btn-icon" (click)="customFurnFlags[aIndex][fIndex] = false; furn.name = ''" title="Volver a la lista">↩️</button>
+                    <button *ngIf="getFurnitureOptionsForArea(area.name).length > 0" type="button" class="btn-icon"
+                      (click)="customFurnFlags[aIndex][fIndex] = false; furn.name = ''"
+                      title="Volver a la lista">↩️</button>
                   </div>
                 </ng-container>
               </div>
               <div class="form-group">
-                <label>Medidas <small *ngIf="furn.unit === 'M2'">(Ancho x Alto)</small><small *ngIf="furn.unit === 'ML'">(Longitud)</small></label>
-                <input type="text" [(ngModel)]="furn.measurements" class="form-control" [placeholder]="furn.unit === 'M2' ? 'Ej. 2.0 x 1.5' : (furn.unit === 'ML' ? 'Ej. 2.5' : 'Ej. Opcional')">
+                <label>Medidas <small *ngIf="furn.unit === 'M2'">(Ancho x Alto)</small><small
+                    *ngIf="furn.unit === 'ML'">(Longitud)</small></label>
+                <input type="text" [(ngModel)]="furn.measurements" class="form-control"
+                  [placeholder]="furn.unit === 'M2' ? 'Ej. 2.0 x 1.5' : (furn.unit === 'ML' ? 'Ej. 2.5' : 'Ej. Opcional')">
               </div>
               <div class="form-group">
                 <label>Metraje <small *ngIf="furn.unit">({{ furn.unit }})</small></label>
-                <input type="number" [(ngModel)]="furn.areaSqm" (change)="recalculate()" class="form-control" step="0.001">
+                <input type="number" [(ngModel)]="furn.areaSqm" (change)="recalculate()" class="form-control"
+                  step="0.001">
               </div>
               <div class="form-group">
                 <label>Cantidad</label>
@@ -373,7 +406,8 @@
               </div>
               <div class="form-group">
                 <label>&nbsp;</label>
-                <button type="button" class="btn-icon text-error" (click)="removeFurniture(area, fIndex)">Eliminar Mueble</button>
+                <button type="button" class="btn-icon text-error" (click)="removeFurniture(area, fIndex)">Eliminar
+                  Mueble</button>
               </div>
             </div>
           </div>
@@ -386,18 +420,20 @@
     <div *ngIf="currentStep === 4">
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
         <h2 style="margin: 0;">Presupuesto Detallado</h2>
-        <button type="button" class="btn-icon" (click)="showTip[4] = !showTip[4]" title="Ver ayuda de este paso">💡</button>
+        <button type="button" class="btn-icon" (click)="showTip[4] = !showTip[4]"
+          title="Ver ayuda de este paso">💡</button>
       </div>
       <div class="wizard-tip" *ngIf="showTip[4]">
-        <strong>💡 Objetivo:</strong> Este es el motor matemático. Audita mueble por mueble agregando los insumos requeridos; las bases de datos de proveedores cruzarán los costos automáticamente en tiempo real.
+        <strong>💡 Objetivo:</strong> Este es el motor matemático. Audita mueble por mueble agregando los insumos
+        requeridos; las bases de datos de proveedores cruzarán los costos automáticamente en tiempo real.
       </div>
-      
+
       <div *ngFor="let area of activeQuotation.areas" class="mt-4">
         <h3 class="area-title">{{ area.name }}</h3>
-        
+
         <div *ngFor="let furn of area.furniture" class="furniture-budget-card">
           <h4>{{ furn.name }} (x{{ furn.quantity }})</h4>
-          
+
           <!-- Insumos -->
           <div class="budget-section">
             <div class="flex-between">
@@ -418,17 +454,17 @@
               <tbody>
                 <tr *ngFor="let sup of furn.supplies; let i = index">
                   <td>
-                    <app-material-picker
-                      category="melamina"
-                      placeholder="Melamina / tablero..."
-                      (materialSelected)="applySupplyMaterial(sup, $event)"
-                    ></app-material-picker>
+                    <app-material-picker category="melamina" placeholder="Melamina / tablero..."
+                      (materialSelected)="applySupplyMaterial(sup, $event)"></app-material-picker>
                   </td>
                   <td><input type="text" [(ngModel)]="sup.description" class="form-control-sm"></td>
-                  <td><input type="number" [(ngModel)]="sup.quantity" (change)="recalculate()" class="form-control-sm num-input"></td>
-                  <td><input type="number" [(ngModel)]="sup.unitPrice" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="sup.quantity" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="sup.unitPrice" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
                   <td>$ {{ sup.totalPrice | number }}</td>
-                  <td><button class="btn-icon text-error" title="Eliminar" (click)="removeItem(furn, 'supplies', i)">🗑️</button></td>
+                  <td><button class="btn-icon text-error" title="Eliminar"
+                      (click)="removeItem(furn, 'supplies', i)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
@@ -456,19 +492,19 @@
               <tbody>
                 <tr *ngFor="let edge of furn.edgeBands; let i = index">
                   <td>
-                    <app-material-picker
-                      category="canto"
-                      placeholder="Canto..."
-                      (materialSelected)="applyEdgeMaterial(edge, $event)"
-                    ></app-material-picker>
+                    <app-material-picker category="canto" placeholder="Canto..."
+                      (materialSelected)="applyEdgeMaterial(edge, $event)"></app-material-picker>
                   </td>
                   <td><input type="text" [(ngModel)]="edge.description" class="form-control-sm"></td>
-                  <td><input type="number" [(ngModel)]="edge.quantity" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="edge.quantity" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
                   <td>{{ (edge.wasteFactor || 0) * 100 }}%</td>
                   <td>{{ edge.total | number:'1.0-2' }}</td>
-                  <td><input type="number" [(ngModel)]="edge.unitPrice" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="edge.unitPrice" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
                   <td>$ {{ edge.totalPrice | number }}</td>
-                  <td><button class="btn-icon text-error" title="Eliminar" (click)="removeItem(furn, 'edgeBands', i)">🗑️</button></td>
+                  <td><button class="btn-icon text-error" title="Eliminar"
+                      (click)="removeItem(furn, 'edgeBands', i)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
@@ -496,9 +532,11 @@
               <tbody>
                 <tr *ngFor="let d of furn.designTime; let i = index">
                   <td><input type="text" [(ngModel)]="d.description" class="form-control-sm"></td>
-                  <td><input type="number" [(ngModel)]="d.quantity" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="d.quantity" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
                   <td>$ {{ d.totalPrice | number }}</td>
-                  <td><button class="btn-icon text-error" title="Eliminar" (click)="removeItem(furn, 'designTime', i)">🗑️</button></td>
+                  <td><button class="btn-icon text-error" title="Eliminar"
+                      (click)="removeItem(furn, 'designTime', i)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
@@ -523,19 +561,22 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let acc of furn.accessories; let i = index" [style.background-color]="acc.description.includes('⧦Est.') ? '#f3e8ff' : null">
+                <tr *ngFor="let acc of furn.accessories; let i = index"
+                  [style.background-color]="acc.description.includes('⧦Est.') ? '#f3e8ff' : null">
                   <td>
-                    <app-material-picker
-                      placeholder="Herraje / accesorio..."
-                      (materialSelected)="applyAccessoryMaterial(acc, $event)"
-                    ></app-material-picker>
+                    <app-material-picker placeholder="Herraje / accesorio..."
+                      (materialSelected)="applyAccessoryMaterial(acc, $event)"></app-material-picker>
                   </td>
                   <td><input type="text" [(ngModel)]="acc.description" class="form-control-sm"></td>
-                  <td><input type="number" [(ngModel)]="acc.quantity" (change)="recalculate()" class="form-control-sm num-input"></td>
-                  <td><input type="number" [(ngModel)]="acc.unitPrice" (change)="recalculate()" class="form-control-sm num-input"></td>
-                  <td><input type="number" [(ngModel)]="acc.timeHours" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="acc.quantity" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="acc.unitPrice" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="acc.timeHours" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
                   <td>$ {{ acc.totalPrice | number }}</td>
-                  <td><button class="btn-icon text-error" title="Eliminar" (click)="removeItem(furn, 'accessories', i)">🗑️</button></td>
+                  <td><button class="btn-icon text-error" title="Eliminar"
+                      (click)="removeItem(furn, 'accessories', i)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
@@ -562,18 +603,25 @@
                 <tr *ngFor="let cut of furn.cuts; let i = index">
                   <td>
                     <div style="display: flex; gap: 5px; flex-direction: column;">
-                      <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm" (change)="onLaborTimeSelect(cut, $any($event.target).value, 'cuts')">
+                      <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
+                        (change)="onLaborTimeSelect(cut, $any($event.target).value, 'cuts')">
                         <option value="">-- Tabla M.O --</option>
-                        <option *ngFor="let lt of availableLaborTimes" [value]="lt.code">{{ lt.activityName }} ({{ lt.timeHours }}h)</option>
+                        <option *ngFor="let lt of availableLaborTimes" [value]="lt.code">{{ lt.activityName }} ({{
+                          lt.timeHours }}h)</option>
                       </select>
-                      <input type="text" [(ngModel)]="cut.description" class="form-control-sm" placeholder="Descripción">
+                      <input type="text" [(ngModel)]="cut.description" class="form-control-sm"
+                        placeholder="Descripción">
                     </div>
                   </td>
-                  <td><input type="number" [(ngModel)]="cut.sqm" (change)="recalculate()" class="form-control-sm num-input"></td>
-                  <td><input type="number" [(ngModel)]="cut.timeHours" (change)="recalculate()" class="form-control-sm num-input"></td>
-                  <td><input type="number" [(ngModel)]="cut.quantity" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="cut.sqm" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="cut.timeHours" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="cut.quantity" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
                   <td>$ {{ cut.totalPrice | number }}</td>
-                  <td><button class="btn-icon text-error" title="Eliminar" (click)="removeItem(furn, 'cuts', i)">🗑️</button></td>
+                  <td><button class="btn-icon text-error" title="Eliminar"
+                      (click)="removeItem(furn, 'cuts', i)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
@@ -598,22 +646,31 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let asm of furn.assembly; let i = index" [style.background-color]="asm.description.includes('⧦Est.') ? '#f3e8ff' : null">
+                <tr *ngFor="let asm of furn.assembly; let i = index"
+                  [style.background-color]="asm.description.includes('⧦Est.') ? '#f3e8ff' : null">
                   <td>
                     <div style="display: flex; gap: 5px; flex-direction: column;">
-                      <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm" (change)="onLaborTimeSelect(asm, $any($event.target).value, 'assembly')">
+                      <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
+                        (change)="onLaborTimeSelect(asm, $any($event.target).value, 'assembly')">
                         <option value="">-- Tabla M.O --</option>
-                        <option *ngFor="let lt of availableLaborTimes" [value]="lt.code">{{ lt.activityName }} ({{ lt.timeHours }}h)</option>
+                        <option *ngFor="let lt of availableLaborTimes" [value]="lt.code">{{ lt.activityName }} ({{
+                          lt.timeHours }}h)</option>
                       </select>
-                      <input type="text" [(ngModel)]="asm.description" class="form-control-sm" placeholder="Descripción">
+                      <input type="text" [(ngModel)]="asm.description" class="form-control-sm"
+                        placeholder="Descripción">
                     </div>
                   </td>
-                  <td><input type="text" [(ngModel)]="asm.measurement" class="form-control-sm" placeholder="ej. 1.72 × 0.36"></td>
-                  <td><input type="number" [(ngModel)]="asm.totalQuantity" (change)="recalculate()" class="form-control-sm num-input"></td>
-                  <td><input type="number" [(ngModel)]="asm.assemblyHours" (change)="recalculate()" class="form-control-sm num-input"></td>
-                  <td><input type="number" [(ngModel)]="asm.persons" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="text" [(ngModel)]="asm.measurement" class="form-control-sm"
+                      placeholder="ej. 1.72 × 0.36"></td>
+                  <td><input type="number" [(ngModel)]="asm.totalQuantity" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="asm.assemblyHours" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="asm.persons" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
                   <td>$ {{ asm.totalPrice | number }}</td>
-                  <td><button class="btn-icon text-error" title="Eliminar" (click)="removeItem(furn, 'assembly', i)">🗑️</button></td>
+                  <td><button class="btn-icon text-error" title="Eliminar"
+                      (click)="removeItem(furn, 'assembly', i)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
@@ -638,22 +695,31 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let inst of furn.installation; let i = index" [style.background-color]="inst.description.includes('⧦Est.') ? '#f3e8ff' : null">
+                <tr *ngFor="let inst of furn.installation; let i = index"
+                  [style.background-color]="inst.description.includes('⧦Est.') ? '#f3e8ff' : null">
                   <td>
                     <div style="display: flex; gap: 5px; flex-direction: column;">
-                      <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm" (change)="onLaborTimeSelect(inst, $any($event.target).value, 'installation')">
+                      <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
+                        (change)="onLaborTimeSelect(inst, $any($event.target).value, 'installation')">
                         <option value="">-- Tabla M.O --</option>
-                        <option *ngFor="let lt of availableLaborTimes" [value]="lt.code">{{ lt.activityName }} ({{ lt.timeHours }}h)</option>
+                        <option *ngFor="let lt of availableLaborTimes" [value]="lt.code">{{ lt.activityName }} ({{
+                          lt.timeHours }}h)</option>
                       </select>
-                      <input type="text" [(ngModel)]="inst.description" class="form-control-sm" placeholder="Descripción">
+                      <input type="text" [(ngModel)]="inst.description" class="form-control-sm"
+                        placeholder="Descripción">
                     </div>
                   </td>
-                  <td><input type="text" [(ngModel)]="inst.measurement" class="form-control-sm" placeholder="ej. 2.10 × 0.60"></td>
-                  <td><input type="number" [(ngModel)]="inst.totalQuantity" (change)="recalculate()" class="form-control-sm num-input"></td>
-                  <td><input type="number" [(ngModel)]="inst.installHours" (change)="recalculate()" class="form-control-sm num-input"></td>
-                  <td><input type="number" [(ngModel)]="inst.persons" (change)="recalculate()" class="form-control-sm num-input"></td>
+                  <td><input type="text" [(ngModel)]="inst.measurement" class="form-control-sm"
+                      placeholder="ej. 2.10 × 0.60"></td>
+                  <td><input type="number" [(ngModel)]="inst.totalQuantity" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="inst.installHours" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="inst.persons" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
                   <td>$ {{ inst.totalPrice | number }}</td>
-                  <td><button class="btn-icon text-error" title="Eliminar" (click)="removeItem(furn, 'installation', i)">🗑️</button></td>
+                  <td><button class="btn-icon text-error" title="Eliminar"
+                      (click)="removeItem(furn, 'installation', i)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
@@ -668,7 +734,7 @@
             <span>Armado: $ {{ furn.totalAssembly | number }}</span>
             <span>Instalación: $ {{ furn.totalInstallation | number }}</span>
           </div>
-          
+
           <div class="furniture-total text-right mt-2">
             <strong>Subtotal Mueble: $ {{ furn.totalCost | number }}</strong>
           </div>
@@ -679,56 +745,68 @@
     <!-- PASO 5: RESUMEN Y TOTALES GLOBALES (was step 4) -->
     <div *ngIf="currentStep === 5" class="summary-section">
       <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
-        <h2 style="margin: 0;">Resumen de Cotización <span *ngIf="activeQuotation.number">No. {{ activeQuotation.number }}</span></h2>
-        <button type="button" class="btn-icon" (click)="showTip[5] = !showTip[5]" title="Ver ayuda de este paso">💡</button>
+        <h2 style="margin: 0;">Resumen de Cotización <span *ngIf="activeQuotation.number">No. {{ activeQuotation.number
+            }}</span></h2>
+        <button type="button" class="btn-icon" (click)="showTip[5] = !showTip[5]"
+          title="Ver ayuda de este paso">💡</button>
       </div>
       <div class="wizard-tip" *ngIf="showTip[5]">
-        <strong>💡 Objetivo:</strong> Verifica los costos base operacionales calculados y ajusta de ser necesario el AIU para obtener el Precio de Venta final con IVA. Cuando esté listo, guarda y genera tu PDF.
+        <strong>💡 Objetivo:</strong> Verifica los costos base operacionales calculados y ajusta de ser necesario el AIU
+        para obtener el Precio de Venta final con IVA. Cuando esté listo, guarda y genera tu PDF.
       </div>
 
 
       <div class="grid-2">
         <div class="totals-card">
           <h3>Resumen de Costos Directos</h3>
-          <p class="flex-between"><span>Costo Total Materiales/Operación:</span> <strong>$ {{ activeQuotation.totals.totalCost | number }}</strong></p>
+          <p class="flex-between"><span>Costo Total Materiales/Operación:</span> <strong>$ {{
+              activeQuotation.totals.totalCost | number }}</strong></p>
         </div>
         <div class="totals-card primary-border">
           <h3>AIU e Impuestos</h3>
-          
+
           <div class="flex-between form-group-sm">
             <span>Imprevistos (%)</span>
-            <input type="number" [(ngModel)]="activeQuotation.totals.unforeseenPercent" (change)="recalculate()" class="form-control-sm num-input">
+            <input type="number" [(ngModel)]="activeQuotation.totals.unforeseenPercent" (change)="recalculate()"
+              class="form-control-sm num-input">
             <span>$ {{ activeQuotation.totals.unforeseenAmount | number }}</span>
           </div>
-          
+
           <div class="flex-between form-group-sm">
             <span>Utilidad (%)</span>
-            <input type="number" [(ngModel)]="activeQuotation.totals.profitPercent" (change)="recalculate()" class="form-control-sm num-input">
+            <input type="number" [(ngModel)]="activeQuotation.totals.profitPercent" (change)="recalculate()"
+              class="form-control-sm num-input">
             <span>$ {{ activeQuotation.totals.profitAmount | number }}</span>
           </div>
-          
+
           <div class="flex-between form-group-sm">
             <span>Gastos Indirectos (%)</span>
-            <input type="number" [(ngModel)]="activeQuotation.totals.indirectPercent" (change)="recalculate()" class="form-control-sm num-input">
+            <input type="number" [(ngModel)]="activeQuotation.totals.indirectPercent" (change)="recalculate()"
+              class="form-control-sm num-input">
             <span>$ {{ activeQuotation.totals.indirectAmount | number }}</span>
           </div>
 
-          <p class="flex-between mt-2"><span>SUBTOTAL:</span> <strong>$ {{ activeQuotation.totals.subtotal | number }}</strong></p>
-          
+          <p class="flex-between mt-2"><span>SUBTOTAL:</span> <strong>$ {{ activeQuotation.totals.subtotal | number
+              }}</strong></p>
+
           <div class="flex-between form-group-sm mt-2">
             <span>IVA (%)</span>
-            <input type="number" [(ngModel)]="activeQuotation.totals.taxPercent" (change)="recalculate()" class="form-control-sm num-input">
+            <input type="number" [(ngModel)]="activeQuotation.totals.taxPercent" (change)="recalculate()"
+              class="form-control-sm num-input">
             <span>$ {{ activeQuotation.totals.taxAmount | number }}</span>
           </div>
-          
+
           <div class="flex-between form-group-sm">
             <span>Recargo adicional (%)</span>
-            <input type="number" [(ngModel)]="activeQuotation.totals.discountPercent" (change)="recalculate()" class="form-control-sm num-input">
+            <input type="number" [(ngModel)]="activeQuotation.totals.discountPercent" (change)="recalculate()"
+              class="form-control-sm num-input">
             <span>+ $ {{ activeQuotation.totals.discountAmount | number }}</span>
           </div>
 
-          <p class="flex-between mt-2"><span>Total con IVA:</span> <strong>$ {{ activeQuotation.totals.totalWithTax | number }}</strong></p>
-          <p class="flex-between" *ngIf="activeQuotation.totals.totalSqm > 0"><span>Precio por M²:</span> <strong>$ {{ activeQuotation.totals.pricePerSqm | number }}</strong></p>
+          <p class="flex-between mt-2"><span>Total con IVA:</span> <strong>$ {{ activeQuotation.totals.totalWithTax |
+              number }}</strong></p>
+          <p class="flex-between" *ngIf="activeQuotation.totals.totalSqm > 0"><span>Precio por M²:</span> <strong>$ {{
+              activeQuotation.totals.pricePerSqm | number }}</strong></p>
 
           <div class="grand-total mt-4">
             <h3>GRAN TOTAL: $ {{ activeQuotation.totals.grandTotal | number }}</h3>
@@ -741,8 +819,11 @@
   <!-- BOTONERA -->
   <div class="wizard-footer mt-4">
     <button type="button" class="btn-secondary" *ngIf="currentStep > 1" (click)="prevStep()">← Anterior</button>
-    <button type="button" class="btn-primary" *ngIf="currentStep === TOTAL_STEPS" (click)="generatePdf()" style="margin-left: 10px;">📄 Generar PDF</button>
-    <button type="button" class="btn-primary ml-auto" *ngIf="currentStep < TOTAL_STEPS" (click)="nextStep()" [disabled]="!isStepValid(currentStep)">Siguiente →</button>
-    <button type="button" class="btn-success ml-auto" *ngIf="currentStep === TOTAL_STEPS" (click)="saveQuotation()" [disabled]="isLoading || !isStepValid(currentStep)">Guardar Cotización</button>
+    <button type="button" class="btn-primary" *ngIf="currentStep === TOTAL_STEPS" (click)="generatePdf()"
+      style="margin-left: 10px;">📄 Generar PDF</button>
+    <button type="button" class="btn-primary ml-auto" *ngIf="currentStep < TOTAL_STEPS" (click)="nextStep()"
+      [disabled]="!isStepValid(currentStep)">Siguiente →</button>
+    <button type="button" class="btn-success ml-auto" *ngIf="currentStep === TOTAL_STEPS" (click)="saveQuotation()"
+      [disabled]="isLoading || !isStepValid(currentStep)">Guardar Cotización</button>
   </div>
 </div>
