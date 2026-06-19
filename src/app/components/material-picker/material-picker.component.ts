@@ -23,20 +23,14 @@ export class MaterialPickerComponent {
   constructor(private materialService: MaterialService) {
     this.search$
       .pipe(
-        debounceTime(280),
+        debounceTime(50), // Reducido para respuesta inmediata local
         distinctUntilChanged(),
         switchMap((q) => {
           if (!q || q.length < 2) {
             return of({ success: true, data: [], pagination: { total: 0, page: 1, limit: 12, pages: 0 } });
           }
           this.isLoading = true;
-          const params: Record<string, string | number> = {
-            search: q,
-            limit: 12,
-            active: 'true'
-          };
-          if (this.category) params['category'] = this.category;
-          return this.materialService.getMaterials(params);
+          return this.materialService.searchLocalMaterials(q, 12, this.category);
         })
       )
       .subscribe({

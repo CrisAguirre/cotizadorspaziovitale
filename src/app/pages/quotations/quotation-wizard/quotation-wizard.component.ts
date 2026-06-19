@@ -6,8 +6,10 @@ import { QuotationCalculatorService } from '../../../services/quotation-calculat
 import { PdfGeneratorService } from '../../../services/pdf-generator.service';
 import { QuotationValidationService, QuotationValidationReport } from '../../../services/quotation-validation.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AppConfig, Quotation, Area, Furniture, Material, SupplyItem, EdgeBandItem, AccessoryItem, WizardConfig, LaborTime } from '../../../models/interfaces';
+import { AppConfig, Quotation, Area, Furniture, Material, SupplyItem, EdgeBandItem, AccessoryItem, AssemblyItem, WizardConfig, LaborTime } from '../../../models/interfaces';
 import { LaborTimeService } from '../../../services/labor-time.service';
+import { TemporalService, TemporalData } from '../../../services/temporal.service';
+import { MaterialService } from '../../../services/material.service';
 import { buildQuotation2604Sample } from '../../../data/quotation-2604.sample';
 import { QUOTATION_2604_REFERENCE } from '../../../data/quotation-2604.reference';
 
@@ -81,6 +83,8 @@ export class QuotationWizardComponent implements OnInit {
   readonly reference2604 = QUOTATION_2604_REFERENCE;
   showTip: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false, 5: false };
   showTipConfig: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false };
+
+  temporalId?: string;
 
   availableLaborTimes: LaborTime[] = [];
   
@@ -170,6 +174,8 @@ export class QuotationWizardComponent implements OnInit {
     private pdfGenerator: PdfGeneratorService,
     private validationService: QuotationValidationService,
     private laborTimeService: LaborTimeService,
+    private temporalService: TemporalService,
+    private materialService: MaterialService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -195,10 +201,67 @@ export class QuotationWizardComponent implements OnInit {
     this.route.queryParams.subscribe((params) => {
       if (params['demo'] === '2604') {
         this.loadSample2604();
+      } else if (params['temporalId']) {
+        this.loadTemporal(params['temporalId']);
       } else if (!this.activeQuotation.areas?.length) {
         this.addArea();
       }
     });
+
+    // Precargar todos los materiales en segundo plano para que el buscador sea inmediato
+    this.materialService.preloadAllMaterials().subscribe();
+  }
+
+  loadTemporal(id: string) {
+    this.temporalService.getTemporal(id).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.temporalId = res.data._id;
+          this.activeQuotation = res.data.data;
+          this.currentStep = res.data.currentStepNumber || 1;
+          
+          this.quotationForm.patchValue({
+            number: this.activeQuotation.number,
+            date: this.activeQuotation.date,
+            city: this.activeQuotation.city,
+            title: this.activeQuotation.title,
+            client: this.activeQuotation.client,
+            paymentTerms: this.activeQuotation.paymentTerms,
+            validityDays: this.activeQuotation.validityDays
+          });
+          this.recalculate();
+        }
+      },
+      error: (err) => console.error('Error loading temporal', err)
+    });
+  }
+
+  autoSave() {
+    // Determine the current step name for UI display
+    let stepName = 'Inicio';
+    if (this.currentStep === 1) stepName = 'Cliente';
+    if (this.currentStep === 2) stepName = 'Configuración';
+    if (this.currentStep === 3) stepName = 'Muebles';
+    if (this.currentStep === 4) stepName = 'Presupuesto';
+    if (this.currentStep === 5) stepName = 'Resumen';
+
+    const clientName = this.quotationForm.value.client?.name || 'Borrador sin cliente';
+    
+    // Only save if we have at least the client name or we moved past step 1
+    if (this.currentStep > 1 || this.quotationForm.value.client?.name) {
+      const temporalData: TemporalData = {
+        _id: this.temporalId,
+        clientName: clientName,
+        currentStepName: stepName,
+        currentStepNumber: this.currentStep,
+        data: this.activeQuotation
+      };
+      this.temporalService.saveTemporal(temporalData).subscribe(res => {
+        if (res.success && res.data._id) {
+          this.temporalId = res.data._id;
+        }
+      });
+    }
   }
 
   loadLaborTimes() {
@@ -283,13 +346,18 @@ export class QuotationWizardComponent implements OnInit {
         this.runValidation2604();
       }
     }
+    
+    this.autoSave();
   }
 
   prevStep() {
     if (this.currentStep === 2) {
       this.wizardStep = 1; // Reset wizard sub-step when going back
     }
-    if (this.currentStep > 1) this.currentStep--;
+    if (this.currentStep > 1) {
+      this.currentStep--;
+      this.autoSave();
+    }
   }
 
   // Config wizard sub-navigation
@@ -377,7 +445,7 @@ export class QuotationWizardComponent implements OnInit {
     }
   }
 
-  isFurnCustom(area: Area, furn: Furniture, aIndex: number, fIndex: number): boolean {
+isFurnCustom(area: Area, furn: Furniture, aIndex: number, fIndex: number): boolean {
     if (this.customFurnFlags[aIndex] && this.customFurnFlags[aIndex][fIndex]) return true;
     const options = this.getFurnitureOptionsForArea(area.name);
     if (options.length === 0) return true; // Si el área no tiene opciones, es custom por defecto
@@ -386,42 +454,116 @@ export class QuotationWizardComponent implements OnInit {
   }
 
   autoAssignHardwareAndLabor(furn: Furniture, area: Area) {
-    // Arquitectura lista para asignar automáticamente herrajes según el mueble
-    // TODO: Conectar a BD. Por ahora agregamos un herraje genérico de prueba y un tiempo M.O. si está activo
-    furn.accessories = []; // reset
-    if (furn.name.includes('PUERTAS ABATIBLES')) {
-      furn.accessories.push({
-        description: 'Bisagra cierre lento (Autogenerada)',
-        quantity: 4,
-        unit: 'UNIDAD',
-        unitPrice: 0,
-        totalPrice: 0,
-        code: '', dimension: '', timeHours: 0, totalTime: 0, laborRate: 0
-      });
-    } else if (furn.name.includes('CORREDISOS')) {
-      furn.accessories.push({
-        description: 'Kit Riel Corredizo (Autogenerado)',
-        quantity: 1,
-        unit: 'UNIDAD',
-        unitPrice: 0,
-        totalPrice: 0,
-        code: '', dimension: '', timeHours: 0, totalTime: 0, laborRate: 0
-      });
+    const laborRate = this.appConfig?.laborRatePerHour || 0;
+    const autoMO = this.activeQuotation.wizardConfig.moTimeMode !== 'manual';
+    furn.accessories = [];
+    furn.assembly = [];
+    furn.installation = [];
+
+    const acc = (desc: string, qty: number, unit = 'UNIDAD'): AccessoryItem => ({
+      description: desc + ' ⧦Est.', quantity: qty, unit,
+      unitPrice: 0, totalPrice: 0,
+      code: 'EST', dimension: '', timeHours: 0, totalTime: 0, laborRate: 0
+    });
+    // M.O. helpers que buscan el código real en la BD; si no lo encuentran, usan fallback
+    const moFromDB = (code: string, fallbackDesc: string, fallbackHours: number): AssemblyItem => {
+      const lt = this.availableLaborTimes.find(l => l.code === code);
+      return {
+        description: lt ? `${lt.activityName} [${code}]` : `${fallbackDesc} ⧦Est.`,
+        assemblyHours: (lt && lt.timeHours > 0) ? lt.timeHours : fallbackHours,
+        persons: 1, totalQuantity: furn.quantity || 1, laborRate, totalPrice: 0,
+        measurement: '', unitOfMeasure: furn.unit || 'UNIDAD'
+      };
+    };
+    const instFromDB = (code: string, fallbackDesc: string, fallbackHours: number) => {
+      const lt = this.availableLaborTimes.find(l => l.code === code);
+      return {
+        description: lt ? `${lt.activityName} [${code}]` : `${fallbackDesc} ⧦Est.`,
+        installHours: (lt && lt.timeHours > 0) ? lt.timeHours : fallbackHours,
+        persons: 1, totalQuantity: furn.quantity || 1, laborRate, totalPrice: 0,
+        measurement: '', unitOfMeasure: furn.unit || 'UNIDAD'
+      };
+    };
+
+    const n = furn.name;
+
+    // ═══ COCINA ══════════════════════════════════════════════════
+    if (n === 'MUEBLE ALTO PRINCIPAL' || n === 'MUEBLE ALTO SECUNDARIO') {
+      // MO-022: Armado 2h/ML | MO-023: Instalación 1.5h/ML
+      furn.accessories = [acc('Bisagra cierre lento 35mm', 3), acc('Jalador barra aluminio', 1), acc('Tornillo melamina 3.5x16mm', 20)];
+      if (autoMO) { furn.assembly = [moFromDB('MO-022', 'Armado mueble alto', 2)]; furn.installation = [instFromDB('MO-023', 'Instalación mueble alto', 1.5)]; }
+    } else if (n === 'MUEBLE BAJO') {
+      // MO-026: Armado | MO-028: Instalación cocina sencilla
+      furn.accessories = [acc('Bisagra cierre lento 35mm', 2), acc('Corredera telescópica soft-closing 350mm', 1), acc('Jalador barra aluminio', 1), acc('Soporte patas regulables', 4), acc('Tornillo melamina 3.5x16mm', 24)];
+      if (autoMO) { furn.assembly = [moFromDB('MO-026', 'Armado mueble bajo', 2.5)]; furn.installation = [instFromDB('MO-028', 'Instalación mueble bajo', 1.5)]; }
+    } else if (n === 'TORRE DE HORNOS') {
+      // MO-037: Torre armado (referencia) | MO-038: instalación
+      furn.accessories = [acc('Bisagra cierre lento 35mm', 4), acc('Jalador barra aluminio', 1), acc('Tornillo melamina 3.5x16mm', 30)];
+      if (autoMO) { furn.assembly = [moFromDB('MO-037', 'Armado torre hornos', 3)]; furn.installation = [instFromDB('MO-038', 'Instalación torre hornos', 2)]; }
+    } else if (n === 'TORRE DE ENTREPAÑOS' || n === 'ALACENA DE ENTREPAÑOS') {
+      // MO-039: TR SIN ENTREPAÑOS ARMADO | MO-040: INSTALACIÓN
+      furn.accessories = [acc('Soporte para entrepaño', 8), acc('Tornillo melamina 3.5x16mm', 20)];
+      if (autoMO) { furn.assembly = [moFromDB('MO-039', 'Armado torre entrepaños', 1.5)]; furn.installation = [instFromDB('MO-040', 'Instalación torre entrepaños', 1)]; }
+    } else if (n === 'ALACENA PARA HERRAJE') {
+      furn.accessories = [acc('Bisagra cierre lento 35mm', 4), acc('Jalador barra aluminio', 1), acc('Tornillo melamina 3.5x16mm', 20)];
+      if (autoMO) { furn.assembly = [moFromDB('MO-039', 'Armado alacena', 1.5)]; furn.installation = [instFromDB('MO-040', 'Instalación alacena', 1)]; }
+    } else if (n === 'MUEBLE NEVERA') {
+      // MO-020: Armado Nevera | MO-021: Instalación
+      furn.accessories = [acc('Tornillo melamina 3.5x16mm', 16)];
+      if (autoMO) { furn.assembly = [moFromDB('MO-020', 'Armado mueble nevera', 2.5)]; furn.installation = [instFromDB('MO-021', 'Instalación mueble nevera', 1)]; }
+    } else if (n === 'MUEBLE BARRA' || n === 'MUEBLE ISLA') {
+      // MO-029: Isla armado | MO-030: Isla instalación
+      furn.accessories = [acc('Bisagra cierre lento 35mm', 2), acc('Soporte patas regulables', 4), acc('Jalador barra aluminio', 1), acc('Tornillo melamina 3.5x16mm', 24)];
+      if (autoMO) { furn.assembly = [moFromDB('MO-029', 'Armado mueble barra/isla', 3)]; furn.installation = [instFromDB('MO-030', 'Instalación mueble barra/isla', 2)]; }
+    } else if (n === 'APERGOLADO' || n === 'SOMBREROS DE ISLA ( ESTRUCTURAS ALTAS )' || n === 'FACHADAS O RECUBRIMIENTOS') {
+      // MO-091: Pergolas instalación 2h/M2 | MO-108/109: Fachadas
+      furn.accessories = [acc('Tornillo melamina 3.5x16mm', 12)];
+      if (autoMO) { furn.installation = [instFromDB('MO-091', 'Instalación apergolado/fachada', 2)]; }
+    // ═══ CLOSET ══════════════════════════════════════════════════
+    } else if (n === 'PUERTAS ABATIBLES') {
+      // MO-101: Closet armado 1h/M2 | MO-102: Instalación 1.5h/M2
+      furn.accessories = [acc('Bisagra cierre lento 35mm Grass', 3), acc('Jalador barra aluminio', 1), acc('Tornillo melamina 3.5x16mm', 16)];
+      if (autoMO) { furn.assembly = [moFromDB('MO-101', 'Armado closet abatible', 1)]; furn.installation = [instFromDB('MO-102', 'Instalación closet abatible', 1.5)]; }
+    } else if (n === 'SISTEMAS CORREDISOS') {
+      // MO-101: Closet base | MO-099: Instalación puerta corrediza
+      furn.accessories = [acc('Kit riel superior corredizo 2m', 1), acc('Rodamiento inferior corredizo', 4), acc('Jalador embutido', 2), acc('Tornillo melamina 3.5x16mm', 16)];
+      if (autoMO) { furn.assembly = [moFromDB('MO-101', 'Armado sistema corredizo', 1)]; furn.installation = [instFromDB('MO-099', 'Instalación puerta corrediza', 0.25)]; }
+    // ═══ MUEBLES DE BAÑO ═════════════════════════════════════════
+    } else if (area.name === 'MUEBLES DE BAÑO' && n === 'MUEBLE FLOTANTE') {
+      // MO-103: Armado baño | MO-104: Instalación baño
+      furn.accessories = [acc('Bisagra cierre lento 35mm', 2), acc('Jalador barra aluminio', 1), acc('Soporte flotante de pared', 2), acc('Tornillo melamina 3.5x16mm', 20)];
+      if (autoMO) { furn.assembly = [moFromDB('MO-103', 'Armado mueble flotante baño', 2)]; furn.installation = [instFromDB('MO-104', 'Instalación mueble flotante baño', 1)]; }
+    // ═══ PUERTAS ═════════════════════════════════════════════════
+    } else if (area.name === 'PUERTAS') {
+      // MO-105: Marco puerta armado 1.5h/ML | MO-106: Instalación 1.5h/ML
+      furn.accessories = [acc('Bisagra fija o cierre lento 35mm', 3), acc('Chapa/cerradura cilíndrica', 1), acc('Jalador de puerta', 1)];
+      if (autoMO) { furn.assembly = [moFromDB('MO-105', 'Armado marco puerta', 1.5)]; furn.installation = [instFromDB('MO-106', 'Instalación puerta', 1.5)]; }
+    // ═══ BIBLIOTECA ══════════════════════════════════════════════
+    } else if (area.name === 'BIBLIOTECA' && n === 'ESCRITORIO') {
+      furn.accessories = [acc('Jalador cajón', 2), acc('Corredera telescópica 350mm', 1), acc('Soporte patas regulables', 4), acc('Tornillo melamina 3.5x16mm', 20)];
+      if (autoMO) { furn.assembly = [moFromDB('MO-026', 'Armado escritorio', 2)]; furn.installation = [instFromDB('MO-028', 'Instalación escritorio', 1)]; }
+    } else if (area.name === 'BIBLIOTECA' && (n === 'MUEBLE ALTO' || n === 'MUEBLE BAJO')) {
+      furn.accessories = [acc('Bisagra cierre lento 35mm', 2), acc('Jalador barra aluminio', 1), acc('Tornillo melamina 3.5x16mm', 16)];
+      if (autoMO) { furn.assembly = [moFromDB('MO-022', 'Armado mueble biblioteca', 2)]; furn.installation = [instFromDB('MO-023', 'Instalación mueble biblioteca', 1.5)]; }
+    } else if (area.name === 'BIBLIOTECA') {
+      furn.accessories = [acc('Soporte para entrepaño', 8), acc('Tornillo melamina 3.5x16mm', 16)];
+      if (autoMO) { furn.assembly = [moFromDB('MO-039', 'Armado biblioteca', 1.5)]; furn.installation = [instFromDB('MO-040', 'Instalación biblioteca', 1)]; }
+    // ═══ ESCRITORIO ══════════════════════════════════════════════
+    } else if (area.name === 'ESCRITORIO') {
+      furn.accessories = [acc('Soporte patas regulables', 4), acc('Jalador cajón', 1), acc('Corredera telescópica 350mm', 1), acc('Tornillo melamina 3.5x16mm', 20)];
+      if (autoMO) { furn.assembly = [moFromDB('MO-026', 'Armado escritorio/mesón', 2)]; furn.installation = [instFromDB('MO-028', 'Instalación escritorio/mesón', 1)]; }
+    // ═══ CENTRO DE ENTRETENIMIENTO ═══════════════════════════════
+    } else if (area.name === 'CENTRO DE ENTRETENIMIENTO') {
+      if (n === 'MUEBLE FLOTANTE' || n === 'MUEBLE BAJO') {
+        // MO-031: TV armado | MO-032: TV instalación
+        furn.accessories = [acc('Bisagra cierre lento 35mm', 2), acc('Jalador barra aluminio', 1), acc('Soporte flotante de pared', 2), acc('Tornillo melamina 3.5x16mm', 16)];
+        if (autoMO) { furn.assembly = [moFromDB('MO-031', 'Armado mueble TV/entretenimiento', 1.5)]; furn.installation = [instFromDB('MO-032', 'Instalación mueble TV/entretenimiento', 1)]; }
+      } else {
+        furn.accessories = [acc('Soporte para entrepaño', 6), acc('Tornillo melamina 3.5x16mm', 12)];
+        if (autoMO) { furn.installation = [instFromDB('MO-040', 'Instalación apergolado/entrepaños', 1)]; }
+      }
     }
 
-    if (this.activeQuotation.wizardConfig.moTimeMode !== 'manual') {
-      // Auto-asignación de M.O.
-      furn.installation = [{
-        description: 'M.O. Instalación ' + furn.name,
-        installHours: 2,
-        persons: 1,
-        totalQuantity: furn.quantity || 1,
-        laborRate: this.appConfig?.laborRatePerHour || 0,
-        totalPrice: 0,
-        measurement: '', unitOfMeasure: furn.unit || 'UNIDAD'
-      }];
-    }
-    
     this.recalculate();
   }
 
@@ -569,7 +711,14 @@ export class QuotationWizardComponent implements OnInit {
       next: (res: any) => {
         this.isLoading = false;
         if (res.success) {
+          // Si todo salió bien y veníamos de un temporal, borrar el temporal
+          if (this.temporalId) {
+            this.temporalService.deleteTemporal(this.temporalId).subscribe();
+          }
+          alert('Cotización guardada con éxito.');
           this.router.navigate(['/quotations']);
+        } else {
+          alert('Error al guardar la cotización.');
         }
       },
       error: (err: unknown) => {

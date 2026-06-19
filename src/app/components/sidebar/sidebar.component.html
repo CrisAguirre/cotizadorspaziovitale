@@ -24,6 +24,19 @@
     <a *ngIf="authService.getUser()?.role === 'admin'" routerLink="/settings" routerLinkActive="active" class="nav-item">
       <span>⚙️ Configuración</span>
     </a>
+
+    <!-- SECCIÓN TEMPORALES -->
+    <div class="nav-section-title" *ngIf="temporals.length > 0" style="padding: 10px 20px; font-size: 0.8em; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 15px;">
+      Temporales
+    </div>
+    <a *ngFor="let t of temporals" (click)="resumeTemporal(t._id!)" class="nav-item temporal-item" style="cursor: pointer; position: relative; padding-right: 40px;">
+      <div style="display: flex; flex-direction: column;">
+        <span style="font-size: 0.9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">⏳ {{ t.clientName }}</span>
+        <span style="font-size: 0.7em; color: #a1a1aa; margin-left: 20px;">Paso: {{ t.currentStepName }}</span>
+      </div>
+      <button class="btn-icon text-error" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.8em;" (click)="deleteTemporal(t._id!, $event)" title="Descartar borrador">✖</button>
+    </a>
+
   </nav>
   <div class="logout-container" style="display: flex; justify-content: center; padding-bottom: 20px;">
     <button class="btn-danger" style="width: 90%;" (click)="logout()">

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of, BehaviorSubject } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Material, ApiResponse, PaginatedResponse } from '../models/interfaces';
 
@@ -9,8 +10,69 @@ import { Material, ApiResponse, PaginatedResponse } from '../models/interfaces';
 })
 export class MaterialService {
   private apiUrl = `${environment.apiUrl}/materials`;
+  
+  private allMaterials: Material[] = [];
+  public isPreloaded$ = new BehaviorSubject<boolean>(false);
 
   constructor(private http: HttpClient) { }
+
+  preloadAllMaterials(): Observable<PaginatedResponse<Material>> {
+    const params = new HttpParams().set('limit', '10000').set('active', 'true');
+    return this.http.get<PaginatedResponse<Material>>(this.apiUrl, { params }).pipe(
+      tap(res => {
+        if (res.success && res.data) {
+          this.allMaterials = res.data;
+          this.isPreloaded$.next(true);
+        }
+      })
+    );
+  }
+
+  searchLocalMaterials(query: string, limit: number = 12, category?: string): Observable<PaginatedResponse<Material>> {
+    // Si aún no se han precargado, simplemente caeremos en un filtro vacío o podríamos esperar, 
+    // pero para no bloquear, si no hay datos devolveremos vacío (o podríamos usar el API real si preferimos).
+    if (!this.isPreloaded$.value) {
+      return this.getMaterials({ search: query, limit, category, active: 'true' });
+    }
+
+    let filtered = this.allMaterials;
+    
+    if (category) {
+      filtered = filtered.filter(m => m.category === category);
+    }
+
+    if (query && query.length >= 2) {
+      const lowerQuery = query.toLowerCase();
+      filtered = filtered.filter(m => 
+        m.description.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    // Sort: los que empiezan con el query primero (opcional pero ayuda a la velocidad de UX)
+    if (query) {
+       const lowerQ = query.toLowerCase();
+       filtered.sort((a, b) => {
+         const aStarts = a.description.toLowerCase().startsWith(lowerQ);
+         const bStarts = b.description.toLowerCase().startsWith(lowerQ);
+         if (aStarts && !bStarts) return -1;
+         if (!aStarts && bStarts) return 1;
+         return 0;
+       });
+    }
+
+    const sliced = filtered.slice(0, limit);
+    
+    return of({
+      success: true,
+      data: sliced,
+      pagination: {
+        total: filtered.length,
+        page: 1,
+        limit,
+        pages: Math.ceil(filtered.length / limit)
+      }
+    });
+  }
 
   getMaterials(params?: any): Observable<PaginatedResponse<Material>> {
     let httpParams = new HttpParams();
