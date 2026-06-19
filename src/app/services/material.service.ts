@@ -28,6 +28,19 @@ export class MaterialService {
     );
   }
 
+  findExactOrBestMatch(keyword: string): Material | undefined {
+    if (!this.allMaterials || this.allMaterials.length === 0) return undefined;
+    const lowerQ = keyword.toLowerCase();
+    
+    // First try exact match
+    let match = this.allMaterials.find(m => m.description.toLowerCase() === lowerQ);
+    if (match) return match;
+
+    // Then try includes
+    match = this.allMaterials.find(m => m.description.toLowerCase().includes(lowerQ));
+    return match;
+  }
+
   searchLocalMaterials(query: string, limit: number = 12, category?: string): Observable<PaginatedResponse<Material>> {
     // Si aún no se han precargado, simplemente caeremos en un filtro vacío o podríamos esperar, 
     // pero para no bloquear, si no hay datos devolveremos vacío (o podríamos usar el API real si preferimos).

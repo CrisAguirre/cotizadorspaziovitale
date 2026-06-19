@@ -115,10 +115,20 @@ export class QuotationWizardComponent implements OnInit {
       );
     }
     if (step === 4) {
-      // Budget: furniture is already created, but we can ensure quantities > 0
       if (!this.activeQuotation.areas) return false;
       return this.activeQuotation.areas.every(a => 
-        a.furniture.every(f => f.quantity > 0)
+        a.furniture.every(f => {
+          if (f.quantity <= 0) return false;
+          
+          // Verificar que no existan ítems sin costear o estimados
+          const hasEstimated = (items: any[]) => items && items.some(i => i.description && i.description.includes('⧦Est.'));
+          const hasZeroPrice = (items: any[]) => items && items.some(i => i.unitPrice === 0);
+          
+          if (hasEstimated(f.accessories) || hasEstimated(f.assembly) || hasEstimated(f.installation)) return false;
+          if (hasZeroPrice(f.supplies) || hasZeroPrice(f.edgeBands) || hasZeroPrice(f.accessories)) return false;
+          
+          return true;
+        })
       );
     }
     return true; // Step 5 is always valid if we reached it
@@ -502,11 +512,21 @@ isFurnCustom(area: Area, furn: Furniture, aIndex: number, fIndex: number): boole
     furn.assembly = [];
     furn.installation = [];
 
-    const acc = (desc: string, qty: number, unit = 'UNIDAD'): AccessoryItem => ({
-      description: desc + ' ⧦Est.', quantity: qty, unit,
-      unitPrice: 0, totalPrice: 0,
-      code: 'EST', dimension: '', timeHours: 0, totalTime: 0, laborRate: 0
-    });
+    const acc = (desc: string, qty: number, unit = 'UNIDAD'): AccessoryItem => {
+      const found = this.materialService.findExactOrBestMatch(desc);
+      if (found) {
+        return {
+          description: found.description, quantity: qty, unit: found.unit || unit,
+          unitPrice: found.unitPrice || 0, totalPrice: 0,
+          code: found.code || '', dimension: found.dimension || '', timeHours: 0, totalTime: 0, laborRate: 0
+        };
+      }
+      return {
+        description: desc + ' ⧦Est.', quantity: qty, unit,
+        unitPrice: 0, totalPrice: 0,
+        code: 'EST', dimension: '', timeHours: 0, totalTime: 0, laborRate: 0
+      };
+    };
     // M.O. helpers que buscan el código real en la BD; si no lo encuentran, usan fallback
     const moFromDB = (code: string, fallbackDesc: string, fallbackHours: number): AssemblyItem => {
       const lt = this.availableLaborTimes.find(l => l.code === code);
@@ -741,6 +761,9 @@ isFurnCustom(area: Area, furn: Furniture, aIndex: number, fIndex: number): boole
     } else if (type === 'installation') {
       item.description = laborTime.activityName;
       item.installHours = laborTime.timeHours;
+    } else if (type === 'designTime') {
+      item.description = laborTime.activityName;
+      item.quantity = laborTime.timeHours;
     }
     this.recalculate();
   }

@@ -452,7 +452,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let sup of furn.supplies; let i = index">
+                <tr *ngFor="let sup of furn.supplies; let i = index" [class.estimated-row]="sup.unitPrice === 0">
                   <td>
                     <app-material-picker category="melamina" placeholder="Melamina / tablero..."
                       (materialSelected)="applySupplyMaterial(sup, $event)"></app-material-picker>
@@ -490,7 +490,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let edge of furn.edgeBands; let i = index">
+                <tr *ngFor="let edge of furn.edgeBands; let i = index" [class.estimated-row]="edge.unitPrice === 0">
                   <td>
                     <app-material-picker category="canto" placeholder="Canto..."
                       (materialSelected)="applyEdgeMaterial(edge, $event)"></app-material-picker>
@@ -531,7 +531,17 @@
               </thead>
               <tbody>
                 <tr *ngFor="let d of furn.designTime; let i = index">
-                  <td><input type="text" [(ngModel)]="d.description" class="form-control-sm"></td>
+                  <td>
+                    <div style="display: flex; gap: 5px; flex-direction: column;">
+                      <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
+                        (change)="onLaborTimeSelect(d, $any($event.target).value, 'designTime')">
+                        <option value="">-- Tabla M.O --</option>
+                        <option *ngFor="let lt of availableLaborTimes" [value]="lt.code">{{ lt.activityName }} ({{
+                          lt.timeHours }}h)</option>
+                      </select>
+                      <input type="text" [(ngModel)]="d.description" class="form-control-sm">
+                    </div>
+                  </td>
                   <td><input type="number" [(ngModel)]="d.quantity" (change)="recalculate()"
                       class="form-control-sm num-input"></td>
                   <td>$ {{ d.totalPrice | number }}</td>
@@ -562,7 +572,7 @@
               </thead>
               <tbody>
                 <tr *ngFor="let acc of furn.accessories; let i = index"
-                  [class.estimated-row]="acc.description.includes('⧦Est.')">
+                  [class.estimated-row]="acc.description.includes('⧦Est.') || acc.unitPrice === 0">
                   <td>
                     <app-material-picker placeholder="Herraje / accesorio..."
                       (materialSelected)="applyAccessoryMaterial(acc, $event)"></app-material-picker>
@@ -823,6 +833,9 @@
       style="margin-left: 10px;">📄 Generar PDF</button>
     <button type="button" class="btn-primary ml-auto" *ngIf="currentStep < TOTAL_STEPS" (click)="nextStep()"
       [disabled]="!isStepValid(currentStep)">Siguiente →</button>
+    <div *ngIf="currentStep === 4 && !isStepValid(4)" class="text-error" style="margin-left: 10px; align-self: center;">
+      ⚠️ Por favor, revisa los ítems marcados en rojo. Todos los insumos y herrajes deben tener un precio asignado.
+    </div>
     <button type="button" class="btn-success ml-auto" *ngIf="currentStep === TOTAL_STEPS" (click)="saveQuotation()"
       [disabled]="isLoading || !isStepValid(currentStep)">Guardar Cotización</button>
   </div>
