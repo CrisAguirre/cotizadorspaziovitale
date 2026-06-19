@@ -148,7 +148,7 @@ export class QuotationWizardComponent implements OnInit {
       discountPercent: 10, discountAmount: 0, grandTotal: 0, totalSqm: 0, pricePerSqm: 0
     },
     wizardConfig: { ...this.defaultWizardConfig },
-    status: 'borrador' as const,
+    status: 'nuevo' as const,
     paymentTerms: '',
     validityDays: 15,
     notes: ''
@@ -705,6 +705,7 @@ isFurnCustom(area: Area, furn: Furniture, aIndex: number, fIndex: number): boole
 
   saveQuotation() {
     this.isLoading = true;
+    this.activeQuotation.status = 'nuevo'; // Forzar estado válido para Mongoose
     this.recalculate();
 
     this.quotationService.createQuotation(this.activeQuotation).subscribe({

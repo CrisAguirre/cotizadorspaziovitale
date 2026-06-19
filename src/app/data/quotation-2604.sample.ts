@@ -113,7 +113,7 @@ export function buildQuotation2604Sample(): Quotation {
       mesonMode: 'no_meson',
       wizardCompleted: true
     },
-    status: 'borrador',
+    status: 'nuevo',
     paymentTerms: '',
     validityDays: 3,
     notes: 'Ejemplo de validación No. 2604 — COCINA'
