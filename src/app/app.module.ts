@@ -18,6 +18,7 @@ import { MainLayoutComponent } from './layouts/main-layout/main-layout.component
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { HeaderComponent } from './components/header/header.component';
 import { MaterialPickerComponent } from './components/material-picker/material-picker.component';
+import { ToastComponent } from './components/toast/toast.component';
 import { ActivityComponent } from './pages/activity/activity.component';
 
 const routes: Routes = [
@@ -55,6 +56,7 @@ const routes: Routes = [
     SidebarComponent,
     HeaderComponent,
     MaterialPickerComponent,
+    ToastComponent,
     ActivityComponent
   ],
   imports: [

@@ -4,6 +4,7 @@ import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { TDocumentDefinitions, Content, TableCell, StyleDictionary } from 'pdfmake/interfaces';
 import { LOGO_BASE64 } from './logo-base64';
+import { ToastService } from './toast.service';
 
 // Safe assignment for vfs fonts
 const fonts = (pdfFonts as any);
@@ -13,8 +14,8 @@ const fonts = (pdfFonts as any);
   providedIn: 'root'
 })
 export class PdfGeneratorService {
+  constructor(private toastService: ToastService) {}
 
-  constructor() { }
 
   generateQuotationPdf(quotation: Quotation, appConfig: AppConfig | null) {
     try {
@@ -39,7 +40,7 @@ export class PdfGeneratorService {
       pdfMake.createPdf(docDef).download(`Cotizacion_${quotation.number}_${quotation.client.name.replace(/\s+/g, '_')}.pdf`);
     } catch (err) {
       console.error('Error al generar PDF:', err);
-      alert('Error al generar PDF. Verifica la consola para más detalles.');
+      this.toastService.error('Error al generar PDF', 'Verifica la consola para más detalles.');
     }
   }
 

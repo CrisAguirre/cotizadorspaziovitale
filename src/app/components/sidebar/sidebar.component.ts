@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { TemporalService, TemporalData } from '../../services/temporal.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -15,7 +16,8 @@ export class SidebarComponent implements OnInit {
   constructor(
     public authService: AuthService, 
     private router: Router,
-    private temporalService: TemporalService
+    private temporalService: TemporalService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -26,9 +28,20 @@ export class SidebarComponent implements OnInit {
 
   deleteTemporal(id: string, event: Event) {
     event.stopPropagation();
-    if (confirm('¿Eliminar cotización temporal?')) {
-      this.temporalService.deleteTemporal(id).subscribe();
-    }
+    this.toastService.confirm({
+      title: 'Eliminar borrador',
+      message: '¿Deseas eliminar esta cotización temporal?',
+      confirmText: 'Sí, eliminar',
+      cancelText: 'Cancelar',
+      type: 'danger'
+    }).then(confirmed => {
+      if (confirmed) {
+        this.temporalService.deleteTemporal(id).subscribe({
+          next: () => this.toastService.success('Borrador eliminado', 'La cotización temporal ha sido descartada.'),
+          error: () => this.toastService.error('Error', 'No se pudo eliminar el borrador.')
+        });
+      }
+    });
   }
 
   resumeTemporal(id: string) {

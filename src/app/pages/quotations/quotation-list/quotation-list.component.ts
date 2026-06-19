@@ -3,6 +3,7 @@ import { QuotationService } from '../../../services/quotation.service';
 import { Quotation } from '../../../models/interfaces';
 import { Router } from '@angular/router';
 import { PdfGeneratorService } from '../../../services/pdf-generator.service';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-quotation-list',
@@ -36,7 +37,8 @@ export class QuotationListComponent implements OnInit {
   constructor(
     private quotationService: QuotationService,
     private router: Router,
-    private pdfGenerator: PdfGeneratorService
+    private pdfGenerator: PdfGeneratorService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit() {
@@ -125,7 +127,7 @@ export class QuotationListComponent implements OnInit {
         }
       },
       error: (err: any) => {
-        alert('Error al cambiar estado: ' + (err.error?.message || err.message));
+        this.toastService.error('Error al cambiar estado', err.error?.message || err.message);
       }
     });
   }
@@ -149,29 +151,38 @@ export class QuotationListComponent implements OnInit {
         if (res.success && res.data) {
           this.pdfGenerator.generateQuotationPdf(res.data, null);
         } else {
-          alert('Error al obtener la cotización completa para el PDF.');
+          this.toastService.error('Error', 'No se pudo obtener la cotización completa para el PDF.');
         }
       },
       error: (err: any) => {
         console.error('Error fetching full quotation:', err);
-        alert('Error al descargar el PDF.');
+        this.toastService.error('Error al descargar PDF', 'Verifica la consola para más detalles.');
       }
     });
   }
 
   deleteQuotation(id: string | undefined, number: number) {
     if (!id) return;
-    if (confirm(`¿Estás seguro de que deseas eliminar la cotización No. ${number}? Esta acción no se puede deshacer.`)) {
-      this.quotationService.deleteQuotation(id).subscribe({
-        next: (res: any) => {
-          if (res.success) {
-            this.loadQuotations();
+    this.toastService.confirm({
+      title: 'Eliminar cotización',
+      message: `¿Estás seguro de que deseas eliminar la cotización No. ${number}? Esta acción no se puede deshacer.`,
+      confirmText: 'Sí, eliminar',
+      cancelText: 'Cancelar',
+      type: 'danger'
+    }).then(confirmed => {
+      if (confirmed) {
+        this.quotationService.deleteQuotation(id).subscribe({
+          next: (res: any) => {
+            if (res.success) {
+              this.toastService.success('Eliminada', `Cotización No. ${number} eliminada exitosamente.`);
+              this.loadQuotations();
+            }
+          },
+          error: (err: any) => {
+            this.toastService.error('Error al eliminar', err.error?.message || err.message);
           }
-        },
-        error: (err: any) => {
-          alert('Error al eliminar: ' + (err.error?.message || err.message));
-        }
-      });
-    }
+        });
+      }
+    });
   }
 }

@@ -10,6 +10,7 @@ import { AppConfig, Quotation, Area, Furniture, Material, SupplyItem, EdgeBandIt
 import { LaborTimeService } from '../../../services/labor-time.service';
 import { TemporalService, TemporalData } from '../../../services/temporal.service';
 import { MaterialService } from '../../../services/material.service';
+import { ToastService } from '../../../services/toast.service';
 import { buildQuotation2604Sample } from '../../../data/quotation-2604.sample';
 import { QUOTATION_2604_REFERENCE } from '../../../data/quotation-2604.reference';
 
@@ -176,6 +177,7 @@ export class QuotationWizardComponent implements OnInit {
     private laborTimeService: LaborTimeService,
     private temporalService: TemporalService,
     private materialService: MaterialService,
+    private toastService: ToastService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -716,10 +718,10 @@ isFurnCustom(area: Area, furn: Furniture, aIndex: number, fIndex: number): boole
           if (this.temporalId) {
             this.temporalService.deleteTemporal(this.temporalId).subscribe();
           }
-          alert('Cotización guardada con éxito.');
+          this.toastService.success('Cotización guardada', `La cotización No. ${this.activeQuotation.number} se guardó exitosamente.`);
           this.router.navigate(['/quotations']);
         } else {
-          alert('Error al guardar la cotización.');
+          this.toastService.error('Error al guardar', 'No se pudo guardar la cotización. Intente de nuevo.');
         }
       },
       error: (err: unknown) => {
