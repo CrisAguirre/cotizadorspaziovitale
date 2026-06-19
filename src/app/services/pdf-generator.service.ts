@@ -126,28 +126,29 @@ export class PdfGeneratorService {
         if (wConfig.hardwareDisplayMode === 'table') {
           furnBaseCost -= (furn.totalAccessories || 0); // Restamos accesorios del mueble
           if (furn.accessories && Array.isArray(furn.accessories)) {
+            const fQty = furn.quantity || 1;
             furn.accessories.forEach(acc => {
               allAccessories.push({
                 furnName: furn.name,
-                acc,
-                clientPrice: (acc.totalPrice || 0) * markupFactor
+                acc: { ...acc, quantity: (acc.quantity || 1) * fQty },
+                clientPrice: (acc.totalPrice || 0) * markupFactor * fQty
               });
             });
           }
         }
 
         // Q1: Precio Cliente
-        let furnClientPrice = 0;
+        let unitPrice = 0;
         if (wConfig.clientPriceMode === 'unit_sqm') {
-          furnClientPrice = (furn.areaSqm || 0) * (totals.pricePerSqm || 0);
+          unitPrice = (furn.areaSqm || 0) * (totals.pricePerSqm || 0);
         } else if (wConfig.clientPriceMode === 'manual' || wConfig.clientPriceMode === 'outsource') {
-          furnClientPrice = furnBaseCost * markupFactor;
+          unitPrice = furnBaseCost * markupFactor;
         } else {
           // Fallback
-          furnClientPrice = furnBaseCost * markupFactor; 
+          unitPrice = furnBaseCost * markupFactor; 
         }
 
-        const unitPrice = furnClientPrice / (furn.quantity || 1);
+        const furnClientPrice = unitPrice * (furn.quantity || 1);
         areaSubtotal += furnClientPrice;
 
         tableBody.push([
@@ -158,7 +159,7 @@ export class PdfGeneratorService {
               { text: `Medidas: ${furn.measurements || 'N/A'}`, fontSize: 9, color: '#666' }
             ] 
           },
-          { text: furn.quantity.toString() },
+          { text: (furn.quantity || 1).toString() },
           { text: this.formatCurrency(unitPrice), alignment: 'right' as 'right' },
           { text: this.formatCurrency(furnClientPrice), alignment: 'right' as 'right' }
         ]);

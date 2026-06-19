@@ -562,7 +562,7 @@
               </thead>
               <tbody>
                 <tr *ngFor="let acc of furn.accessories; let i = index"
-                  [style.background-color]="acc.description.includes('⧦Est.') ? '#f3e8ff' : null">
+                  [class.estimated-row]="acc.description.includes('⧦Est.')">
                   <td>
                     <app-material-picker placeholder="Herraje / accesorio..."
                       (materialSelected)="applyAccessoryMaterial(acc, $event)"></app-material-picker>
@@ -647,7 +647,7 @@
               </thead>
               <tbody>
                 <tr *ngFor="let asm of furn.assembly; let i = index"
-                  [style.background-color]="asm.description.includes('⧦Est.') ? '#f3e8ff' : null">
+                  [class.estimated-row]="asm.description.includes('⧦Est.')">
                   <td>
                     <div style="display: flex; gap: 5px; flex-direction: column;">
                       <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
@@ -696,7 +696,7 @@
               </thead>
               <tbody>
                 <tr *ngFor="let inst of furn.installation; let i = index"
-                  [style.background-color]="inst.description.includes('⧦Est.') ? '#f3e8ff' : null">
+                  [class.estimated-row]="inst.description.includes('⧦Est.')">
                   <td>
                     <div style="display: flex; gap: 5px; flex-direction: column;">
                       <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
