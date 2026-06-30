@@ -191,9 +191,9 @@ export class QuotationCalculatorService {
     const taxAmount = subtotal * (taxPercent / 100);
     const totalWithTax = subtotal + taxAmount;
 
-    // Excel: I91 = I90 * H91; I92 = I90 + I91 (recargo, no descuento)
+    // Excel: I91 = I90 * H91; I92 = I90 - I91 (descuento)
     const discountAmount = totalWithTax * (discountPercent / 100);
-    const grandTotal = totalWithTax + discountAmount;
+    const grandTotal = totalWithTax - discountAmount;
     const pricePerSqm = totalSqm > 0 ? grandTotal / totalSqm : 0;
 
     return {
