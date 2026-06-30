@@ -12,15 +12,14 @@ export class AuthService {
   constructor(private http: HttpClient) { }
 
   login(credentials: any): Observable<any> {
-    return this.http.post(this.apiUrl, credentials);
+    return this.http.post(this.apiUrl, credentials, { withCredentials: true });
   }
 
-  saveToken(token: string): void {
-    localStorage.setItem('token', token);
-  }
-
-  saveUser(user: any): void {
+  saveUser(user: any, expiresAt?: number): void {
     localStorage.setItem('user', JSON.stringify(user));
+    if (expiresAt) {
+      localStorage.setItem('expiresAt', expiresAt.toString());
+    }
   }
 
   getUser(): any {
@@ -29,19 +28,31 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
+    const hasUser = !!localStorage.getItem('user');
+    const expiresAt = localStorage.getItem('expiresAt');
+    
+    if (hasUser && expiresAt) {
+      const isExpired = Date.now() > parseInt(expiresAt, 10);
+      if (isExpired) {
+        this.logout();
+        return false;
+      }
+      return true;
+    }
+    
+    return hasUser;
   }
 
   logout(): void {
-    localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('expiresAt');
   }
 
   logoutApi(): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/logout`, {});
+    return this.http.post(`${environment.apiUrl}/logout`, {}, { withCredentials: true });
   }
 
   getActivities(): Observable<any> {
-    return this.http.get(`${environment.apiUrl}/activities`);
+    return this.http.get(`${environment.apiUrl}/activities`, { withCredentials: true });
   }
 }

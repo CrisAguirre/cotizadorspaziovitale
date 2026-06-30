@@ -4,15 +4,12 @@ import { QuotationService } from '../../../services/quotation.service';
 import { ConfigService } from '../../../services/config.service';
 import { QuotationCalculatorService } from '../../../services/quotation-calculator.service';
 import { PdfGeneratorService } from '../../../services/pdf-generator.service';
-import { QuotationValidationService, QuotationValidationReport } from '../../../services/quotation-validation.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AppConfig, Quotation, Area, Furniture, Material, SupplyItem, EdgeBandItem, AccessoryItem, AssemblyItem, WizardConfig, LaborTime } from '../../../models/interfaces';
 import { LaborTimeService } from '../../../services/labor-time.service';
 import { TemporalService, TemporalData } from '../../../services/temporal.service';
 import { MaterialService } from '../../../services/material.service';
 import { ToastService } from '../../../services/toast.service';
-import { buildQuotation2604Sample } from '../../../data/quotation-2604.sample';
-import { QUOTATION_2604_REFERENCE } from '../../../data/quotation-2604.reference';
 
 import { FURNITURE_HIERARCHY, FurnitureType } from '../../../config/furniture-hierarchy.config';
 import { QuotationLogicService } from '../../../services/quotation-logic.service';
@@ -29,8 +26,6 @@ export class QuotationWizardComponent implements OnInit {
   readonly TOTAL_WIZARD_QUESTIONS = 4;
   quotationForm: FormGroup;
   isLoading = false;
-  validationReport: QuotationValidationReport | null = null;
-  readonly reference2604 = QUOTATION_2604_REFERENCE;
   showTip: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false, 5: false };
   showTipConfig: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false };
 
@@ -132,7 +127,6 @@ export class QuotationWizardComponent implements OnInit {
     private configService: ConfigService,
     public calcService: QuotationCalculatorService,
     private pdfGenerator: PdfGeneratorService,
-    private validationService: QuotationValidationService,
     private laborTimeService: LaborTimeService,
     private temporalService: TemporalService,
     private materialService: MaterialService,
@@ -169,9 +163,7 @@ export class QuotationWizardComponent implements OnInit {
     });
 
     this.route.queryParams.subscribe((params) => {
-      if (params['demo'] === '2604') {
-        this.loadSample2604();
-      } else if (params['temporalId']) {
+      if (params['temporalId']) {
         this.loadTemporal(params['temporalId']);
       } else if (!this.activeQuotation.areas?.length && !this.activeQuotation._id) {
         // Solo inicializamos el área por defecto si no estamos cargando nada
@@ -293,26 +285,6 @@ export class QuotationWizardComponent implements OnInit {
       }
     });
   }
-
-  loadSample2604(): void {
-    this.activeQuotation = buildQuotation2604Sample();
-    this.quotationForm.patchValue({
-      number: this.activeQuotation.number,
-      date: this.activeQuotation.date,
-      city: this.activeQuotation.city,
-      title: this.activeQuotation.title,
-      client: this.activeQuotation.client,
-      paymentTerms: this.activeQuotation.paymentTerms,
-      validityDays: this.activeQuotation.validityDays
-    });
-    this.recalculate();
-    this.runValidation2604();
-  }
-
-  runValidation2604(): void {
-    this.validationReport = this.validationService.validateAgainst2604(this.activeQuotation.totals);
-  }
-
   nextStep() {
     if (this.currentStep === 1) {
       if (this.quotationForm.invalid) {
@@ -344,9 +316,6 @@ export class QuotationWizardComponent implements OnInit {
 
     if (this.currentStep === 5) {
       this.recalculate();
-      if (this.activeQuotation.number === 2604) {
-        this.runValidation2604();
-      }
     }
     
     this.autoSave();
@@ -548,9 +517,6 @@ export class QuotationWizardComponent implements OnInit {
   recalculate() {
     if (!this.appConfig) return;
     this.calcService.recalculateAll(this.activeQuotation, this.appConfig);
-    if (this.activeQuotation.number === 2604 && this.currentStep === 4) {
-      this.runValidation2604();
-    }
   }
 
   applySupplyMaterial(item: SupplyItem, material: Material): void {

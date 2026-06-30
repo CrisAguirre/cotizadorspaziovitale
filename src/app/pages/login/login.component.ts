@@ -33,9 +33,8 @@ export class LoginComponent implements OnInit {
       this.errorMessage = '';
       this.authService.login(this.loginForm.value).subscribe({
         next: (response) => {
-          this.authService.saveToken(response.token);
           if (response.user) {
-            this.authService.saveUser(response.user);
+            this.authService.saveUser(response.user, response.expiresAt);
           }
           this.isLoading = false;
           this.router.navigate(['/dashboard']);

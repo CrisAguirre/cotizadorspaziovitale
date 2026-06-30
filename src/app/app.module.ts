@@ -13,6 +13,7 @@ import { QuotationListComponent } from './pages/quotations/quotation-list/quotat
 import { QuotationWizardComponent } from './pages/quotations/quotation-wizard/quotation-wizard.component';
 import { QuotationViewComponent } from './pages/quotations/quotation-view/quotation-view.component';
 import { authGuard } from './guards/auth.guard';
+import { roleGuard } from './guards/role.guard';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
@@ -30,12 +31,12 @@ const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'price-list', component: PriceListComponent },
-      { path: 'settings', component: SettingsComponent },
+      { path: 'settings', component: SettingsComponent, canActivate: [roleGuard], data: { expectedRole: 'admin' } },
       { path: 'quotations', component: QuotationListComponent },
       { path: 'quotations/new', component: QuotationWizardComponent },
       { path: 'quotations/view/:id', component: QuotationViewComponent },
       { path: 'quotations/:id', component: QuotationWizardComponent },
-      { path: 'activity', component: ActivityComponent },
+      { path: 'activity', component: ActivityComponent, canActivate: [roleGuard], data: { expectedRole: 'admin' } },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },

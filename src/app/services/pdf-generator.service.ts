@@ -165,6 +165,52 @@ export class PdfGeneratorService {
         ]);
       });
 
+      // Sub-Áreas (Mesones, etc)
+      if (area.subAreas && Array.isArray(area.subAreas)) {
+        area.subAreas.forEach((subArea) => {
+          if (subArea.items && Array.isArray(subArea.items)) {
+            subArea.items.forEach((item, index) => {
+              const itemClientPrice = (item.price || 0) * (item.quantity || 0) * markupFactor;
+              const unitClientPrice = (item.price || 0) * markupFactor;
+              areaSubtotal += itemClientPrice;
+
+              tableBody.push([
+                { text: `*` },
+                { text: [
+                    { text: `${subArea.name} - ${item.description}\n`, bold: true },
+                    { text: `Medidas: ${item.measurements || 'N/A'}`, fontSize: 9, color: '#666' }
+                  ] 
+                },
+                { text: (item.quantity || 1).toString() },
+                { text: this.formatCurrency(unitClientPrice), alignment: 'right' as 'right' },
+                { text: this.formatCurrency(itemClientPrice), alignment: 'right' as 'right' }
+              ]);
+            });
+          }
+        });
+      }
+
+      // Accesorios Visibles
+      if (area.visibleAccessories && Array.isArray(area.visibleAccessories)) {
+        area.visibleAccessories.forEach((acc, index) => {
+          const accClientPrice = (acc.unitPrice || 0) * (acc.quantity || 0) * markupFactor;
+          const unitClientPrice = (acc.unitPrice || 0) * markupFactor;
+          areaSubtotal += accClientPrice;
+
+          tableBody.push([
+            { text: `+` },
+            { text: [
+                { text: `${acc.description}\n`, bold: true },
+                { text: `Código: ${acc.code || 'N/A'}, Medidas: ${acc.measurements || 'N/A'}`, fontSize: 9, color: '#666' }
+              ] 
+            },
+            { text: (acc.quantity || 1).toString() },
+            { text: this.formatCurrency(unitClientPrice), alignment: 'right' as 'right' },
+            { text: this.formatCurrency(accClientPrice), alignment: 'right' as 'right' }
+          ]);
+        });
+      }
+
       content.push({
         table: {
           headerRows: 1,
