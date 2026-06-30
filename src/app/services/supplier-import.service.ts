@@ -73,9 +73,9 @@ const SUPPLIER_CONFIGS: Record<SupplierImportFormat, SupplierImportConfig> = {
       code: 'A', description: 'C', price: 'E',
       color: 'B', unit: 'D', section: 'A'
     },
-    isEmptyRow:     (f) => !f.code && !f.description,
-    isSectionRow:   (f) => !!f.section && !/^\d+$/.test(f.section) && !f.description,
-    isValidRow:     (f) => /^\d+$/.test(f.code) && !!f.description && f.price > 0,
+    isEmptyRow: (f) => !f.code && !f.description,
+    isSectionRow: (f) => !!f.section && !/^\d+$/.test(f.section) && !f.description,
+    isValidRow: (f) => /^\d+$/.test(f.code) && !!f.description && f.price > 0,
     shouldCountSkip: () => true,
   },
 
@@ -89,11 +89,11 @@ const SUPPLIER_CONFIGS: Record<SupplierImportFormat, SupplierImportConfig> = {
       code: 'C', description: 'D', price: 'F', priceFallback: 'G',
       section: 'B'
     },
-    isEmptyRow:      () => false,
-    isSectionRow:    (f) => !!f.section && !f.description && !f.code,
-    isValidRow:      (f) => !!f.description && f.price > 0,
+    isEmptyRow: () => false,
+    isSectionRow: (f) => !!f.section && !f.description && !f.code,
+    isValidRow: (f) => !!f.description && f.price > 0,
     shouldCountSkip: (f) => !!f.description || !!f.code,
-    buildCode:        (f) => f.code || f.description.substring(0, 40),
+    buildCode: (f) => f.code || f.description.substring(0, 40),
     buildDescription: (f, section) => section ? `${f.description} — ${section}` : f.description,
   },
 
@@ -107,11 +107,11 @@ const SUPPLIER_CONFIGS: Record<SupplierImportFormat, SupplierImportConfig> = {
       code: 'C', description: 'D', price: 'F',
       section: 'B'
     },
-    isEmptyRow:      () => false,
-    isSectionRow:    (f) => !!f.section && !f.description,
-    isValidRow:      (f) => !!f.description && f.price > 0,
+    isEmptyRow: () => false,
+    isSectionRow: (f) => !!f.section && !f.description,
+    isValidRow: (f) => !!f.description && f.price > 0,
     shouldCountSkip: (f) => !!f.description,
-    buildCode:        (f, row) => f.code || `VOL-${row}`,
+    buildCode: (f, row) => f.code || `VOL-${row}`,
     buildDescription: (f, section) => section ? `${f.description} — ${section}` : f.description,
   },
 
@@ -126,9 +126,9 @@ const SUPPLIER_CONFIGS: Record<SupplierImportFormat, SupplierImportConfig> = {
       section: 'B',
       extras: { module: 'E', dimension: 'F' }
     },
-    isEmptyRow:      () => false,
-    isSectionRow:    (f) => !!f.section && !f.code,
-    isValidRow:      (f) => !!f.code && f.price > 0,
+    isEmptyRow: () => false,
+    isSectionRow: (f) => !!f.section && !f.code,
+    isValidRow: (f) => !!f.code && f.price > 0,
     shouldCountSkip: (f) => !!f.code,
     buildDescription: (f, section) => {
       const parts = [
@@ -179,14 +179,14 @@ export class SupplierImportService {
 
       // Read all configured columns into a flat object
       const fields: RawFields = {
-        code:        getCell(cells, cols.code, row),
+        code: getCell(cells, cols.code, row),
         description: getCell(cells, cols.description, row),
-        price:       getCellNum(cells, cols.price, row) ||
-                     (cols.priceFallback ? getCellNum(cells, cols.priceFallback, row) : 0),
-        unit:        cols.unit  ? getCell(cells, cols.unit, row)  : '',
-        color:       cols.color ? getCell(cells, cols.color, row) : '',
-        section:     getCell(cells, cols.section, row),
-        extras:      {}
+        price: getCellNum(cells, cols.price, row) ||
+          (cols.priceFallback ? getCellNum(cells, cols.priceFallback, row) : 0),
+        unit: cols.unit ? getCell(cells, cols.unit, row) : '',
+        color: cols.color ? getCell(cells, cols.color, row) : '',
+        section: getCell(cells, cols.section, row),
+        extras: {}
       };
 
       // Read extra columns (module, dimension, etc.)
@@ -212,9 +212,9 @@ export class SupplierImportService {
       }
 
       // 4. Build material
-      const code        = config.buildCode        ? config.buildCode(fields, row)        : fields.code;
+      const code = config.buildCode ? config.buildCode(fields, row) : fields.code;
       const description = config.buildDescription ? config.buildDescription(fields, section) : fields.description;
-      const unit        = config.normalizeUnit    ? this.normalizeUnit(fields.unit)       : (fields.unit || config.defaultUnit);
+      const unit = config.normalizeUnit ? this.normalizeUnit(fields.unit) : (fields.unit || config.defaultUnit);
 
       materials.push(this.baseMaterial({
         category: config.category,
@@ -223,8 +223,8 @@ export class SupplierImportService {
         provider: config.provider,
         unit: unit || config.defaultUnit,
         unitPrice: fields.price,
-        color: fields.color || undefined,
-        dimension: fields.extras['dimension'] || undefined
+        color: fields.color || '',
+        dimension: fields.extras['dimension'] || ''
       }));
     }
 
