@@ -640,7 +640,7 @@
               </thead>
               <tbody>
                 <tr *ngFor="let acc of furn.accessories; let i = index"
-                  [class.estimated-row]="acc.description?.includes('⧦Est.') || acc.unitPrice == null || acc.unitPrice <= 0">
+                  [class.estimated-row]="acc.description.includes('⧦Est.') || acc.unitPrice == null || acc.unitPrice <= 0">
                   <td>
                     <app-material-picker category="accesorio,herraje" placeholder="Herraje / accesorio..."
                       (materialSelected)="applyAccessoryMaterial(acc, $event)"></app-material-picker>
@@ -722,7 +722,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let asm of furn.assembly; let i = index" [class.estimated-row]="asm.description?.includes('⧦Est.')">
+                <tr *ngFor="let asm of furn.assembly; let i = index" [class.estimated-row]="asm.description.includes('⧦Est.')">
                   <td>
                     <div style="display: flex; gap: 5px; flex-direction: column;">
                       <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
@@ -773,7 +773,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let inst of furn.installation; let i = index" [class.estimated-row]="inst.description?.includes('⧦Est.')">
+                <tr *ngFor="let inst of furn.installation; let i = index" [class.estimated-row]="inst.description.includes('⧦Est.')">
                   <td>
                     <div style="display: flex; gap: 5px; flex-direction: column;">
                       <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
