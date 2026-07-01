@@ -51,7 +51,8 @@ export class MaterialService {
     let filtered = this.allMaterials;
     
     if (category) {
-      filtered = filtered.filter(m => m.category === category);
+      const cats = category.split(',').map(c => c.trim());
+      filtered = filtered.filter(m => cats.includes(m.category));
     }
 
     if (query && query.length >= 2) {

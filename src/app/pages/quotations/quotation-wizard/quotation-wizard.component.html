@@ -453,7 +453,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
+                  <tr [class.estimated-row]="furn.mesonDetails.basePricePerM2 == null || furn.mesonDetails.basePricePerM2 <= 0">
                     <td>
                       <app-material-picker category="meson" placeholder="Buscar material de mesón..."
                         (materialSelected)="applyMesonMaterial(furn, $event)"></app-material-picker>
@@ -517,7 +517,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let sup of furn.supplies; let i = index" [class.estimated-row]="sup.unitPrice === 0">
+                <tr *ngFor="let sup of furn.supplies; let i = index" [class.estimated-row]="sup.unitPrice == null || sup.unitPrice <= 0">
                   <td>
                     <app-material-picker category="melamina" placeholder="Melamina / tablero..."
                       (materialSelected)="applySupplyMaterial(sup, $event)"></app-material-picker>
@@ -555,7 +555,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let edge of furn.edgeBands; let i = index" [class.estimated-row]="edge.unitPrice === 0">
+                <tr *ngFor="let edge of furn.edgeBands; let i = index" [class.estimated-row]="edge.unitPrice == null || edge.unitPrice <= 0">
                   <td>
                     <app-material-picker category="canto" placeholder="Canto..."
                       (materialSelected)="applyEdgeMaterial(edge, $event)"></app-material-picker>
@@ -640,9 +640,9 @@
               </thead>
               <tbody>
                 <tr *ngFor="let acc of furn.accessories; let i = index"
-                  [class.estimated-row]="acc.description.includes('⧦Est.') || acc.unitPrice === 0">
+                  [class.estimated-row]="acc.description?.includes('⧦Est.') || acc.unitPrice == null || acc.unitPrice <= 0">
                   <td>
-                    <app-material-picker placeholder="Herraje / accesorio..."
+                    <app-material-picker category="accesorio,herraje" placeholder="Herraje / accesorio..."
                       (materialSelected)="applyAccessoryMaterial(acc, $event)"></app-material-picker>
                   </td>
                   <td><input type="text" [(ngModel)]="acc.description" class="form-control-sm"></td>
@@ -691,9 +691,9 @@
                     </div>
                   </td>
                   <td><input type="number" [(ngModel)]="cut.timeHours" (change)="recalculate()"
-                      class="form-control-sm num-input"></td>
+                      class="form-control-sm num-input" step="any"></td>
                   <td><input type="number" [(ngModel)]="cut.quantity" (change)="recalculate()"
-                      class="form-control-sm num-input"></td>
+                      class="form-control-sm num-input" step="any"></td>
                   <td>$ {{ cut.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'cuts', i)">🗑️</button></td>
@@ -713,6 +713,7 @@
                 <tr>
                   <th>Descripción</th>
                   <th>Medida</th>
+                  <th>Unidad</th>
                   <th>Cant.</th>
                   <th>Hrs</th>
                   <th>Operarios</th>
@@ -721,8 +722,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let asm of furn.assembly; let i = index"
-                  [class.estimated-row]="asm.description.includes('⧦Est.')">
+                <tr *ngFor="let asm of furn.assembly; let i = index" [class.estimated-row]="asm.description?.includes('⧦Est.')">
                   <td>
                     <div style="display: flex; gap: 5px; flex-direction: column;">
                       <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
@@ -737,12 +737,14 @@
                   </td>
                   <td><input type="text" [(ngModel)]="asm.measurement" class="form-control-sm"
                       placeholder="ej. 1.72 × 0.36"></td>
+                  <td><input type="text" [(ngModel)]="asm.unitOfMeasure" class="form-control-sm"
+                      placeholder="ML, M2, ser"></td>
                   <td><input type="number" [(ngModel)]="asm.totalQuantity" (change)="recalculate()"
-                      class="form-control-sm num-input"></td>
+                      class="form-control-sm num-input" step="any"></td>
                   <td><input type="number" [(ngModel)]="asm.assemblyHours" (change)="recalculate()"
-                      class="form-control-sm num-input"></td>
+                      class="form-control-sm num-input" step="any"></td>
                   <td><input type="number" [(ngModel)]="asm.persons" (change)="recalculate()"
-                      class="form-control-sm num-input"></td>
+                      class="form-control-sm num-input" step="any"></td>
                   <td>$ {{ asm.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'assembly', i)">🗑️</button></td>
@@ -762,6 +764,7 @@
                 <tr>
                   <th>Descripción</th>
                   <th>Medida</th>
+                  <th>Unidad</th>
                   <th>Cant.</th>
                   <th>Hrs</th>
                   <th>Operarios</th>
@@ -770,8 +773,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let inst of furn.installation; let i = index"
-                  [class.estimated-row]="inst.description.includes('⧦Est.')">
+                <tr *ngFor="let inst of furn.installation; let i = index" [class.estimated-row]="inst.description?.includes('⧦Est.')">
                   <td>
                     <div style="display: flex; gap: 5px; flex-direction: column;">
                       <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
@@ -786,12 +788,14 @@
                   </td>
                   <td><input type="text" [(ngModel)]="inst.measurement" class="form-control-sm"
                       placeholder="ej. 2.10 × 0.60"></td>
+                  <td><input type="text" [(ngModel)]="inst.unitOfMeasure" class="form-control-sm"
+                      placeholder="ML, M2, ser"></td>
                   <td><input type="number" [(ngModel)]="inst.totalQuantity" (change)="recalculate()"
-                      class="form-control-sm num-input"></td>
+                      class="form-control-sm num-input" step="any"></td>
                   <td><input type="number" [(ngModel)]="inst.installHours" (change)="recalculate()"
-                      class="form-control-sm num-input"></td>
+                      class="form-control-sm num-input" step="any"></td>
                   <td><input type="number" [(ngModel)]="inst.persons" (change)="recalculate()"
-                      class="form-control-sm num-input"></td>
+                      class="form-control-sm num-input" step="any"></td>
                   <td>$ {{ inst.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'installation', i)">🗑️</button></td>
@@ -818,7 +822,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let ven of furn.veneer; let i = index">
+                <tr *ngFor="let ven of furn.veneer; let i = index" [class.estimated-row]="ven.unitPrice == null || ven.unitPrice <= 0">
                   <td>
                     <app-material-picker placeholder="Buscar enchape..."
                       (materialSelected)="applyVeneerMaterial(ven, $event)"></app-material-picker>

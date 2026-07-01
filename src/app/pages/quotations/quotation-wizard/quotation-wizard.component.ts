@@ -55,21 +55,24 @@ export class QuotationWizardComponent implements OnInit {
       return this.activeQuotation.areas.every(a => 
         a.name && a.name.trim() !== '' && 
         a.furniture && a.furniture.length > 0 && 
-        a.furniture.every(f => f.name && f.name.trim() !== '')
+        a.furniture.every(f => f.name && f.name.trim() !== '' && f.quantity > 0)
       );
     }
     if (step === 4) {
       if (!this.activeQuotation.areas) return false;
       return this.activeQuotation.areas.every(a => 
         a.furniture.every(f => {
-          if (f.quantity <= 0) return false;
+          if (f.type === 'meson') {
+            if (!f.mesonDetails || !f.mesonDetails.basePricePerM2 || f.mesonDetails.basePricePerM2 <= 0) return false;
+            return true;
+          }
           
           // Verificar que no existan ítems sin costear o estimados
           const hasEstimated = (items: any[]) => items && items.some(i => i.description && i.description.includes('⧦Est.'));
-          const hasZeroPrice = (items: any[]) => items && items.some(i => i.unitPrice === 0);
+          const hasZeroPrice = (items: any[]) => items && items.some(i => i.unitPrice == null || i.unitPrice <= 0);
           
           if (hasEstimated(f.accessories) || hasEstimated(f.assembly) || hasEstimated(f.installation)) return false;
-          if (hasZeroPrice(f.supplies) || hasZeroPrice(f.edgeBands) || hasZeroPrice(f.accessories)) return false;
+          if (hasZeroPrice(f.supplies) || hasZeroPrice(f.edgeBands) || hasZeroPrice(f.accessories) || hasZeroPrice(f.veneer)) return false;
           
           return true;
         })
