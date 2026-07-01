@@ -3,9 +3,9 @@
 :root {
   --primary-color: #D5A052; /* Corporate Gold */
   --primary-hover: #c48e42;
-  --bg-color: #0B4249; /* Corporate Dark/Navy */
-  --bg-gradient: #0B4249; /* Removed gradient to keep pure color */
-  --panel-bg: rgba(11, 66, 73, 0.6);
+  --bg-color: #1C2A32; /* Slightly darker for contrast */
+  --bg-gradient: #1C2A32;
+  --panel-bg: #26343D; /* Exact requested tone for panels (RGB 38, 52, 61) */
   --text-main: #FFFFFF; /* Pure White */
   --text-muted: #A8BDBF;
   --border-color: rgba(255, 255, 255, 0.15);
@@ -20,12 +20,12 @@
   --bg-color: #FFFFFF; /* Pure White */
   --bg-gradient: #FFFFFF; /* Pure White without gradient */
   --panel-bg: rgba(255, 255, 255, 0.7);
-  --text-main: #0B4249; /* Dark text for light mode */
+  --text-main: #26343D; /* Dark text for light mode */
   --text-muted: #5A7B7E;
-  --border-color: rgba(11, 66, 73, 0.15);
+  --border-color: rgba(38, 52, 61, 0.15);
   --error-color: #ef4444;
   --input-bg: rgba(255, 255, 255, 0.9);
-  --shadow: 0 8px 32px 0 rgba(11, 66, 73, 0.1);
+  --shadow: 0 8px 32px 0 rgba(38, 52, 61, 0.1);
 }
 
 * {
@@ -36,20 +36,18 @@
 
 body {
   font-family: 'Montserrat', sans-serif;
-  background-color: var(--bg-color);
-  background: var(--bg-color); /* Overwrite any gradients */
+  background-color: var(--bg-color) !important;
+  background: var(--bg-color) !important;
   color: var(--text-main);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  transition: background-color 0.4s ease, color 0.4s ease, background-image 0.4s ease;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-/* Glassmorphism Utility */
+/* Flat Panel Utility */
 .glass-panel {
   background: var(--panel-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow);
   border-radius: 16px;
@@ -84,7 +82,7 @@ body {
 /* Primary Button */
 .btn-primary {
   background-color: var(--primary-color);
-  color: #0B4249; /* Dark text for primary buttons to contrast the gold */
+  color: #26343D; /* Dark text for primary buttons to contrast the gold */
   box-shadow: 0 4px 10px rgba(213, 160, 82, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -171,6 +169,10 @@ body {
   border-color: rgba(248, 113, 113, 0.3);
 }
 
+.toast.glass {
+  background: #26343D;
+}
+
 /* Tab Button */
 .btn-tab {
   padding: 10px 20px;
@@ -245,7 +247,7 @@ select option {
 }
 
 [data-theme="light"] select.form-control {
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230B4249' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2326343D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
 }
 
 /* Page Headers and Cards */
