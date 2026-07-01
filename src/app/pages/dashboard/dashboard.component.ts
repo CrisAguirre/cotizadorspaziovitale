@@ -1,5 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { timeout, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { QuotationService } from '../../services/quotation.service';
 import { DashboardStats } from '../../models/interfaces';
 
@@ -15,6 +17,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   currentTime: Date = new Date();
   currentTrm: number | null = null;
+  trmError = false;
   private timerRef: any;
 
   constructor(
@@ -43,13 +46,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
   fetchTrm(): void {
     // API de Datos Abiertos de Colombia
     const url = 'https://www.datos.gov.co/resource/32sa-8pi3.json?$limit=1&$order=vigenciahasta%20DESC';
-    this.http.get<any[]>(url).subscribe({
-      next: (data) => {
-        if (data && data.length > 0) {
-          this.currentTrm = parseFloat(data[0].valor);
-        }
-      },
-      error: (err) => console.error('Error fetching TRM', err)
+    this.trmError = false;
+    this.http.get<any[]>(url).pipe(
+      timeout(8000),
+      catchError((err) => {
+        console.error('Error fetching TRM', err);
+        this.trmError = true;
+        return of(null);
+      })
+    ).subscribe((data) => {
+      if (data && data.length > 0) {
+        this.currentTrm = parseFloat(data[0].valor);
+      } else if (data === null) {
+        // Ya se marcó trmError arriba; no dejamos el indicador colgado en "Cargando..."
+      }
     });
   }
 

@@ -27,11 +27,12 @@
       <div class="stat-info">
         <h3>TRM Dólar (Hoy)</h3>
         <span class="stat-value" style="font-size: 1.5rem;">
-          <ng-container *ngIf="currentTrm !== null; else loadingTrm">
+          <ng-container *ngIf="currentTrm !== null; else trmFallback">
             {{ currentTrm | currency:'COP':'symbol':'1.0-0' }}
           </ng-container>
-          <ng-template #loadingTrm>
-            <span class="loading-text" style="font-size: 1rem; opacity: 0.7;">Cargando...</span>
+          <ng-template #trmFallback>
+            <span class="loading-text" style="font-size: 1rem; opacity: 0.7;" *ngIf="!trmError">Cargando...</span>
+            <span class="loading-text" style="font-size: 0.9rem; opacity: 0.7;" *ngIf="trmError" title="No se pudo obtener la TRM del día">No disponible</span>
           </ng-template>
         </span>
       </div>
