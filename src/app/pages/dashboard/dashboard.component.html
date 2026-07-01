@@ -15,6 +15,28 @@
 
   <div *ngIf="!isLoading && stats" class="stats-grid">
     <div class="stat-card glass-panel">
+      <div class="stat-icon info">🕒</div>
+      <div class="stat-info">
+        <h3>Hora Local (BOG)</h3>
+        <span class="stat-value" style="font-size: 1.5rem;">{{ currentTime | date:'hh:mm:ss a' }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card glass-panel">
+      <div class="stat-icon success">💵</div>
+      <div class="stat-info">
+        <h3>TRM Dólar (Hoy)</h3>
+        <span class="stat-value" style="font-size: 1.5rem;">
+          <ng-container *ngIf="currentTrm !== null; else loadingTrm">
+            {{ currentTrm | currency:'COP':'symbol':'1.0-0' }}
+          </ng-container>
+          <ng-template #loadingTrm>
+            <span class="loading-text" style="font-size: 1rem; opacity: 0.7;">Cargando...</span>
+          </ng-template>
+        </span>
+      </div>
+    </div>
+    <div class="stat-card glass-panel">
       <div class="stat-icon primary">📄</div>
       <div class="stat-info">
         <h3>Cotizaciones {{ viewMode === 'month' ? 'del Mes' : 'Totales' }}</h3>
