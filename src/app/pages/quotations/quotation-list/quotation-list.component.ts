@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { QuotationService } from '../../../services/quotation.service';
 import { Quotation } from '../../../models/interfaces';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { PdfGeneratorService } from '../../../services/pdf-generator.service';
 import { ToastService } from '../../../services/toast.service';
 
@@ -15,6 +15,7 @@ export class QuotationListComponent implements OnInit {
   archivedQuotations: Quotation[] = [];
   isLoading = true;
   activeTab: 'activas' | 'archivo' = 'activas';
+  filterStatus: string | null = null;
 
   // Sorting
   sortColumn: string = '';
@@ -37,12 +38,29 @@ export class QuotationListComponent implements OnInit {
   constructor(
     private quotationService: QuotationService,
     private router: Router,
+    private route: ActivatedRoute,
     private pdfGenerator: PdfGeneratorService,
     private toastService: ToastService
   ) {}
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      this.filterStatus = params['filter'] || null;
+      // switch to archivo tab if filter suggests it, but let's stick to activas if filtering the active ones.
+    });
     this.loadQuotations();
+  }
+
+  clearFilter() {
+    this.setFilter(null);
+  }
+
+  setFilter(status: string | null) {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { filter: status },
+      queryParamsHandling: 'merge'
+    });
   }
 
   loadQuotations() {
@@ -70,6 +88,10 @@ export class QuotationListComponent implements OnInit {
   getDisplayList(): Quotation[] {
     let list = this.activeTab === 'activas' ? this.quotations : this.archivedQuotations;
     
+    if (this.filterStatus) {
+      list = list.filter((q: any) => this.getStatusClass(q.status) === this.filterStatus);
+    }
+
     if (this.sortColumn) {
       list = [...list].sort((a: any, b: any) => {
         let valA = a[this.sortColumn];

@@ -306,4 +306,5 @@ export interface DashboardStats {
   monthQuotations: number;
   statusCounts: { [key: string]: number };
   monthTotal: number;
+  allTimeTotal: number;
 }

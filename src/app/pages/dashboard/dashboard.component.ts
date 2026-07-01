@@ -10,6 +10,7 @@ import { DashboardStats } from '../../models/interfaces';
 export class DashboardComponent implements OnInit {
   stats: DashboardStats | null = null;
   isLoading = true;
+  viewMode: 'month' | 'all' = 'month';
 
   constructor(private quotationService: QuotationService) {}
 
@@ -30,5 +31,9 @@ export class DashboardComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  toggleViewMode(mode: 'month' | 'all'): void {
+    this.viewMode = mode;
   }
 }

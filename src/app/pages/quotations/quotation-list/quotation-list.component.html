@@ -10,15 +10,27 @@
 
 <!-- Tabs -->
 <div class="tabs-bar">
-  <button class="btn-tab" [class.active]="activeTab === 'activas'" (click)="activeTab = 'activas'">
-    📋 Activas ({{ quotations.length }})
-  </button>
-  <button class="btn-tab" [class.active]="activeTab === 'archivo'" (click)="activeTab = 'archivo'">
-    🗄️ Archivo ({{ archivedQuotations.length }})
-  </button>
+  <div style="display: flex; gap: 10px; align-items: center;">
+    <button class="btn-tab" [class.active]="activeTab === 'activas'" (click)="activeTab = 'activas'">
+      📋 Activas ({{ quotations.length }})
+    </button>
+    <button class="btn-tab" [class.active]="activeTab === 'archivo'" (click)="activeTab = 'archivo'">
+      🗄️ Archivo ({{ archivedQuotations.length }})
+    </button>
+  </div>
 </div>
 
 <div class="card glass-panel">
+  
+  <div class="filters-row">
+    <span class="filter-label">Filtros rápidos:</span>
+    <button class="filter-chip" [class.active]="!filterStatus" (click)="setFilter(null)">Todas</button>
+    <button class="filter-chip badge nuevo" [class.active]="filterStatus === 'nuevo'" (click)="setFilter('nuevo')">Nuevas</button>
+    <button class="filter-chip badge en_revision" [class.active]="filterStatus === 'en_revision'" (click)="setFilter('en_revision')">En Revisión</button>
+    <button class="filter-chip badge aceptada" [class.active]="filterStatus === 'aceptada'" (click)="setFilter('aceptada')">Aceptadas</button>
+    <button class="filter-chip badge rechazada" [class.active]="filterStatus === 'rechazada'" (click)="setFilter('rechazada')">Rechazadas</button>
+  </div>
+
   <div *ngIf="isLoading" class="loading-state">
     <div class="loader"></div>
     <p>Cargando...</p>

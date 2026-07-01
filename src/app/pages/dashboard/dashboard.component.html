@@ -2,6 +2,10 @@
   <div class="header-section">
     <h1>Dashboard</h1>
     <p>Resumen de actividad de cotizaciones</p>
+    <div class="view-toggle mt-3" *ngIf="!isLoading && stats">
+      <button class="btn" [class.btn-primary]="viewMode === 'month'" [class.btn-secondary]="viewMode !== 'month'" (click)="toggleViewMode('month')">Este Mes</button>
+      <button class="btn" [class.btn-primary]="viewMode === 'all'" [class.btn-secondary]="viewMode !== 'all'" (click)="toggleViewMode('all')">Histórico (Todas)</button>
+    </div>
   </div>
 
   <div *ngIf="isLoading" class="loading-state">
@@ -13,20 +17,20 @@
     <div class="stat-card glass-panel">
       <div class="stat-icon primary">📄</div>
       <div class="stat-info">
-        <h3>Cotizaciones Mes</h3>
-        <span class="stat-value">{{ stats.monthQuotations }}</span>
+        <h3>Cotizaciones {{ viewMode === 'month' ? 'del Mes' : 'Totales' }}</h3>
+        <span class="stat-value">{{ viewMode === 'month' ? stats.monthQuotations : stats.totalQuotations }}</span>
       </div>
     </div>
 
     <div class="stat-card glass-panel">
       <div class="stat-icon success">💰</div>
       <div class="stat-info">
-        <h3>Total Mes</h3>
-        <span class="stat-value">{{ stats.monthTotal | currency:'COP':'symbol':'1.0-0' }}</span>
+        <h3>Total {{ viewMode === 'month' ? 'del Mes' : 'Histórico' }}</h3>
+        <span class="stat-value">{{ (viewMode === 'month' ? stats.monthTotal : stats.allTimeTotal) | currency:'COP':'symbol':'1.0-0' }}</span>
       </div>
     </div>
 
-    <div class="stat-card glass-panel">
+    <div class="stat-card glass-panel clickable" [routerLink]="['/quotations']" [queryParams]="{ filter: 'nuevo' }">
       <div class="stat-icon warning">🟡</div>
       <div class="stat-info">
         <h3>Nuevas</h3>
@@ -34,7 +38,7 @@
       </div>
     </div>
 
-    <div class="stat-card glass-panel">
+    <div class="stat-card glass-panel clickable" [routerLink]="['/quotations']" [queryParams]="{ filter: 'en_revision' }">
       <div class="stat-icon info">🔵</div>
       <div class="stat-info">
         <h3>En Revisión</h3>
@@ -42,7 +46,7 @@
       </div>
     </div>
 
-    <div class="stat-card glass-panel">
+    <div class="stat-card glass-panel clickable" [routerLink]="['/quotations']" [queryParams]="{ filter: 'aceptada' }">
       <div class="stat-icon success">✅</div>
       <div class="stat-info">
         <h3>Aceptadas</h3>
@@ -50,7 +54,7 @@
       </div>
     </div>
 
-    <div class="stat-card glass-panel">
+    <div class="stat-card glass-panel clickable" [routerLink]="['/quotations']" [queryParams]="{ filter: 'rechazada' }">
       <div class="stat-icon danger">❌</div>
       <div class="stat-info">
         <h3>Rechazadas</h3>
