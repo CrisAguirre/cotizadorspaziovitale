@@ -10,7 +10,7 @@
   z-index: 50;
   left: 0;
   right: 0;
-  max-height: 220px;
+  max-height: 350px;
   overflow-y: auto;
   background: var(--card-bg, #1e293b);
   border: 1px solid var(--border-color, #334155);

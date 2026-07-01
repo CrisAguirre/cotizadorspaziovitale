@@ -97,6 +97,7 @@ export interface DesignTimeItem {
   description: string;
   quantity: number;
   laborRate: number;
+  unitPrice?: number;
   totalPrice: number;
 }
 
@@ -131,6 +132,29 @@ export interface InstallationItem {
   totalPrice: number;
 }
 
+export interface VeneerItem {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+}
+
+export interface MesonDetails {
+  materialId?: string;
+  materialName?: string;
+  basePricePerM2: number;
+  depth: number;
+  transportCost: number;
+  profitPercentage: number;
+  taxPercentage: number;
+  linearPrice: number;
+  baseCost: number;
+  profitAmount: number;
+  subtotal: number;
+  taxAmount: number;
+  finalPricePerMl: number;
+}
+
 export interface Furniture {
   _id?: string;
   name: string;
@@ -149,6 +173,8 @@ export interface Furniture {
   cuts: CutItem[];
   assembly: AssemblyItem[];
   installation: InstallationItem[];
+  veneer: VeneerItem[];
+  mesonDetails?: MesonDetails;
   totalSupplies: number;
   totalEdgeBands: number;
   totalAccessories: number;
@@ -156,6 +182,7 @@ export interface Furniture {
   totalCuts: number;
   totalAssembly: number;
   totalInstallation: number;
+  totalVeneer: number;
   totalCost: number;
   totalBudget: number;
 }

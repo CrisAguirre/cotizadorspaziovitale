@@ -388,6 +388,12 @@
                       title="Volver a la lista">↩️</button>
                   </div>
                 </ng-container>
+                <div style="margin-top: 8px;">
+                  <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-weight: normal;">
+                    <input type="checkbox" [checked]="furn.type === 'meson'" (change)="toggleMeson(furn, $event)">
+                    Cotizar como Mesón
+                  </label>
+                </div>
               </div>
               <div class="form-group">
                 <label>Medidas <small *ngIf="furn.unit === 'M2'">(Ancho x Alto)</small><small
@@ -434,8 +440,67 @@
         <div *ngFor="let furn of area.furniture" class="furniture-budget-card">
           <h4>{{ furn.name }} (x{{ furn.quantity }})</h4>
 
-          <!-- Insumos -->
-          <div class="budget-section">
+          <!-- CALCULADORA DE MESONES -->
+          <ng-container *ngIf="furn.type === 'meson' && furn.mesonDetails">
+            <div class="budget-section">
+              <h5>Calculadora de Mesones (Cotización Exclusiva)</h5>
+              <table class="budget-table">
+                <thead>
+                  <tr>
+                    <th>Material (Buscar)</th>
+                    <th>Fondo (Multiplicador)</th>
+                    <th>Transporte y M.O.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <app-material-picker category="meson" placeholder="Buscar material de mesón..."
+                        (materialSelected)="applyMesonMaterial(furn, $event)"></app-material-picker>
+                      <small class="text-muted" *ngIf="furn.mesonDetails.materialName">{{ furn.mesonDetails.materialName }}</small>
+                    </td>
+                    <td>
+                      <input type="number" [(ngModel)]="furn.mesonDetails.depth" (change)="recalculate()"
+                        class="form-control num-input" step="0.1">
+                    </td>
+                    <td>
+                      <input type="number" [(ngModel)]="furn.mesonDetails.transportCost" (change)="recalculate()"
+                        class="form-control num-input">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <table class="budget-table mt-3" style="background-color: var(--bg-secondary); border-radius: 8px;">
+                <thead>
+                  <tr>
+                    <th>VR. SIN IVA (M²)</th>
+                    <th>VR CON TRANSP</th>
+                    <th>UTILIDAD ({{ furn.mesonDetails.profitPercentage }}%)</th>
+                    <th>SUBTOTAL</th>
+                    <th>VR FINAL CON IVA (ML)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>$ {{ furn.mesonDetails.basePricePerM2 | number }}</td>
+                    <td>$ {{ furn.mesonDetails.baseCost | number }}</td>
+                    <td>$ {{ furn.mesonDetails.profitAmount | number }}</td>
+                    <td>$ {{ furn.mesonDetails.subtotal | number }}</td>
+                    <td><strong class="text-primary">$ {{ furn.mesonDetails.finalPricePerMl | number }}</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+              
+              <div class="text-right mt-2 text-muted">
+                <small>El valor total de este mesón ($ {{ furn.totalBudget | number }}) se sumará directamente al Gran Total.</small>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="furn.type !== 'meson'">
+            <!-- Insumos -->
+            <div class="budget-section">
             <div class="flex-between">
               <h5>1. Insumos (Láminas, etc.)</h5>
               <button class="btn-secondary btn-sm" (click)="addItem(furn, 'supplies')">+ Añadir</button>
@@ -461,7 +526,7 @@
                   <td><input type="number" [(ngModel)]="sup.quantity" (change)="recalculate()"
                       class="form-control-sm num-input"></td>
                   <td><input type="number" [(ngModel)]="sup.unitPrice" (change)="recalculate()"
-                      class="form-control-sm num-input"></td>
+                      class="form-control-sm num-input" readonly></td>
                   <td>$ {{ sup.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'supplies', i)">🗑️</button></td>
@@ -501,7 +566,7 @@
                   <td>{{ (edge.wasteFactor || 0) * 100 }}%</td>
                   <td>{{ edge.total | number:'1.0-2' }}</td>
                   <td><input type="number" [(ngModel)]="edge.unitPrice" (change)="recalculate()"
-                      class="form-control-sm num-input"></td>
+                      class="form-control-sm num-input" readonly></td>
                   <td>$ {{ edge.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'edgeBands', i)">🗑️</button></td>
@@ -525,6 +590,7 @@
                 <tr>
                   <th>Descripción</th>
                   <th>Horas</th>
+                  <th>Precio Und</th>
                   <th>Total</th>
                   <th></th>
                 </tr>
@@ -543,6 +609,8 @@
                     </div>
                   </td>
                   <td><input type="number" [(ngModel)]="d.quantity" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="d.unitPrice" (change)="recalculate()"
                       class="form-control-sm num-input"></td>
                   <td>$ {{ d.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
@@ -581,7 +649,7 @@
                   <td><input type="number" [(ngModel)]="acc.quantity" (change)="recalculate()"
                       class="form-control-sm num-input"></td>
                   <td><input type="number" [(ngModel)]="acc.unitPrice" (change)="recalculate()"
-                      class="form-control-sm num-input"></td>
+                      class="form-control-sm num-input" readonly></td>
                   <td><input type="number" [(ngModel)]="acc.timeHours" (change)="recalculate()"
                       class="form-control-sm num-input"></td>
                   <td>$ {{ acc.totalPrice | number }}</td>
@@ -595,14 +663,13 @@
           <!-- Cortes -->
           <div class="budget-section">
             <div class="flex-between">
-              <h5>5. Cortes Melaminas (M² × tiempo × cant.)</h5>
+              <h5>5. Cortes Melaminas</h5>
               <button class="btn-secondary btn-sm" (click)="addItem(furn, 'cuts')">+ Añadir</button>
             </div>
             <table class="budget-table" *ngIf="furn.cuts?.length">
               <thead>
                 <tr>
                   <th>Descripción</th>
-                  <th>M2</th>
                   <th>Hrs</th>
                   <th>Cant.</th>
                   <th>Total</th>
@@ -623,8 +690,6 @@
                         placeholder="Descripción">
                     </div>
                   </td>
-                  <td><input type="number" [(ngModel)]="cut.sqm" (change)="recalculate()"
-                      class="form-control-sm num-input"></td>
                   <td><input type="number" [(ngModel)]="cut.timeHours" (change)="recalculate()"
                       class="form-control-sm num-input"></td>
                   <td><input type="number" [(ngModel)]="cut.quantity" (change)="recalculate()"
@@ -735,6 +800,43 @@
             </table>
           </div>
 
+          <!-- Enchape -->
+          <div class="budget-section">
+            <div class="flex-between">
+              <h5>8. Enchape</h5>
+              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'veneer')">+ Añadir</button>
+            </div>
+            <table class="budget-table" *ngIf="furn.veneer?.length">
+              <thead>
+                <tr>
+                  <th>Buscar</th>
+                  <th>Descripción</th>
+                  <th>Cant.</th>
+                  <th>Precio Und</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let ven of furn.veneer; let i = index">
+                  <td>
+                    <app-material-picker placeholder="Buscar enchape..."
+                      (materialSelected)="applyVeneerMaterial(ven, $event)"></app-material-picker>
+                  </td>
+                  <td><input type="text" [(ngModel)]="ven.description" class="form-control-sm"
+                      placeholder="Descripción del enchape"></td>
+                  <td><input type="number" [(ngModel)]="ven.quantity" (change)="recalculate()"
+                      class="form-control-sm num-input"></td>
+                  <td><input type="number" [(ngModel)]="ven.unitPrice" (change)="recalculate()"
+                      class="form-control-sm num-input" readonly></td>
+                  <td>$ {{ ven.totalPrice | number }}</td>
+                  <td><button class="btn-icon text-error" title="Eliminar"
+                      (click)="removeItem(furn, 'veneer', i)">🗑️</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
           <div class="section-totals text-muted" style="gap: 16px;">
             <span>Insumos: $ {{ furn.totalSupplies | number }}</span>
             <span>Cantos: $ {{ furn.totalEdgeBands | number }}</span>
@@ -743,7 +845,9 @@
             <span>Cortes: $ {{ furn.totalCuts | number }}</span>
             <span>Armado: $ {{ furn.totalAssembly | number }}</span>
             <span>Instalación: $ {{ furn.totalInstallation | number }}</span>
+            <span>Enchape: $ {{ furn.totalVeneer | number }}</span>
           </div>
+          </ng-container>
 
           <div class="furniture-total text-right mt-2">
             <strong>Subtotal Mueble: $ {{ furn.totalCost | number }}</strong>

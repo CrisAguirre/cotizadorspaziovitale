@@ -12,7 +12,9 @@ export class QuotationCalculatorService {
    */
   public recalculateAll(quotation: Quotation, config: AppConfig): Quotation {
     let globalTotalSqm = 0;
-    let globalTotalCost = 0;
+    let globalTotalCost = 0; // Costo bruto para cálculo global
+    let globalMesonesSubtotal = 0; // Subtotal ya liquidado
+    let globalMesonesTax = 0; // IVA de mesones
 
     if (quotation.areas) {
       quotation.areas.forEach((area: Area) => {
@@ -21,7 +23,16 @@ export class QuotationCalculatorService {
         if (area.furniture) {
           area.furniture.forEach((furniture: Furniture) => {
             this.calculateFurnitureTotals(furniture, config);
-            areaTotal += (furniture.totalCost || 0) * (furniture.quantity || 1);
+            
+            if (furniture.type === 'meson' && furniture.mesonDetails) {
+              const fQty = furniture.quantity || 1;
+              const fLen = furniture.areaSqm || 1;
+              globalMesonesSubtotal += furniture.mesonDetails.subtotal * fLen * fQty;
+              globalMesonesTax += furniture.mesonDetails.taxAmount * fLen * fQty;
+              areaTotal += furniture.totalBudget * fQty;
+            } else {
+              areaTotal += (furniture.totalCost || 0) * (furniture.quantity || 1);
+            }
 
             if (furniture.areaSqm && furniture.areaSqm > 0) {
               globalTotalSqm += furniture.areaSqm * (furniture.quantity || 1);
@@ -56,21 +67,55 @@ export class QuotationCalculatorService {
         }
 
         area.areaTotal = areaTotal;
-        globalTotalCost += areaTotal;
+      });
+    }
+    
+    // El globalTotalCost solo debe llevar el costo de los muebles normales y subAreas
+    let rawTotalCostForPercentages = 0;
+    if (quotation.areas) {
+      quotation.areas.forEach((area: Area) => {
+        if (area.furniture) {
+          area.furniture.forEach((furniture: Furniture) => {
+            if (furniture.type !== 'meson') {
+              rawTotalCostForPercentages += (furniture.totalCost || 0) * (furniture.quantity || 1);
+            }
+          });
+        }
+        if (area.subAreas) {
+          area.subAreas.forEach((sub) => { rawTotalCostForPercentages += (sub.total || 0); });
+        }
+        if (area.visibleAccessories) {
+          area.visibleAccessories.forEach((acc) => { rawTotalCostForPercentages += (acc.totalPrice || 0); });
+        }
       });
     }
 
     quotation.totals = this.calculateGlobalTotals(
-      globalTotalCost,
+      rawTotalCostForPercentages,
       globalTotalSqm,
       config,
-      quotation.totals
+      quotation.totals,
+      globalMesonesSubtotal,
+      globalMesonesTax
     );
-
     return quotation;
   }
 
   private calculateFurnitureTotals(furniture: Furniture, config: AppConfig): void {
+    if (furniture.type === 'meson' && furniture.mesonDetails) {
+      const md = furniture.mesonDetails;
+      md.linearPrice = (md.basePricePerM2 || 0) * (md.depth || 0.8);
+      md.baseCost = md.linearPrice + (md.transportCost || 0);
+      md.profitAmount = md.baseCost * ((md.profitPercentage || 68) / 100);
+      md.subtotal = md.baseCost + md.profitAmount;
+      md.taxAmount = md.subtotal * ((md.taxPercentage || 19) / 100);
+      md.finalPricePerMl = md.subtotal + md.taxAmount;
+      
+      furniture.totalCost = md.baseCost; // Optional, for reference
+      furniture.totalBudget = md.finalPricePerMl * (furniture.areaSqm || 1);
+      return;
+    }
+
     const laborRate = config.laborRatePerHour || 0;
     const designRate = config.designRatePerHour || 0;
 
@@ -159,6 +204,15 @@ export class QuotationCalculatorService {
       });
     }
 
+    // 8. Enchape — I = cantidad × precio unitario
+    furniture.totalVeneer = 0;
+    if (furniture.veneer) {
+      furniture.veneer.forEach((v) => {
+        v.totalPrice = (v.quantity || 0) * (v.unitPrice || 0);
+        furniture.totalVeneer! += v.totalPrice;
+      });
+    }
+
     furniture.totalCost =
       (furniture.totalSupplies || 0) +
       (furniture.totalEdgeBands || 0) +
@@ -166,7 +220,8 @@ export class QuotationCalculatorService {
       (furniture.totalDesignTime || 0) +
       (furniture.totalCuts || 0) +
       (furniture.totalAssembly || 0) +
-      (furniture.totalInstallation || 0);
+      (furniture.totalInstallation || 0) +
+      (furniture.totalVeneer || 0);
 
     furniture.totalBudget = furniture.totalCost;
   }
@@ -175,7 +230,9 @@ export class QuotationCalculatorService {
     totalCost: number,
     totalSqm: number,
     config: AppConfig,
-    existing?: QuotationTotals
+    existing?: QuotationTotals,
+    totalMesonesSubtotal: number = 0,
+    totalMesonesTax: number = 0
   ): QuotationTotals {
     const unforeseenPercent = existing?.unforeseenPercent ?? config.unforeseenPercent;
     const profitPercent = existing?.profitPercent ?? config.profitPercent;
@@ -187,8 +244,8 @@ export class QuotationCalculatorService {
     const profitAmount = totalCost * (profitPercent / 100);
     const indirectAmount = totalCost * (indirectPercent / 100);
 
-    const subtotal = totalCost + unforeseenAmount + profitAmount + indirectAmount;
-    const taxAmount = subtotal * (taxPercent / 100);
+    const subtotal = totalCost + unforeseenAmount + profitAmount + indirectAmount + totalMesonesSubtotal;
+    const taxAmount = (totalCost + unforeseenAmount + profitAmount + indirectAmount) * (taxPercent / 100) + totalMesonesTax;
     const totalWithTax = subtotal + taxAmount;
 
     // Excel: I91 = I90 * H91; I92 = I90 - I91 (descuento)

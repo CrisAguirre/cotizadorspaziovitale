@@ -4,7 +4,7 @@
     class="form-control-sm picker-input"
     [(ngModel)]="query"
     (input)="onInput()"
-    (focus)="onInput()"
+    (focus)="onFocus()"
     (blur)="close()"
     [placeholder]="placeholder"
   />
@@ -20,6 +20,10 @@
       <span class="picker-desc">{{ m.description }}</span>
       <span class="picker-meta">{{ m.provider }} · {{ m.unitPrice | currency:'COP':'symbol':'1.0-0' }}</span>
     </button>
+    <div *ngIf="!isLoading && totalResults > results.length" class="picker-item muted">
+      Mostrando {{ results.length }} de {{ totalResults }} — escribe para filtrar
+    </div>
     <div *ngIf="!isLoading && !results.length" class="picker-item muted">Sin resultados</div>
   </div>
 </div>
+

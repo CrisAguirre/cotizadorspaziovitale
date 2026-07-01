@@ -346,10 +346,7 @@
   margin-left: auto;
 }
 
-select option {
-  background-color: var(--input-bg, #1a1a1a);
-  color: inherit;
-}
+
 
 .estimated-row {
   background-color: rgba(255, 255, 255, 0.05);

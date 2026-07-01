@@ -5,7 +5,7 @@ import { ConfigService } from '../../../services/config.service';
 import { QuotationCalculatorService } from '../../../services/quotation-calculator.service';
 import { PdfGeneratorService } from '../../../services/pdf-generator.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AppConfig, Quotation, Area, Furniture, Material, SupplyItem, EdgeBandItem, AccessoryItem, AssemblyItem, WizardConfig, LaborTime } from '../../../models/interfaces';
+import { AppConfig, Quotation, Area, Furniture, Material, SupplyItem, EdgeBandItem, AccessoryItem, AssemblyItem, VeneerItem, WizardConfig, LaborTime } from '../../../models/interfaces';
 import { LaborTimeService } from '../../../services/labor-time.service';
 import { TemporalService, TemporalData } from '../../../services/temporal.service';
 import { MaterialService } from '../../../services/material.service';
@@ -444,6 +444,7 @@ export class QuotationWizardComponent implements OnInit {
       cuts: [],
       assembly: [],
       installation: [],
+      veneer: [],
       totalSupplies: 0,
       totalEdgeBands: 0,
       totalAccessories: 0,
@@ -451,6 +452,7 @@ export class QuotationWizardComponent implements OnInit {
       totalCuts: 0,
       totalAssembly: 0,
       totalInstallation: 0,
+      totalVeneer: 0,
       totalCost: 0,
       totalBudget: 0
     });
@@ -461,12 +463,37 @@ export class QuotationWizardComponent implements OnInit {
     this.recalculate();
   }
 
+  toggleMeson(furn: Furniture, event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+    if (isChecked) {
+      furn.type = 'meson';
+      if (!furn.mesonDetails) {
+        furn.mesonDetails = {
+          basePricePerM2: 0,
+          depth: 0.8,
+          transportCost: 180000,
+          profitPercentage: 68,
+          taxPercentage: 19,
+          linearPrice: 0,
+          baseCost: 0,
+          profitAmount: 0,
+          subtotal: 0,
+          taxAmount: 0,
+          finalPricePerMl: 0
+        };
+      }
+    } else {
+      furn.type = 'custom';
+    }
+    this.recalculate();
+  }
+
   addItem(
     furniture: Furniture,
-    type: 'supplies' | 'edgeBands' | 'accessories' | 'designTime' | 'cuts' | 'assembly' | 'installation'
+    type: 'supplies' | 'edgeBands' | 'accessories' | 'designTime' | 'cuts' | 'assembly' | 'installation' | 'veneer'
   ) {
     if (!furniture[type]) furniture[type] = [];
-    const item: Record<string, unknown> = {};
+    const item: Record<string, unknown> = { description: '' };
     if (type === 'supplies') {
       item['unitOfMeasure'] = 'LAMINA';
       item['quantity'] = 0;
@@ -484,7 +511,6 @@ export class QuotationWizardComponent implements OnInit {
       item['timeHours'] = 0;
     }
     if (type === 'designTime') {
-      item['description'] = '';
       item['quantity'] = 0;
     }
     if (type === 'cuts') {
@@ -493,16 +519,22 @@ export class QuotationWizardComponent implements OnInit {
       item['quantity'] = 1;
     }
     if (type === 'assembly') {
+      item['measurement'] = '';
       item['unitOfMeasure'] = 'm2';
       item['assemblyHours'] = 0;
       item['persons'] = 2;
       item['totalQuantity'] = 1;
     }
     if (type === 'installation') {
+      item['measurement'] = '';
       item['unitOfMeasure'] = 'm2';
       item['installHours'] = 0;
       item['persons'] = 2;
       item['totalQuantity'] = 1;
+    }
+    if (type === 'veneer') {
+      item['quantity'] = 0;
+      item['unitPrice'] = 0;
     }
 
     (furniture[type] as unknown[]).push(item);
@@ -540,6 +572,20 @@ export class QuotationWizardComponent implements OnInit {
     item.code = material.code;
     item.unitPrice = material.unitPrice;
     item.unit = material.unit || 'UNIDAD';
+    this.recalculate();
+  }
+
+  applyVeneerMaterial(item: VeneerItem, material: Material): void {
+    item.description = material.description;
+    item.unitPrice = material.unitPrice;
+    this.recalculate();
+  }
+
+  applyMesonMaterial(furn: Furniture, material: Material): void {
+    if (!furn.mesonDetails) return;
+    furn.mesonDetails.materialId = material._id;
+    furn.mesonDetails.materialName = material.description;
+    furn.mesonDetails.basePricePerM2 = material.unitPrice || material.pricePerSqm || 0;
     this.recalculate();
   }
 

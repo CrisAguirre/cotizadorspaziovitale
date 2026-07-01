@@ -4,7 +4,7 @@
   --primary-color: #D5A052; /* Corporate Gold */
   --primary-hover: #c48e42;
   --bg-color: #0B4249; /* Corporate Dark/Navy */
-  --bg-gradient: radial-gradient(circle at top right, #116570, #0B4249);
+  --bg-gradient: #0B4249; /* Removed gradient to keep pure color */
   --panel-bg: rgba(11, 66, 73, 0.6);
   --text-main: #FFFFFF; /* Pure White */
   --text-muted: #A8BDBF;
@@ -18,7 +18,7 @@
   --primary-color: #D5A052; 
   --primary-hover: #c48e42;
   --bg-color: #FFFFFF; /* Pure White */
-  --bg-gradient: radial-gradient(circle at top right, #FFFFFF, #F0F4F5);
+  --bg-gradient: #FFFFFF; /* Pure White without gradient */
   --panel-bg: rgba(255, 255, 255, 0.7);
   --text-main: #0B4249; /* Dark text for light mode */
   --text-muted: #5A7B7E;
@@ -37,7 +37,7 @@
 body {
   font-family: 'Montserrat', sans-serif;
   background-color: var(--bg-color);
-  background-image: var(--bg-gradient);
+  background: var(--bg-color); /* Overwrite any gradients */
   color: var(--text-main);
   min-height: 100vh;
   display: flex;
@@ -84,7 +84,7 @@ body {
 /* Primary Button */
 .btn-primary {
   background-color: var(--primary-color);
-  color: #000;
+  color: #0B4249; /* Dark text for primary buttons to contrast the gold */
   box-shadow: 0 4px 10px rgba(213, 160, 82, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -239,7 +239,7 @@ select.form-control {
   padding-right: 30px;
 }
 
-select.form-control option {
+select option {
   background-color: var(--bg-color);
   color: var(--text-main);
 }
