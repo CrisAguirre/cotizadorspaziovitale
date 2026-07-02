@@ -556,9 +556,18 @@ export class QuotationWizardComponent implements OnInit {
 
   applySupplyMaterial(item: SupplyItem, material: Material): void {
     item.description = material.description;
-    item.unitPrice = material.unitPrice;
     item.providerColor = material.provider;
     item.unitOfMeasure = material.unit || 'LAMINA';
+
+    // Para tableros (uropack, alto brillo, mdf, melaminas): usar precio por m²
+    if (material.unit === 'LAMINA' && material.pricePerSqm > 0) {
+      item.quantityMode = 'sqm';
+      item.unitPrice = material.pricePerSqm;
+    } else {
+      item.quantityMode = 'unit';
+      item.unitPrice = material.unitPrice;
+    }
+
     this.recalculate();
   }
 

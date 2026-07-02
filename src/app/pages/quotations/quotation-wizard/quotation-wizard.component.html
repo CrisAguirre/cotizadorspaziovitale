@@ -510,7 +510,7 @@
                 <tr>
                   <th>Buscar lista</th>
                   <th>Descripción</th>
-                  <th>Cant.</th>
+                  <th>Cant. / m²</th>
                   <th>Precio Und</th>
                   <th>Total</th>
                   <th></th>
@@ -523,10 +523,21 @@
                       (materialSelected)="applySupplyMaterial(sup, $event)"></app-material-picker>
                   </td>
                   <td><input type="text" [(ngModel)]="sup.description" class="form-control-sm"></td>
-                  <td><input type="number" [(ngModel)]="sup.quantity" (change)="recalculate()"
-                      class="form-control-sm num-input"></td>
-                  <td><input type="number" [(ngModel)]="sup.unitPrice" (change)="recalculate()"
-                      class="form-control-sm num-input" readonly></td>
+                  <td>
+                    <div class="sqm-input-wrapper">
+                      <input type="number" [(ngModel)]="sup.quantity" (change)="recalculate()"
+                        class="form-control-sm num-input" [attr.step]="sup.quantityMode === 'sqm' ? '0.01' : '1'"
+                        [attr.placeholder]="sup.quantityMode === 'sqm' ? 'm²' : 'Cant.'">
+                      <span class="sqm-label" *ngIf="sup.quantityMode === 'sqm'">m²</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="sqm-input-wrapper">
+                      <input type="number" [(ngModel)]="sup.unitPrice" (change)="recalculate()"
+                        class="form-control-sm num-input" readonly>
+                      <span class="sqm-label" *ngIf="sup.quantityMode === 'sqm'">/m²</span>
+                    </div>
+                  </td>
                   <td>$ {{ sup.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'supplies', i)">🗑️</button></td>

@@ -62,6 +62,7 @@ export interface SupplyItem {
   providerColor: string;
   dimension: string;
   unitOfMeasure: string;
+  quantityMode?: 'unit' | 'sqm'; // 'sqm' para tableros (uropack, alto brillo, mdf, melaminas)
   quantity: number;
   total: number;
   unitPrice: number;

@@ -351,3 +351,22 @@
 .estimated-row {
   background-color: rgba(255, 255, 255, 0.05);
 }
+
+/* =========================================
+   M² INPUT INDICATOR (INSUMOS)
+========================================= */
+.sqm-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sqm-label {
+  font-size: 0.7rem;
+  color: var(--primary-color);
+  background: rgba(var(--primary-rgb), 0.12);
+  padding: 2px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-weight: 600;
+}
