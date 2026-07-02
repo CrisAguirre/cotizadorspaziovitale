@@ -135,8 +135,9 @@ export interface InstallationItem {
 
 export interface VeneerItem {
   description: string;
-  quantity: number;
-  unitPrice: number;
+  ml: number;
+  timeHours: number;
+  laborRate: number;
   totalPrice: number;
 }
 

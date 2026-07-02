@@ -681,8 +681,9 @@
               <thead>
                 <tr>
                   <th>Descripción</th>
-                  <th>Hrs</th>
-                  <th>Cant.</th>
+                  <th>m² (Calc)</th>
+                  <th>Hrs/m²</th>
+                  <th>Precio/Hr</th>
                   <th>Total</th>
                   <th></th>
                 </tr>
@@ -701,10 +702,16 @@
                         placeholder="Descripción">
                     </div>
                   </td>
+                  <td>
+                    <div class="sqm-input-wrapper">
+                      <input type="number" [value]="cut.sqm" class="form-control-sm num-input" readonly>
+                      <span class="sqm-label">m²</span>
+                    </div>
+                  </td>
                   <td><input type="number" [(ngModel)]="cut.timeHours" (change)="recalculate()"
                       class="form-control-sm num-input" step="any"></td>
-                  <td><input type="number" [(ngModel)]="cut.quantity" (change)="recalculate()"
-                      class="form-control-sm num-input" step="any"></td>
+                  <td><input type="number" [(ngModel)]="cut.laborRate" (change)="recalculate()"
+                      class="form-control-sm num-input" step="any" [placeholder]="(appConfig?.laborRatePerHour || 0).toString()"></td>
                   <td>$ {{ cut.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'cuts', i)">🗑️</button></td>
@@ -824,26 +831,38 @@
             <table class="budget-table" *ngIf="furn.veneer?.length">
               <thead>
                 <tr>
-                  <th>Buscar</th>
                   <th>Descripción</th>
-                  <th>Cant.</th>
-                  <th>Precio Und</th>
+                  <th>ML (Calc)</th>
+                  <th>Hrs/ML</th>
+                  <th>Precio/Hr</th>
                   <th>Total</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let ven of furn.veneer; let i = index" [class.estimated-row]="ven.unitPrice == null || ven.unitPrice <= 0">
+                <tr *ngFor="let ven of furn.veneer; let i = index">
                   <td>
-                    <app-material-picker placeholder="Buscar enchape..."
-                      (materialSelected)="applyVeneerMaterial(ven, $event)"></app-material-picker>
+                    <div style="display: flex; gap: 5px; flex-direction: column;">
+                      <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
+                        (change)="onLaborTimeSelect(ven, $any($event.target).value, 'veneer')">
+                        <option value="">-- Tabla M.O --</option>
+                        <option *ngFor="let lt of availableLaborTimes" [value]="lt.code">{{ lt.activityName }} ({{
+                          lt.timeHours }}h)</option>
+                      </select>
+                      <input type="text" [(ngModel)]="ven.description" class="form-control-sm"
+                        placeholder="Descripción del enchape">
+                    </div>
                   </td>
-                  <td><input type="text" [(ngModel)]="ven.description" class="form-control-sm"
-                      placeholder="Descripción del enchape"></td>
-                  <td><input type="number" [(ngModel)]="ven.quantity" (change)="recalculate()"
-                      class="form-control-sm num-input"></td>
-                  <td><input type="number" [(ngModel)]="ven.unitPrice" (change)="recalculate()"
-                      class="form-control-sm num-input" readonly></td>
+                  <td>
+                    <div class="sqm-input-wrapper">
+                      <input type="number" [value]="ven.ml" class="form-control-sm num-input" readonly>
+                      <span class="sqm-label">ML</span>
+                    </div>
+                  </td>
+                  <td><input type="number" [(ngModel)]="ven.timeHours" (change)="recalculate()"
+                      class="form-control-sm num-input" step="any"></td>
+                  <td><input type="number" [(ngModel)]="ven.laborRate" (change)="recalculate()"
+                      class="form-control-sm num-input" step="any" [placeholder]="(appConfig?.laborRatePerHour || 0).toString()"></td>
                   <td>$ {{ ven.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'veneer', i)">🗑️</button></td>

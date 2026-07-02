@@ -519,7 +519,7 @@ export class QuotationWizardComponent implements OnInit {
     if (type === 'cuts') {
       item['sqm'] = 0;
       item['timeHours'] = 0;
-      item['quantity'] = 1;
+      item['laborRate'] = 0;
     }
     if (type === 'assembly') {
       item['measurement'] = '';
@@ -536,8 +536,9 @@ export class QuotationWizardComponent implements OnInit {
       item['totalQuantity'] = 1;
     }
     if (type === 'veneer') {
-      item['quantity'] = 0;
-      item['unitPrice'] = 0;
+      item['ml'] = 0;
+      item['timeHours'] = 0;
+      item['laborRate'] = 0;
     }
 
     (furniture[type] as unknown[]).push(item);
@@ -587,11 +588,7 @@ export class QuotationWizardComponent implements OnInit {
     this.recalculate();
   }
 
-  applyVeneerMaterial(item: VeneerItem, material: Material): void {
-    item.description = material.description;
-    item.unitPrice = material.unitPrice;
-    this.recalculate();
-  }
+
 
   applyMesonMaterial(furn: Furniture, material: Material): void {
     if (!furn.mesonDetails) return;
@@ -617,6 +614,9 @@ export class QuotationWizardComponent implements OnInit {
     } else if (type === 'designTime') {
       item.description = laborTime.activityName;
       item.quantity = laborTime.timeHours;
+    } else if (type === 'veneer') {
+      item.description = laborTime.activityName;
+      item.timeHours = laborTime.timeHours;
     }
     this.recalculate();
   }

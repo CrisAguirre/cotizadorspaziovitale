@@ -121,16 +121,22 @@ export class QuotationCalculatorService {
 
     // 1. Insumos — I = cantidad × precio unitario
     furniture.totalSupplies = 0;
+    let totalMelaminaSqm = 0;
     if (furniture.supplies) {
       furniture.supplies.forEach((s) => {
         const qty = s.total > 0 ? s.total : (s.quantity || 0);
         s.totalPrice = qty * (s.unitPrice || 0);
         furniture.totalSupplies! += s.totalPrice;
+
+        if (s.quantityMode === 'sqm') {
+          totalMelaminaSqm += qty;
+        }
       });
     }
 
     // 2. Cantos — G = ML + desperdicio; I = G × precio
     furniture.totalEdgeBands = 0;
+    let totalEdgeBandML = 0;
     if (furniture.edgeBands) {
       furniture.edgeBands.forEach((e) => {
         const factor = this.getWasteFactor(e.quantity || 0, config.wasteTable);
@@ -139,6 +145,8 @@ export class QuotationCalculatorService {
         e.total = (e.quantity || 0) + e.waste;
         e.totalPrice = e.total * (e.unitPrice || 0);
         furniture.totalEdgeBands! += e.totalPrice;
+        
+        totalEdgeBandML += e.total;
       });
     }
 
@@ -168,13 +176,13 @@ export class QuotationCalculatorService {
       });
     }
 
-    // 5. Cortes — G = M² × tiempo × cantidad; I = G × valor hora
+    // 5. Cortes — G = M² × tiempo; I = G × valor hora
     furniture.totalCuts = 0;
     if (furniture.cuts) {
       furniture.cuts.forEach((c) => {
-        const workUnits =
-          (c.sqm || 0) * (c.timeHours || 0) * (c.quantity || 1);
+        c.sqm = totalMelaminaSqm;
         const rate = c.laborRate || laborRate;
+        const workUnits = (c.sqm || 0) * (c.timeHours || 0);
         c.totalPrice = workUnits * rate;
         furniture.totalCuts! += c.totalPrice;
       });
@@ -204,11 +212,14 @@ export class QuotationCalculatorService {
       });
     }
 
-    // 8. Enchape — I = cantidad × precio unitario
+    // 8. Enchape — G = ML × tiempo; I = G × valor hora
     furniture.totalVeneer = 0;
     if (furniture.veneer) {
       furniture.veneer.forEach((v) => {
-        v.totalPrice = (v.quantity || 0) * (v.unitPrice || 0);
+        v.ml = totalEdgeBandML;
+        const rate = v.laborRate || laborRate;
+        const workUnits = (v.ml || 0) * (v.timeHours || 0);
+        v.totalPrice = workUnits * rate;
         furniture.totalVeneer! += v.totalPrice;
       });
     }
