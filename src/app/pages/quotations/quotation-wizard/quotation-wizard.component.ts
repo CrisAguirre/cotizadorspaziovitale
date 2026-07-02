@@ -527,6 +527,7 @@ export class QuotationWizardComponent implements OnInit {
       item['assemblyHours'] = 0;
       item['persons'] = 2;
       item['totalQuantity'] = 1;
+      item['laborRate'] = 0;
     }
     if (type === 'installation') {
       item['measurement'] = '';
@@ -534,6 +535,7 @@ export class QuotationWizardComponent implements OnInit {
       item['installHours'] = 0;
       item['persons'] = 2;
       item['totalQuantity'] = 1;
+      item['laborRate'] = 0;
     }
     if (type === 'veneer') {
       item['ml'] = 0;
@@ -555,7 +557,7 @@ export class QuotationWizardComponent implements OnInit {
     this.calcService.recalculateAll(this.activeQuotation, this.appConfig);
   }
 
-  applySupplyMaterial(item: SupplyItem, material: Material): void {
+  applySupplyMaterial(furn: Furniture, item: SupplyItem, material: Material): void {
     item.description = material.description;
     item.providerColor = material.provider;
     item.unitOfMeasure = material.unit || 'LAMINA';
@@ -564,6 +566,17 @@ export class QuotationWizardComponent implements OnInit {
     if (material.unit === 'LAMINA' && material.pricePerSqm > 0) {
       item.quantityMode = 'sqm';
       item.unitPrice = material.pricePerSqm;
+      
+      // Auto-agregar fila de Cortes si no existe
+      if (!furn.cuts || furn.cuts.length === 0) {
+        if (!furn.cuts) furn.cuts = [];
+        this.addItem(furn, 'cuts');
+      }
+      // Auto-agregar fila de Armado si no existe
+      if (!furn.assembly || furn.assembly.length === 0) {
+        if (!furn.assembly) furn.assembly = [];
+        this.addItem(furn, 'assembly');
+      }
     } else {
       item.quantityMode = 'unit';
       item.unitPrice = material.unitPrice;
@@ -572,11 +585,18 @@ export class QuotationWizardComponent implements OnInit {
     this.recalculate();
   }
 
-  applyEdgeMaterial(item: EdgeBandItem, material: Material): void {
+  applyEdgeMaterial(furn: Furniture, item: EdgeBandItem, material: Material): void {
     item.description = material.description;
     item.unitPrice = material.unitPrice;
     item.color = material.color || material.provider;
     item.unitOfMeasure = material.unit || 'ML';
+    
+    // Auto-agregar fila de Enchape si no existe
+    if (!furn.veneer || furn.veneer.length === 0) {
+      if (!furn.veneer) furn.veneer = [];
+      this.addItem(furn, 'veneer');
+    }
+    
     this.recalculate();
   }
 

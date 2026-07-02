@@ -520,7 +520,7 @@
                 <tr *ngFor="let sup of furn.supplies; let i = index" [class.estimated-row]="sup.unitPrice == null || sup.unitPrice <= 0">
                   <td>
                     <app-material-picker category="melamina" placeholder="Melamina / tablero..."
-                      (materialSelected)="applySupplyMaterial(sup, $event)"></app-material-picker>
+                      (materialSelected)="applySupplyMaterial(furn, sup, $event)"></app-material-picker>
                   </td>
                   <td><input type="text" [(ngModel)]="sup.description" class="form-control-sm"></td>
                   <td>
@@ -569,7 +569,7 @@
                 <tr *ngFor="let edge of furn.edgeBands; let i = index" [class.estimated-row]="edge.unitPrice == null || edge.unitPrice <= 0">
                   <td>
                     <app-material-picker category="canto" placeholder="Canto..."
-                      (materialSelected)="applyEdgeMaterial(edge, $event)"></app-material-picker>
+                      (materialSelected)="applyEdgeMaterial(furn, edge, $event)"></app-material-picker>
                   </td>
                   <td><input type="text" [(ngModel)]="edge.description" class="form-control-sm"></td>
                   <td><input type="number" [(ngModel)]="edge.quantity" (change)="recalculate()"
@@ -735,6 +735,7 @@
                   <th>Cant.</th>
                   <th>Hrs</th>
                   <th>Operarios</th>
+                  <th>Precio/Hr</th>
                   <th>Total</th>
                   <th></th>
                 </tr>
@@ -763,6 +764,8 @@
                       class="form-control-sm num-input" step="any"></td>
                   <td><input type="number" [(ngModel)]="asm.persons" (change)="recalculate()"
                       class="form-control-sm num-input" step="any"></td>
+                  <td><input type="number" [(ngModel)]="asm.laborRate" (change)="recalculate()"
+                      class="form-control-sm num-input" step="any" [placeholder]="(appConfig?.laborRatePerHour || 0).toString()"></td>
                   <td>$ {{ asm.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'assembly', i)">🗑️</button></td>
@@ -786,6 +789,7 @@
                   <th>Cant.</th>
                   <th>Hrs</th>
                   <th>Operarios</th>
+                  <th>Precio/Hr</th>
                   <th>Total</th>
                   <th></th>
                 </tr>
@@ -814,6 +818,8 @@
                       class="form-control-sm num-input" step="any"></td>
                   <td><input type="number" [(ngModel)]="inst.persons" (change)="recalculate()"
                       class="form-control-sm num-input" step="any"></td>
+                  <td><input type="number" [(ngModel)]="inst.laborRate" (change)="recalculate()"
+                      class="form-control-sm num-input" step="any" [placeholder]="(appConfig?.laborRatePerHour || 0).toString()"></td>
                   <td>$ {{ inst.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'installation', i)">🗑️</button></td>
