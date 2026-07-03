@@ -69,13 +69,17 @@
 
 <div class="card glass-panel">
   <div class="filters-row">
-    <select [(ngModel)]="filterCategory" (change)="loadMaterials()" class="form-control">
+    <select [(ngModel)]="filterCategory" (change)="onSearch()" class="form-control">
       <option *ngFor="let c of categories" [value]="c.value">{{ c.label }}</option>
+    </select>
+    <select [(ngModel)]="filterProvider" (change)="onSearch()" class="form-control">
+      <option value="">Todos los proveedores</option>
+      <option *ngFor="let p of providers" [value]="p">{{ p }}</option>
     </select>
     <input
       type="text"
       class="form-control"
-      placeholder="Buscar código, descripción, proveedor..."
+      placeholder="Buscar código, descripción..."
       [(ngModel)]="searchTerm"
       (keyup.enter)="onSearch()"
     />

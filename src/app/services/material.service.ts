@@ -122,4 +122,8 @@ export class MaterialService {
       { materials, replaceProvider }
     );
   }
+
+  getProviders(): Observable<ApiResponse<string[]>> {
+    return this.http.get<ApiResponse<string[]>>(`${this.apiUrl}/providers`);
+  }
 }

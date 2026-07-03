@@ -30,7 +30,9 @@ export class PriceListComponent implements OnInit {
     { value: 'otro', label: 'Otros' }
   ];
   filterCategory = '';
+  filterProvider = '';
   searchTerm = '';
+  providers: string[] = [];
 
   // Pagination
   currentPage = 1;
@@ -55,7 +57,16 @@ export class PriceListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.loadProviders();
     this.loadMaterials();
+  }
+
+  loadProviders(): void {
+    this.materialService.getProviders().subscribe({
+      next: (res: any) => {
+        if (res.success) this.providers = res.data;
+      }
+    });
   }
 
   loadMaterials(): void {
@@ -65,6 +76,7 @@ export class PriceListComponent implements OnInit {
       page: this.currentPage
     };
     if (this.filterCategory) params['category'] = this.filterCategory;
+    if (this.filterProvider) params['provider'] = this.filterProvider;
     if (this.searchTerm.trim()) params['search'] = this.searchTerm.trim();
     if (this.sortColumn) {
       params['sort'] = this.sortDirection === 'desc' ? `-${this.sortColumn}` : this.sortColumn;
