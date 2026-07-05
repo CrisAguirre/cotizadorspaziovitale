@@ -23,11 +23,11 @@ export class QuotationWizardComponent implements OnInit {
   currentStep = 1;
   wizardStep = 1; // Sub-step within the configuration wizard (1-4)
   readonly TOTAL_STEPS = 5;
-  readonly TOTAL_WIZARD_QUESTIONS = 4;
+  readonly TOTAL_WIZARD_QUESTIONS = 5;
   quotationForm: FormGroup;
   isLoading = false;
   showTip: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false, 5: false };
-  showTipConfig: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false };
+  showTipConfig: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false, 5: false };
 
   temporalId?: string;
 
@@ -47,6 +47,7 @@ export class QuotationWizardComponent implements OnInit {
       if (c.requiresDesignFiles === null) return false;
       if (!c.areaDisplayMode) return false;
       if (!c.mesonMode) return false;
+      if (!c.pricingTier) return false;
       return true;
     }
     if (step === 3) {
@@ -90,6 +91,7 @@ export class QuotationWizardComponent implements OnInit {
     designFilesInternal: null,
     areaDisplayMode: '',
     mesonMode: '',
+    pricingTier: '',
     wizardCompleted: false
   };
 
@@ -119,7 +121,8 @@ export class QuotationWizardComponent implements OnInit {
     { step: 1, title: 'Modo de precio', icon: '💰' },
     { step: 2, title: 'Diseño y medidas', icon: '📐' },
     { step: 3, title: 'Estructura de áreas', icon: '🏠' },
-    { step: 4, title: 'Mesones', icon: '🍽️' }
+    { step: 4, title: 'Mesones', icon: '🍽️' },
+    { step: 5, title: 'Lista de Precios', icon: '🏷️' }
   ];
 
   appConfig!: AppConfig;

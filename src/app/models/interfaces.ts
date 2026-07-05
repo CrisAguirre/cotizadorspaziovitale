@@ -9,6 +9,11 @@ export interface Material {
   dimension: string;
   unit: string;
   unitPrice: number;
+  pricePublic?: number;
+  pricePublicVol?: number;
+  priceIndustrial?: number;
+  priceIndustrialVol?: number;
+  volThreshold?: number;
   pricePerSheet: number;
   measure1: number;
   measure2: number;
@@ -263,6 +268,8 @@ export interface WizardConfig {
   areaDisplayMode: 'subtotals' | 'global_only' | 'single' | '';
   /** Mesones: includes_meson = Sí (granito, quarztone, piedra sinterizada, compactos), no_meson = No */
   mesonMode: 'includes_meson' | 'no_meson' | '';
+  /** Nivel de precios para materiales con esquemas escalonados (ej. Duropak) */
+  pricingTier: 'industrial' | 'public' | '';
   wizardCompleted: boolean;
 }
 

@@ -87,7 +87,7 @@
       <!-- Q1: Modo de precio (Reunión 17-jun: 3 opciones nuevas) -->
       <div *ngIf="wizardStep === 1" class="config-question">
         <div class="question-header">
-          <span class="question-number">1 / 4</span>
+          <span class="question-number">1 / 5</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
             <h3 style="margin: 0;">💰 ¿Cómo se calculará el precio de cada mueble que verá el cliente?</h3>
             <button type="button" class="btn-icon" (click)="showTipConfig[1] = !showTipConfig[1]"
@@ -140,7 +140,7 @@
       <!-- Q2: Diseño y medidas (Reunión 17-jun: reemplaza despiece gráfico, 2 opciones) -->
       <div *ngIf="wizardStep === 2" class="config-question">
         <div class="question-header">
-          <span class="question-number">2 / 4</span>
+          <span class="question-number">2 / 5</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px;">
             <h3 style="margin: 0;">📐 ¿Desea adjuntar archivos de diseño y medidas?</h3>
             <button type="button" class="btn-icon" (click)="showTipConfig[2] = !showTipConfig[2]"
@@ -183,7 +183,7 @@
       <!-- Q3: Estructura de áreas (sin cambios, era Q5) -->
       <div *ngIf="wizardStep === 3" class="config-question">
         <div class="question-header">
-          <span class="question-number">3 / 4</span>
+          <span class="question-number">3 / 5</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
             <h3 style="margin: 0;">🏠 ¿Esta cotización tiene más de un espacio o área?</h3>
             <button type="button" class="btn-icon" (click)="showTipConfig[3] = !showTipConfig[3]"
@@ -235,7 +235,7 @@
       <!-- Q4: Mesones (Reunión 17-jun: simplificado a 2 opciones) -->
       <div *ngIf="wizardStep === 4" class="config-question">
         <div class="question-header">
-          <span class="question-number">4 / 4</span>
+          <span class="question-number">4 / 5</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
             <h3 style="margin: 0;">🍽️ ¿Esta cotización incluye mesones o superficies de trabajo?</h3>
             <button type="button" class="btn-icon" (click)="showTipConfig[4] = !showTipConfig[4]"
@@ -266,6 +266,45 @@
               <div>
                 <strong>No incluye mesones o superficies de trabajo</strong>
                 <p>Esta cotización no incluye mesonería</p>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Q5: Tipo de Lista de Precios -->
+      <div *ngIf="wizardStep === 5" class="config-question">
+        <div class="question-header">
+          <span class="question-number">5 / 5</span>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <h3 style="margin: 0;">🏷️ ¿Qué lista de precios se aplicará para los materiales?</h3>
+            <button type="button" class="btn-icon" (click)="showTipConfig[5] = !showTipConfig[5]"
+              title="Ver ayuda de esta pregunta">💡</button>
+          </div>
+        </div>
+        <div class="wizard-tip" *ngIf="showTipConfig[5]"
+          style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
+          <strong>💡 Objetivo:</strong> Indica si se utilizará la lista de precios de fábrica (Industrial) o la lista de precios para Venta Directa (Público).
+        </div>
+        <div class="option-cards">
+          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.pricingTier === 'industrial'">
+            <input type="radio" name="pricingTier" value="industrial"
+              [(ngModel)]="activeQuotation.wizardConfig.pricingTier">
+            <div class="option-content">
+              <span class="option-letter">A</span>
+              <div>
+                <strong>Industrial (Fabricación interna)</strong>
+                <p>Lista de precios base para elaboración de muebles propios</p>
+              </div>
+            </div>
+          </label>
+          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.pricingTier === 'public'">
+            <input type="radio" name="pricingTier" value="public" [(ngModel)]="activeQuotation.wizardConfig.pricingTier">
+            <div class="option-content">
+              <span class="option-letter">B</span>
+              <div>
+                <strong>Público (Venta directa)</strong>
+                <p>Lista de precios sugerida para venta directa de material</p>
               </div>
             </div>
           </label>
