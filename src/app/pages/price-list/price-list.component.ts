@@ -50,7 +50,8 @@ export class PriceListComponent implements OnInit {
     { value: 'volpato', label: 'Volpato' },
     { value: 'iberway_cocina', label: 'Iberway cocina / armario' },
     { value: 'roca_marmol', label: 'Roca Mármol (mesones granito)' },
-    { value: 'lamitech_compac', label: 'Lamitech (compactos)' }
+    { value: 'lamitech_compac', label: 'Lamitech (compactos)' },
+    { value: 'tecnifacil', label: 'TECNIFACIL (sistemas corredizos)' }
   ];
 
   constructor(

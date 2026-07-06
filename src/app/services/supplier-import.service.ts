@@ -8,7 +8,8 @@ export type SupplierImportFormat =
   | 'volpato'
   | 'iberway_cocina'
   | 'roca_marmol'
-  | 'lamitech_compac';
+  | 'lamitech_compac'
+  | 'tecnifacil';
 
 export interface ImportPreview {
   format: SupplierImportFormat;
@@ -206,6 +207,33 @@ const SUPPLIER_CONFIGS: Record<SupplierImportFormat, SupplierImportConfig> = {
       }
       return material;
     },
+  },
+
+  tecnifacil: {
+    format: 'tecnifacil',
+    provider: 'TECNIFACIL',
+    category: 'herraje',
+    sheetIndex: 1, startRow: 4, maxRow: 200,
+    defaultUnit: 'UNIDAD',
+    columns: {
+      code: 'A', description: 'B', price: 'C',
+      section: 'A'
+    },
+    isEmptyRow: (f) => !f.code && !f.description,
+    isSectionRow: (f) => {
+      const d = (f.description || '').toUpperCase();
+      return !f.price && (d.includes('SKU') || d.includes('PRODUCTO') || d.includes('PRECIO') || d.includes('REF'));
+    },
+    isValidRow: (f) => !!f.code && f.price > 0,
+    shouldCountSkip: (f) => !!f.code || !!f.description,
+    buildCode: (f) => {
+      const raw = (f.code || '').replace(/\s+/g, '');
+      if (!raw.startsWith('TFC')) return `TFC-${raw.substring(0, 20)}`;
+      return raw;
+    },
+    buildDescription: (f) => {
+      return (f.description || '').replace(/\s+/g, ' ').trim();
+    },
   }
 };
 
@@ -229,6 +257,7 @@ export class SupplierImportService {
     if (n.includes('IBERWAY') || n.includes('IBERWEY') || n.includes('COCINA Y ARMARIO')) return 'iberway_cocina';
     if (n.includes('MESONES') || n.includes('ROCA MARMOL')) return 'roca_marmol';
     if (n.includes('COMPAC') || n.includes('LAMITECH')) return 'lamitech_compac';
+    if (n.includes('TFC') || n.includes('TECNIFACIL')) return 'tecnifacil';
     return null;
   }
 
