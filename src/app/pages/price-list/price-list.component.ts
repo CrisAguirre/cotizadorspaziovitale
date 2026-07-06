@@ -48,7 +48,9 @@ export class PriceListComponent implements OnInit {
     { value: 'hejercol', label: 'Hejercol (portafolio herrajes)' },
     { value: 'ferramenta', label: 'Ferramenta Italiana' },
     { value: 'volpato', label: 'Volpato' },
-    { value: 'iberway_cocina', label: 'Iberway cocina / armario' }
+    { value: 'iberway_cocina', label: 'Iberway cocina / armario' },
+    { value: 'roca_marmol', label: 'Roca Mármol (mesones granito)' },
+    { value: 'lamitech_compac', label: 'Lamitech (compactos)' }
   ];
 
   constructor(

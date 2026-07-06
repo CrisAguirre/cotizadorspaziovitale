@@ -119,12 +119,13 @@ export class PdfGeneratorService {
       ];
 
       const furnitureList = area.furniture || [];
+      const mesonBreakdowns: Content[] = [];
       furnitureList.forEach((furn, index) => {
         let furnBaseCost = furn.totalCost;
 
         // Q2: Herrajes
         if (wConfig.hardwareDisplayMode === 'table') {
-          furnBaseCost -= (furn.totalAccessories || 0); // Restamos accesorios del mueble
+          furnBaseCost -= (furn.totalAccessories || 0);
           if (furn.accessories && Array.isArray(furn.accessories)) {
             const fQty = furn.quantity || 1;
             furn.accessories.forEach(acc => {
@@ -144,7 +145,6 @@ export class PdfGeneratorService {
         } else if (wConfig.clientPriceMode === 'manual' || wConfig.clientPriceMode === 'outsource') {
           unitPrice = furnBaseCost * markupFactor;
         } else {
-          // Fallback
           unitPrice = furnBaseCost * markupFactor; 
         }
 
@@ -163,9 +163,30 @@ export class PdfGeneratorService {
           { text: this.formatCurrency(unitPrice), alignment: 'right' as 'right' },
           { text: this.formatCurrency(furnClientPrice), alignment: 'right' as 'right' }
         ]);
+
+        if (furn.type === 'meson' && furn.mesonDetails) {
+          const md = furn.mesonDetails;
+          mesonBreakdowns.push({
+            text: [
+              { text: `   ── Desglose Mesón: ${md.materialName || furn.name} ──`, fontSize: 9, bold: true, color: '#0B4249' },
+              { text: `\n   Precio M² sin IVA: ${this.formatCurrency(md.basePricePerM2)}`, fontSize: 9 },
+              { text: `   × Fondo: ${md.depth}`, fontSize: 9 },
+              { text: `   = Precio Lineal: ${this.formatCurrency(md.linearPrice)}`, fontSize: 9 },
+              { text: `   + Transporte y M.O.: ${this.formatCurrency(md.transportCost)}`, fontSize: 9 },
+              { text: `   = VR. CON TRANSPORTE: ${this.formatCurrency(md.baseCost)}`, fontSize: 9 },
+              { text: `   + Utilidad ${md.profitPercentage}%: ${this.formatCurrency(md.profitAmount)}`, fontSize: 9 },
+              { text: `   = SUBTOTAL: ${this.formatCurrency(md.subtotal)}`, fontSize: 9 },
+              { text: `   + IVA ${md.taxPercentage}%: ${this.formatCurrency(md.taxAmount)}`, fontSize: 9 },
+              { text: `   = VR. FINAL POR ML: ${this.formatCurrency(md.finalPricePerMl)}`, fontSize: 9, bold: true },
+              { text: `   Total (× ${furn.quantity || 1} × ${furn.areaSqm || 1} ML): ${this.formatCurrency(furn.totalBudget)}`, fontSize: 9, bold: true, color: '#D5A052' },
+              { text: '\n' }
+            ],
+            margin: [0, 2, 0, 4]
+          });
+        }
       });
 
-      // Sub-Áreas (Mesones, etc)
+      // Sub-Áreas
       if (area.subAreas && Array.isArray(area.subAreas)) {
         area.subAreas.forEach((subArea) => {
           if (subArea.items && Array.isArray(subArea.items)) {
@@ -224,8 +245,12 @@ export class PdfGeneratorService {
           paddingTop: () => 8,
           paddingBottom: () => 8
         },
-        margin: [0, 0, 0, 10]
+        margin: [0, 0, 0, 5]
       });
+
+      if (mesonBreakdowns.length > 0) {
+        content.push(...mesonBreakdowns);
+      }
 
       // Q5: Subtotales por área
       if (wConfig.areaDisplayMode === 'subtotals') {

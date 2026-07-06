@@ -68,6 +68,11 @@ export class QuotationViewComponent implements OnInit {
 
   getFurnitureClientPrice(furn: any): number {
     if (!this.quotation) return 0;
+    
+    if (furn.type === 'meson' && furn.mesonDetails) {
+      return furn.totalBudget || 0;
+    }
+
     const wConfig = this.quotation.wizardConfig || { clientPriceMode: 'proportional', hardwareDisplayMode: 'table' };
     const totals = this.quotation.totals || { pricePerSqm: 0 };
     
@@ -87,5 +92,12 @@ export class QuotationViewComponent implements OnInit {
   getAreaSubtotal(area: any): number {
     if (!area.furniture) return 0;
     return area.furniture.reduce((sum: number, f: any) => sum + this.getFurnitureClientPrice(f), 0);
+  }
+
+  isMesonExpanded: { [furnIndex: string]: boolean } = {};
+
+  toggleMesonExpand(areaIndex: number, furnIndex: number) {
+    const key = `${areaIndex}-${furnIndex}`;
+    this.isMesonExpanded[key] = !this.isMesonExpanded[key];
   }
 }

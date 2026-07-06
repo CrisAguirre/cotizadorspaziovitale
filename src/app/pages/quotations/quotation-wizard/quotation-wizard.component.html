@@ -487,6 +487,7 @@
                 <thead>
                   <tr>
                     <th>Material (Buscar)</th>
+                    <th>Tipo Material</th>
                     <th>Fondo (Multiplicador)</th>
                     <th>Transporte y M.O.</th>
                   </tr>
@@ -499,8 +500,40 @@
                       <small class="text-muted" *ngIf="furn.mesonDetails.materialName">{{ furn.mesonDetails.materialName }}</small>
                     </td>
                     <td>
+                      <div class="btn-group" style="display: flex; gap: 4px; flex-wrap: wrap;">
+                        <button type="button" class="btn-sm"
+                          [class.btn-primary]="mesonUIState.get(furn)?.transportType === 'piedra'"
+                          [class.btn-secondary]="mesonUIState.get(furn)?.transportType !== 'piedra'"
+                          (click)="setTransportType(furn, 'piedra')">Piedra
+                          <small style="display:block;font-size:9px;">$180,000</small></button>
+                        <button type="button" class="btn-sm"
+                          [class.btn-primary]="mesonUIState.get(furn)?.transportType === 'compac'"
+                          [class.btn-secondary]="mesonUIState.get(furn)?.transportType !== 'compac'"
+                          (click)="setTransportType(furn, 'compac')">Compac
+                          <small style="display:block;font-size:9px;">$160,000</small></button>
+                      </div>
+                    </td>
+                    <td>
+                      <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 4px;">
+                        <button type="button" class="btn-xs"
+                          [class.btn-primary]="furn.mesonDetails.depth === 0.8"
+                          [class.btn-outline]="furn.mesonDetails.depth !== 0.8"
+                          (click)="setDepth(furn, 0.8)" title="Mesón estándar 80cm">0.80</button>
+                        <button type="button" class="btn-xs"
+                          [class.btn-primary]="furn.mesonDetails.depth === 0.9"
+                          [class.btn-outline]="furn.mesonDetails.depth !== 0.9"
+                          (click)="setDepth(furn, 0.9)" title="Isla 90cm (equiv. 70cm frente)">0.90</button>
+                        <button type="button" class="btn-xs"
+                          [class.btn-primary]="furn.mesonDetails.depth === 1.0"
+                          [class.btn-outline]="furn.mesonDetails.depth !== 1.0"
+                          (click)="setDepth(furn, 1.0)" title="Isla 100cm">1.00</button>
+                        <button type="button" class="btn-xs"
+                          [class.btn-primary]="furn.mesonDetails.depth === 1.1"
+                          [class.btn-outline]="furn.mesonDetails.depth !== 1.1"
+                          (click)="setDepth(furn, 1.1)" title="Compac 110cm">1.10</button>
+                      </div>
                       <input type="number" [(ngModel)]="furn.mesonDetails.depth" (change)="recalculate()"
-                        class="form-control num-input" step="0.1">
+                        class="form-control num-input" step="0.1" style="width: 80px;">
                     </td>
                     <td>
                       <input type="number" [(ngModel)]="furn.mesonDetails.transportCost" (change)="recalculate()"
@@ -509,6 +542,30 @@
                   </tr>
                 </tbody>
               </table>
+
+              <div class="mt-2" style="display: flex; align-items: center; gap: 8px;">
+                <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-weight: normal; font-size: 13px;">
+                  <input type="checkbox"
+                    [checked]="mesonUIState.get(furn)?.calcMode === 'compac'"
+                    (change)="toggleCalcMode(furn, $event)">
+                  Modo placa COMPAC (calcular M² desde precio de placa)
+                </label>
+              </div>
+
+              <div class="mt-2" *ngIf="mesonUIState.get(furn)?.calcMode === 'compac'"
+                style="display: flex; gap: 8px; align-items: flex-end; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                <div>
+                  <label style="font-size: 12px;">Precio por placa</label>
+                  <input type="number" [(ngModel)]="mesonUIState.get(furn)!.platePrice"
+                    class="form-control num-input" placeholder="$ 0">
+                </div>
+                <div>
+                  <label style="font-size: 12px;">Área de la placa (M²)</label>
+                  <input type="number" [(ngModel)]="mesonUIState.get(furn)!.plateArea"
+                    class="form-control num-input" step="0.01" placeholder="Ej: 5.60">
+                </div>
+                <button type="button" class="btn-primary btn-sm" (click)="applyCompacPrice(furn)">Calcular</button>
+              </div>
 
               <table class="budget-table mt-3" style="background-color: var(--bg-secondary); border-radius: 8px;">
                 <thead>
@@ -750,7 +807,7 @@
                   <td><input type="number" [(ngModel)]="cut.timeHours" (change)="recalculate()"
                       class="form-control-sm num-input" step="any"></td>
                   <td><input type="number" [(ngModel)]="cut.laborRate" (change)="recalculate()"
-                      class="form-control-sm num-input" step="any" [placeholder]="(appConfig?.laborRatePerHour || 0).toString()"></td>
+                      class="form-control-sm num-input" step="any" [placeholder]="(appConfig.laborRatePerHour || 0).toString()"></td>
                   <td>$ {{ cut.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'cuts', i)">🗑️</button></td>
@@ -804,7 +861,7 @@
                   <td><input type="number" [(ngModel)]="asm.persons" (change)="recalculate()"
                       class="form-control-sm num-input" step="any"></td>
                   <td><input type="number" [(ngModel)]="asm.laborRate" (change)="recalculate()"
-                      class="form-control-sm num-input" step="any" [placeholder]="(appConfig?.laborRatePerHour || 0).toString()"></td>
+                      class="form-control-sm num-input" step="any" [placeholder]="(appConfig.laborRatePerHour || 0).toString()"></td>
                   <td>$ {{ asm.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'assembly', i)">🗑️</button></td>
@@ -858,7 +915,7 @@
                   <td><input type="number" [(ngModel)]="inst.persons" (change)="recalculate()"
                       class="form-control-sm num-input" step="any"></td>
                   <td><input type="number" [(ngModel)]="inst.laborRate" (change)="recalculate()"
-                      class="form-control-sm num-input" step="any" [placeholder]="(appConfig?.laborRatePerHour || 0).toString()"></td>
+                      class="form-control-sm num-input" step="any" [placeholder]="(appConfig.laborRatePerHour || 0).toString()"></td>
                   <td>$ {{ inst.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'installation', i)">🗑️</button></td>
@@ -907,7 +964,7 @@
                   <td><input type="number" [(ngModel)]="ven.timeHours" (change)="recalculate()"
                       class="form-control-sm num-input" step="any"></td>
                   <td><input type="number" [(ngModel)]="ven.laborRate" (change)="recalculate()"
-                      class="form-control-sm num-input" step="any" [placeholder]="(appConfig?.laborRatePerHour || 0).toString()"></td>
+                      class="form-control-sm num-input" step="any" [placeholder]="(appConfig.laborRatePerHour || 0).toString()"></td>
                   <td>$ {{ ven.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'veneer', i)">🗑️</button></td>

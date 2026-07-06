@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 import { DashboardComponent } from './dashboard.component';
+import { QuotationService } from '../../services/quotation.service';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -8,7 +10,9 @@ describe('DashboardComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [DashboardComponent]
+      imports: [HttpClientTestingModule],
+      declarations: [DashboardComponent],
+      providers: [QuotationService]
     });
     fixture = TestBed.createComponent(DashboardComponent);
     component = fixture.componentInstance;

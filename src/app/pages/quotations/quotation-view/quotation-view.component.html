@@ -39,7 +39,7 @@
     <!-- Areas & Furniture -->
     <div class="areas-section mt-4">
       <h3>Detalle de Muebles</h3>
-      <div *ngFor="let area of quotation.areas" class="area-card mt-3">
+      <div *ngFor="let area of quotation.areas; let aIndex = index" class="area-card mt-3">
         <h4 class="area-title">
           {{ area.name }}
           <span *ngIf="quotation.wizardConfig?.areaDisplayMode === 'subtotals'" style="float: right; color: var(--primary-color);">
@@ -58,11 +58,34 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let furn of area.furniture">
+              <tr *ngFor="let furn of area.furniture; let fIndex = index">
                 <td><strong>{{ furn.name }}</strong></td>
                 <td>
-                  {{ furn.description || 'Sin descripción' }}<br>
-                  <small class="text-muted">{{ furn.measurements || 'Sin medidas' }}</small>
+                  <ng-container *ngIf="furn.type !== 'meson'">
+                    {{ furn.description || 'Sin descripción' }}<br>
+                    <small class="text-muted">{{ furn.measurements || 'Sin medidas' }}</small>
+                  </ng-container>
+                  <ng-container *ngIf="furn.type === 'meson'">
+                    <span style="cursor:pointer;" (click)="toggleMesonExpand(aIndex, fIndex)">
+                      {{ furn.mesonDetails?.materialName || furn.description || 'Mesón' }}
+                      <small class="text-muted">[Ver desglose {{ isMesonExpanded[aIndex+'-'+fIndex] ? '▲' : '▼' }}]</small>
+                    </span>
+                    <div *ngIf="isMesonExpanded[aIndex+'-'+fIndex] && furn.mesonDetails" class="meson-breakdown" style="margin-top: 8px; padding: 8px; background: var(--bg-secondary); border-radius: 6px; font-size: 12px;">
+                      <div>Precio M² sin IVA: <strong>$ {{ furn.mesonDetails.basePricePerM2 | number }}</strong></div>
+                      <div>× Fondo: <strong>{{ furn.mesonDetails.depth }}</strong></div>
+                      <div>= Precio Lineal: <strong>$ {{ furn.mesonDetails.linearPrice | number }}</strong></div>
+                      <div>+ Transporte y M.O.: <strong>$ {{ furn.mesonDetails.transportCost | number }}</strong></div>
+                      <div style="border-top: 1px dashed #ccc; margin: 4px 0;"></div>
+                      <div>= VR. CON TRANSPORTE: <strong>$ {{ furn.mesonDetails.baseCost | number }}</strong></div>
+                      <div>+ Utilidad {{ furn.mesonDetails.profitPercentage }}%: <strong>$ {{ furn.mesonDetails.profitAmount | number }}</strong></div>
+                      <div style="border-top: 1px dashed #ccc; margin: 4px 0;"></div>
+                      <div>= SUBTOTAL: <strong>$ {{ furn.mesonDetails.subtotal | number }}</strong></div>
+                      <div>+ IVA {{ furn.mesonDetails.taxPercentage }}%: <strong>$ {{ furn.mesonDetails.taxAmount | number }}</strong></div>
+                      <div style="border-top: 1px solid #999; margin: 4px 0;"></div>
+                      <div><strong>VR. FINAL POR ML: $ {{ furn.mesonDetails.finalPricePerMl | number }}</strong></div>
+                      <div style="color: var(--primary-color); font-weight: bold; margin-top: 6px;">Total Mesón (× {{ furn.quantity || 1 }} × {{ furn.areaSqm || 1 }} ML): $ {{ furn.totalBudget | number }}</div>
+                    </div>
+                  </ng-container>
                 </td>
                 <td>{{ furn.quantity }}</td>
                 <td>{{ (getFurnitureClientPrice(furn) / (furn.quantity || 1)) | currency:'COP':'symbol':'1.0-0' }}</td>

@@ -69,6 +69,7 @@ export function buildQuotation2604Sample(): Quotation {
               { description: 'Alistamiento y limpieza', measurement: '', unitOfMeasure: 'SER', installHours: 1, persons: 1, totalQuantity: 1, laborRate: 0, totalPrice: 0 },
               { description: 'Instalación final', measurement: '', unitOfMeasure: 'SER', installHours: 1, persons: 1, totalQuantity: 1, laborRate: 0, totalPrice: 0 }
             ],
+            veneer: [],
             totalSupplies: 0,
             totalEdgeBands: 0,
             totalAccessories: 0,
@@ -76,6 +77,7 @@ export function buildQuotation2604Sample(): Quotation {
             totalCuts: 0,
             totalAssembly: 0,
             totalInstallation: 0,
+            totalVeneer: 0,
             totalCost: 0,
             totalBudget: 0
           }
@@ -111,6 +113,7 @@ export function buildQuotation2604Sample(): Quotation {
       designFilesInternal: false,
       areaDisplayMode: 'subtotals',
       mesonMode: 'no_meson',
+      pricingTier: 'industrial',
       wizardCompleted: true
     },
     status: 'nuevo',

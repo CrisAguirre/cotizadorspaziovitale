@@ -17,7 +17,9 @@ export const FURNITURE_HIERARCHY: { [area: string]: FurnitureType[] } = {
     { name: 'MUEBLE ISLA', unit: 'ML' },
     { name: 'APERGOLADO', unit: 'M2' },
     { name: 'SOMBREROS DE ISLA ( ESTRUCTURAS ALTAS )', unit: 'M2' },
-    { name: 'FACHADAS O RECUBRIMIENTOS', unit: 'M2' }
+    { name: 'FACHADAS O RECUBRIMIENTOS', unit: 'M2' },
+    { name: 'MESONES', unit: 'ML' },
+    { name: 'ISLA', unit: 'ML' }
   ],
   'CLOSET': [
     { name: 'PUERTAS ABATIBLES', unit: 'M2' },

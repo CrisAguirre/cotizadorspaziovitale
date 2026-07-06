@@ -200,6 +200,7 @@ export class QuotationWizardComponent implements OnInit {
             paymentTerms: this.activeQuotation.paymentTerms,
             validityDays: this.activeQuotation.validityDays
           });
+          this.initMesonUIStates();
           this.recalculate();
           this.isLoading = false;
         }
@@ -210,6 +211,25 @@ export class QuotationWizardComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  private initMesonUIStates() {
+    this.mesonUIState.clear();
+    if (this.activeQuotation.areas) {
+      for (const area of this.activeQuotation.areas) {
+        if (area.furniture) {
+          for (const furn of area.furniture) {
+            if (furn.type === 'meson') {
+              this.initMesonUIState(furn);
+              const state = this.mesonUIState.get(furn);
+              if (state && furn.mesonDetails) {
+                state.transportType = furn.mesonDetails.transportCost <= 160000 ? 'compac' : 'piedra';
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   loadTemporal(id: string) {
@@ -229,6 +249,7 @@ export class QuotationWizardComponent implements OnInit {
             paymentTerms: this.activeQuotation.paymentTerms,
             validityDays: this.activeQuotation.validityDays
           });
+          this.initMesonUIStates();
           this.recalculate();
         }
       },
@@ -469,6 +490,24 @@ export class QuotationWizardComponent implements OnInit {
     this.recalculate();
   }
 
+  mesonUIState = new Map<Furniture, {
+    transportType: 'piedra' | 'compac';
+    calcMode: 'standard' | 'compac';
+    platePrice: number;
+    plateArea: number;
+  }>();
+
+  private initMesonUIState(furn: Furniture) {
+    if (!this.mesonUIState.has(furn)) {
+      this.mesonUIState.set(furn, {
+        transportType: 'piedra',
+        calcMode: 'standard',
+        platePrice: 0,
+        plateArea: 0
+      });
+    }
+  }
+
   toggleMeson(furn: Furniture, event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;
     if (isChecked) {
@@ -488,8 +527,43 @@ export class QuotationWizardComponent implements OnInit {
           finalPricePerMl: 0
         };
       }
+      this.initMesonUIState(furn);
     } else {
       furn.type = 'custom';
+    }
+    this.recalculate();
+  }
+
+  setDepth(furn: Furniture, depth: number) {
+    if (!furn.mesonDetails) return;
+    furn.mesonDetails.depth = depth;
+    this.recalculate();
+  }
+
+  setTransportType(furn: Furniture, type: 'piedra' | 'compac') {
+    if (!furn.mesonDetails) return;
+    const state = this.mesonUIState.get(furn);
+    if (state) state.transportType = type;
+    furn.mesonDetails.transportCost = type === 'compac' ? 160000 : 180000;
+    this.recalculate();
+  }
+
+  toggleCalcMode(furn: Furniture, event: Event) {
+    const isCompac = (event.target as HTMLInputElement).checked;
+    const state = this.mesonUIState.get(furn);
+    if (!state || !furn.mesonDetails) return;
+    state.calcMode = isCompac ? 'compac' : 'standard';
+    if (isCompac) {
+      this.setTransportType(furn, 'compac');
+    }
+  }
+
+  applyCompacPrice(furn: Furniture) {
+    const state = this.mesonUIState.get(furn);
+    if (!state || !furn.mesonDetails || !state.plateArea || state.plateArea <= 0) return;
+    const m2Price = state.platePrice / state.plateArea;
+    if (m2Price > 0) {
+      furn.mesonDetails.basePricePerM2 = m2Price;
     }
     this.recalculate();
   }
@@ -618,6 +692,12 @@ export class QuotationWizardComponent implements OnInit {
     furn.mesonDetails.materialId = material._id;
     furn.mesonDetails.materialName = material.description;
     furn.mesonDetails.basePricePerM2 = material.unitPrice || material.pricePerSqm || 0;
+    const prov = (material.provider || '').toUpperCase();
+    if (prov.includes('LAMITECH') || prov.includes('COMPAC')) {
+      this.setTransportType(furn, 'compac');
+    } else {
+      this.setTransportType(furn, 'piedra');
+    }
     this.recalculate();
   }
 

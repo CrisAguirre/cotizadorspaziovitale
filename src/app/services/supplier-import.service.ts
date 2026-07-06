@@ -6,7 +6,9 @@ export type SupplierImportFormat =
   | 'hejercol'
   | 'ferramenta'
   | 'volpato'
-  | 'iberway_cocina';
+  | 'iberway_cocina'
+  | 'roca_marmol'
+  | 'lamitech_compac';
 
 export interface ImportPreview {
   format: SupplierImportFormat;
@@ -56,6 +58,7 @@ interface SupplierImportConfig {
   shouldCountSkip: (f: RawFields) => boolean;
   buildCode?: (f: RawFields, row: number) => string;
   buildDescription?: (f: RawFields, section: string) => string;
+  postProcessMaterial?: (material: Material, fields: RawFields) => Material;
 }
 
 // ── Supplier configs ────────────────────────────────────────────
@@ -138,6 +141,71 @@ const SUPPLIER_CONFIGS: Record<SupplierImportFormat, SupplierImportConfig> = {
       ].filter(Boolean).join(' · ');
       return section ? `${parts} (${section})` : parts;
     },
+  },
+
+  roca_marmol: {
+    format: 'roca_marmol',
+    provider: 'ROCA MARMOL',
+    category: 'meson',
+    sheetIndex: 1, startRow: 6, maxRow: 50,
+    defaultUnit: 'M2',
+    columns: {
+      code: 'A', description: 'A', price: 'B', section: 'A'
+    },
+    isEmptyRow: (f) => !f.description,
+    isSectionRow: (f) => {
+      const d = (f.description || '').toUpperCase();
+      return !f.price && (d.includes('VALORES PARA') || d.includes('NOMBRE GRANITO') || d.includes('X 0,') || d.includes('VR CON'));
+    },
+    isValidRow: (f) => !!f.description && f.price > 0,
+    shouldCountSkip: () => true,
+    buildCode: (f, row) => {
+      const cleanDesc = (f.description || '').replace(/\s*M2$/i, '').trim();
+      return `RM-${cleanDesc.substring(0, 30).replace(/\s+/g, '_')}`;
+    },
+    buildDescription: (f) => {
+      return (f.description || '').replace(/\s*M2$/i, '').trim() + ' (M²)';
+    },
+  },
+
+  lamitech_compac: {
+    format: 'lamitech_compac',
+    provider: 'LAMITECH',
+    category: 'meson',
+    sheetIndex: 1, startRow: 6, maxRow: 16,
+    defaultUnit: 'M2',
+    columns: {
+      code: 'D', description: 'D', price: 'J',
+      section: 'A',
+      extras: { platePrice: 'H', area: 'C' }
+    },
+    isEmptyRow: () => false,
+    isSectionRow: (f) => {
+      const d = (f.description || '').toUpperCase();
+      return !f.price && (!f.code || d.includes('PRODUCTO') || d.includes('REF. COLOR'));
+    },
+    isValidRow: (f) => !!f.code && f.price > 0,
+    shouldCountSkip: (f) => !!f.code,
+    buildCode: (f) => {
+      return (f.code || '').split(' ')[0];
+    },
+    buildDescription: (f) => {
+      const parts = [(f.code || ''), f.extras['dimension'] || ''].filter(Boolean);
+      return parts.join(' · ') + ' (M²)';
+    },
+    postProcessMaterial: (material, fields) => {
+      const rawArea = fields.extras['area'] || '';
+      const area = parseFloat(rawArea.replace(',', '.'));
+      const rawPlatePrice = fields.extras['platePrice'] || '';
+      const platePrice = parseFloat(rawPlatePrice.replace(/[^0-9,.]/g, '').replace(',', ''));
+      if (area > 0) {
+        material.sqmPerSheet = area;
+      }
+      if (platePrice > 0) {
+        material.pricePerSheet = platePrice;
+      }
+      return material;
+    },
   }
 };
 
@@ -159,6 +227,8 @@ export class SupplierImportService {
     if (n.includes('FERRAMENTA')) return 'ferramenta';
     if (n.includes('VOLPATO')) return 'volpato';
     if (n.includes('IBERWAY') || n.includes('IBERWEY') || n.includes('COCINA Y ARMARIO')) return 'iberway_cocina';
+    if (n.includes('MESONES') || n.includes('ROCA MARMOL')) return 'roca_marmol';
+    if (n.includes('COMPAC') || n.includes('LAMITECH')) return 'lamitech_compac';
     return null;
   }
 
@@ -216,7 +286,7 @@ export class SupplierImportService {
       const description = config.buildDescription ? config.buildDescription(fields, section) : fields.description;
       const unit = config.normalizeUnit ? this.normalizeUnit(fields.unit) : (fields.unit || config.defaultUnit);
 
-      materials.push(this.baseMaterial({
+      let material = this.baseMaterial({
         category: config.category,
         code,
         description,
@@ -225,7 +295,13 @@ export class SupplierImportService {
         unitPrice: fields.price,
         color: fields.color || '',
         dimension: fields.extras['dimension'] || ''
-      }));
+      });
+
+      if (config.postProcessMaterial) {
+        material = config.postProcessMaterial(material, fields);
+      }
+
+      materials.push(material);
     }
 
     return { format: config.format, provider: config.provider, fileName, materials, skipped };
