@@ -20,6 +20,7 @@ export interface Material {
   sqmPerSheet: number;
   pricePerSqm: number;
   active: boolean;
+  laborMinutes?: number;
   createdAt?: string;
   updatedAt?: string;
 }

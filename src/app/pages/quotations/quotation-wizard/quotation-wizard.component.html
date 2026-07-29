@@ -738,6 +738,7 @@
                 <tr>
                   <th>Buscar</th>
                   <th>Descripción</th>
+                  <th>Und</th>
                   <th>Cant.</th>
                   <th>Precio Und</th>
                   <th>Hrs Obra</th>
@@ -753,8 +754,13 @@
                       (materialSelected)="applyAccessoryMaterial(acc, $event)"></app-material-picker>
                   </td>
                   <td><input type="text" [(ngModel)]="acc.description" class="form-control-sm"></td>
-                  <td><input type="number" [(ngModel)]="acc.quantity" (change)="recalculate()"
-                      class="form-control-sm num-input"></td>
+                  <td>
+                    <div class="sqm-input-wrapper">
+                      <input type="number" [(ngModel)]="acc.quantity" (change)="recalculate()"
+                        class="form-control-sm num-input" style="width: 55px;">
+                      <span class="sqm-label">{{ acc.unit || 'UNIDAD' }}</span>
+                    </div>
+                  </td>
                   <td><input type="number" [(ngModel)]="acc.unitPrice" (change)="recalculate()"
                       class="form-control-sm num-input" readonly></td>
                   <td><input type="number" [(ngModel)]="acc.timeHours" (change)="recalculate()"

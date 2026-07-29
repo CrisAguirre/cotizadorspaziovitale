@@ -682,6 +682,9 @@ export class QuotationWizardComponent implements OnInit {
     item.code = material.code;
     item.unitPrice = material.unitPrice;
     item.unit = material.unit || 'UNIDAD';
+    if (material.laborMinutes && material.laborMinutes > 0) {
+      item.timeHours = material.laborMinutes / 60;
+    }
     this.recalculate();
   }
 

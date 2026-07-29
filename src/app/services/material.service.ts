@@ -58,7 +58,8 @@ export class MaterialService {
     if (query && query.length >= 2) {
       const lowerQuery = query.toLowerCase();
       filtered = filtered.filter(m => 
-        m.description.toLowerCase().includes(lowerQuery)
+        m.description.toLowerCase().includes(lowerQuery) ||
+        m.code.toLowerCase().includes(lowerQuery)
       );
     }
 
@@ -66,8 +67,8 @@ export class MaterialService {
     if (query) {
        const lowerQ = query.toLowerCase();
        filtered.sort((a, b) => {
-         const aStarts = a.description.toLowerCase().startsWith(lowerQ);
-         const bStarts = b.description.toLowerCase().startsWith(lowerQ);
+         const aStarts = a.description.toLowerCase().startsWith(lowerQ) || a.code.toLowerCase().startsWith(lowerQ);
+         const bStarts = b.description.toLowerCase().startsWith(lowerQ) || b.code.toLowerCase().startsWith(lowerQ);
          if (aStarts && !bStarts) return -1;
          if (!aStarts && bStarts) return 1;
          return 0;
