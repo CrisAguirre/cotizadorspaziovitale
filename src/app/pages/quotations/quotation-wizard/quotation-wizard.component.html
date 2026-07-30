@@ -34,10 +34,6 @@
           <label>Fecha <span class="text-error">*</span></label>
           <input type="date" formControlName="date" class="form-control">
         </div>
-        <div class="form-group">
-          <label>Ciudad Instalación <span class="text-error">*</span></label>
-          <input type="text" formControlName="city" class="form-control">
-        </div>
       </div>
 
       <div formGroupName="client" class="form-grid mt-4">
@@ -73,6 +69,10 @@
       </div>
 
       <div class="form-grid" *ngIf="!quotationForm.get('sameAddress')?.value">
+        <div class="form-group">
+          <label>Ciudad Instalación <span class="text-error">*</span></label>
+          <input type="text" formControlName="city" class="form-control">
+        </div>
         <div class="form-group">
           <label>Dirección Instalación</label>
           <input type="text" formControlName="installationAddress" class="form-control" placeholder="Av. 5 #10-20">
@@ -783,8 +783,8 @@
                   </td>
                   <td><input type="number" [(ngModel)]="acc.unitPrice" (change)="recalculate()"
                       class="form-control-sm num-input" readonly></td>
-                  <td><input type="number" [ngModel]="getMinutes(acc.timeHours)" (ngModelChange)="acc.timeHours = $event / 60" (change)="recalculate()"
-                      class="form-control-sm num-input"></td>
+                  <td class="text-center" style="min-width: 60px;">
+                    <span class="sqm-label">{{ getTotalTimeMinutes(acc) }} min</span></td>
                   <td>$ {{ acc.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'accessories', i)">🗑️</button></td>

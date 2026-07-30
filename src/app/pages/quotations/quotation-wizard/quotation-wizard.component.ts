@@ -330,7 +330,7 @@ export class QuotationWizardComponent implements OnInit {
       const val = this.quotationForm.value;
       this.activeQuotation.number = val.number || this.activeQuotation.number;
       this.activeQuotation.date = val.date;
-      this.activeQuotation.city = val.city;
+      this.activeQuotation.city = val.sameAddress ? val.client.city : val.city;
       this.activeQuotation.installationAddress = val.sameAddress ? val.client.address : val.installationAddress;
       this.activeQuotation.sameAddress = val.sameAddress;
       this.activeQuotation.title = val.title;
@@ -362,7 +362,9 @@ export class QuotationWizardComponent implements OnInit {
   onSameAddressChange() {
     const same = this.quotationForm.get('sameAddress')?.value;
     if (same) {
+      const clientCity = this.quotationForm.get('client.city')?.value;
       const clientAddress = this.quotationForm.get('client.address')?.value;
+      this.quotationForm.get('city')?.setValue(clientCity || '');
       this.quotationForm.get('installationAddress')?.setValue(clientAddress || '');
     }
   }
@@ -650,6 +652,10 @@ export class QuotationWizardComponent implements OnInit {
 
   getMinutes(hours: number): number {
     return Math.round((hours || 0) * 60);
+  }
+
+  getTotalTimeMinutes(item: { quantity?: number; timeHours?: number }): number {
+    return Math.round((item.quantity || 0) * (item.timeHours || 0) * 60);
   }
 
   recalculate() {
