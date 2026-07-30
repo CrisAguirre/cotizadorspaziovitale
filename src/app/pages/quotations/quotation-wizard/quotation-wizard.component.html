@@ -741,7 +741,7 @@
                   <th>Cantidad</th>
                   <th>Tipo Medida</th>
                   <th>Precio unitario</th>
-                  <th>Hrs Obra</th>
+                  <th>Tiempo M.O.</th>
                   <th>Total</th>
                   <th></th>
                 </tr>
@@ -763,7 +763,7 @@
                   </td>
                   <td><input type="number" [(ngModel)]="acc.unitPrice" (change)="recalculate()"
                       class="form-control-sm num-input" readonly></td>
-                  <td><input type="number" [(ngModel)]="acc.timeHours" (change)="recalculate()"
+                  <td><input type="number" [ngModel]="getMinutes(acc.timeHours)" (ngModelChange)="acc.timeHours = $event / 60" (change)="recalculate()"
                       class="form-control-sm num-input"></td>
                   <td>$ {{ acc.totalPrice | number }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"

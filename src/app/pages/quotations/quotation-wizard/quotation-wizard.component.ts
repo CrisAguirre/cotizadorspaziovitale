@@ -629,6 +629,10 @@ export class QuotationWizardComponent implements OnInit {
     this.recalculate();
   }
 
+  getMinutes(hours: number): number {
+    return Math.round((hours || 0) * 60);
+  }
+
   recalculate() {
     if (!this.appConfig) return;
     this.calcService.recalculateAll(this.activeQuotation, this.appConfig);
