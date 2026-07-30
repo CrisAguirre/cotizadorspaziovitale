@@ -99,8 +99,10 @@ export class QuotationWizardComponent implements OnInit {
     number: 0,
     date: new Date().toISOString().substring(0, 10),
     city: 'San Juan de Pasto',
+    installationAddress: '',
+    sameAddress: true,
     title: 'VENTA, ELABORACIÓN E INSTALACIÓN DE MOBILIARIO',
-    client: { name: '', email: '', phone: '', city: '' },
+    client: { name: '', email: '', phone: '', city: '', address: '' },
     areas: [],
     totals: {
       totalCost: 0, unforeseenPercent: 10, unforeseenAmount: 0, profitPercent: 35, profitAmount: 0,
@@ -145,12 +147,15 @@ export class QuotationWizardComponent implements OnInit {
       number: [0],
       date: [new Date().toISOString().substring(0, 10), Validators.required],
       city: ['San Juan de Pasto', Validators.required],
+      installationAddress: [''],
+      sameAddress: [true],
       title: ['VENTA, ELABORACIÓN E INSTALACIÓN DE MOBILIARIO', Validators.required],
       client: this.fb.group({
         name: ['', Validators.required],
         city: ['', Validators.required],
         phone: ['', Validators.required],
-        email: ['', [Validators.required, Validators.email]]
+        email: ['', [Validators.required, Validators.email]],
+        address: ['']
       }),
       paymentTerms: [''],
       validityDays: [15]
@@ -193,8 +198,10 @@ export class QuotationWizardComponent implements OnInit {
           this.activeQuotation = res.data;
           this.quotationForm.patchValue({
             number: this.activeQuotation.number,
-            date: this.activeQuotation.date, // Podría requerir formateo si viene con hora
+            date: this.activeQuotation.date,
             city: this.activeQuotation.city,
+            installationAddress: this.activeQuotation.installationAddress || '',
+            sameAddress: this.activeQuotation.sameAddress ?? true,
             title: this.activeQuotation.title,
             client: this.activeQuotation.client,
             paymentTerms: this.activeQuotation.paymentTerms,
@@ -244,6 +251,8 @@ export class QuotationWizardComponent implements OnInit {
             number: this.activeQuotation.number,
             date: this.activeQuotation.date,
             city: this.activeQuotation.city,
+            installationAddress: this.activeQuotation.installationAddress || '',
+            sameAddress: this.activeQuotation.sameAddress ?? true,
             title: this.activeQuotation.title,
             client: this.activeQuotation.client,
             paymentTerms: this.activeQuotation.paymentTerms,
@@ -322,6 +331,8 @@ export class QuotationWizardComponent implements OnInit {
       this.activeQuotation.number = val.number || this.activeQuotation.number;
       this.activeQuotation.date = val.date;
       this.activeQuotation.city = val.city;
+      this.activeQuotation.installationAddress = val.sameAddress ? val.client.address : val.installationAddress;
+      this.activeQuotation.sameAddress = val.sameAddress;
       this.activeQuotation.title = val.title;
       this.activeQuotation.client = val.client;
       this.activeQuotation.paymentTerms = val.paymentTerms;
@@ -346,6 +357,14 @@ export class QuotationWizardComponent implements OnInit {
     }
     
     this.autoSave();
+  }
+
+  onSameAddressChange() {
+    const same = this.quotationForm.get('sameAddress')?.value;
+    if (same) {
+      const clientAddress = this.quotationForm.get('client.address')?.value;
+      this.quotationForm.get('installationAddress')?.setValue(clientAddress || '');
+    }
   }
 
   prevStep() {

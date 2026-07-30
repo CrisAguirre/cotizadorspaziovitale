@@ -31,8 +31,10 @@
       <div class="grid-2">
         <p><strong>Nombre:</strong> {{ quotation.client.name }}</p>
         <p><strong>Ciudad:</strong> {{ quotation.client.city || 'N/A' }}</p>
+        <p><strong>Dirección:</strong> {{ quotation.client.address || 'N/A' }}</p>
         <p><strong>Teléfono:</strong> {{ quotation.client.phone || 'N/A' }}</p>
         <p><strong>Email:</strong> {{ quotation.client.email || 'N/A' }}</p>
+        <p><strong>Dirección Instalación:</strong> {{ quotation.sameAddress ? quotation.client.address : (quotation.installationAddress || 'N/A') }}</p>
       </div>
     </div>
 

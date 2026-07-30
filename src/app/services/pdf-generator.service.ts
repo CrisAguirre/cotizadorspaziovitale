@@ -76,8 +76,10 @@ export class PdfGeneratorService {
         body: [
           [{ text: 'Cliente:', bold: true }, quotation.client.name],
           [{ text: 'Ciudad:', bold: true }, quotation.client.city || 'N/A'],
+          [{ text: 'Dirección:', bold: true }, quotation.client.address || 'N/A'],
           [{ text: 'Teléfono:', bold: true }, quotation.client.phone || 'N/A'],
-          [{ text: 'Email:', bold: true }, quotation.client.email || 'N/A']
+          [{ text: 'Email:', bold: true }, quotation.client.email || 'N/A'],
+          [{ text: 'Dir. Instalación:', bold: true }, quotation.sameAddress ? (quotation.client.address || 'N/A') : (quotation.installationAddress || 'N/A')]
         ]
       },
       layout: 'lightHorizontalLines',

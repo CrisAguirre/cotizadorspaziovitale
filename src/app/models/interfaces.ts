@@ -253,6 +253,7 @@ export interface QuotationClient {
   city: string;
   phone: string;
   email: string;
+  address: string;
 }
 
 // ===== WIZARD CONFIG (FASE 0.5) =====
@@ -279,6 +280,8 @@ export interface Quotation {
   number: number;
   date: string;
   city: string;
+  installationAddress: string;
+  sameAddress: boolean;
   client: QuotationClient;
   title: string;
   areas: Area[];
