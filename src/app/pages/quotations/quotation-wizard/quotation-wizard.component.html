@@ -763,6 +763,7 @@
                   <th>Precio unitario</th>
                   <th>Tiempo M.O.</th>
                   <th>Total</th>
+                  <th title="Agrega 5% adicional al precio unitario">+5%</th>
                   <th></th>
                 </tr>
               </thead>
@@ -781,11 +782,16 @@
                   <td>
                     <span class="sqm-label">{{ acc.unit || 'UNIDAD' }}</span>
                   </td>
-                  <td><input type="number" [(ngModel)]="acc.unitPrice" (change)="recalculate()"
+                  <td><input type="number" [value]="getEffectiveUnitPrice(acc)"
                       class="form-control-sm num-input" readonly></td>
                   <td class="text-center" style="min-width: 60px;">
                     <span class="sqm-label">{{ getTotalTimeMinutes(acc) }} min</span></td>
                   <td>$ {{ acc.totalPrice | number }}</td>
+                  <td class="text-center">
+                    <input type="checkbox" [ngModel]="acc.apply5Percent"
+                      (ngModelChange)="acc.apply5Percent = $event; recalculate()"
+                      title="Agrega 5% adicional al precio unitario">
+                  </td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'accessories', i)">🗑️</button></td>
                 </tr>

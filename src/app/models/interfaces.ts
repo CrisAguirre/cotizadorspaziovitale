@@ -98,6 +98,8 @@ export interface AccessoryItem {
   laborRate: number;
   unitPrice: number;
   totalPrice: number;
+  /** Si está activo agrega 5% adicional al precio unitario */
+  apply5Percent?: boolean;
 }
 
 export interface DesignTimeItem {

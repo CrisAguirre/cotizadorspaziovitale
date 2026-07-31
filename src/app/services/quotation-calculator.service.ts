@@ -155,8 +155,9 @@ export class QuotationCalculatorService {
     if (furniture.accessories) {
       furniture.accessories.forEach((a) => {
         a.totalTime = (a.quantity || 0) * (a.timeHours || 0);
+        const effectiveUnitPrice = (a.unitPrice || 0) * (a.apply5Percent ? 1.05 : 1);
         const laborCost = a.totalTime * (a.laborRate || laborRate);
-        const materialCost = (a.quantity || 0) * (a.unitPrice || 0);
+        const materialCost = (a.quantity || 0) * effectiveUnitPrice;
         a.totalPrice = laborCost + materialCost;
         furniture.totalAccessories! += a.totalPrice;
       });

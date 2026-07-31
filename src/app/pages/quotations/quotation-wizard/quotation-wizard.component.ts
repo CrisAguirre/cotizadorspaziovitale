@@ -610,6 +610,7 @@ export class QuotationWizardComponent implements OnInit {
       item['quantity'] = 1;
       item['unitPrice'] = 0;
       item['timeHours'] = 0;
+      item['apply5Percent'] = false;
     }
     if (type === 'designTime') {
       item['quantity'] = 0;
@@ -715,6 +716,16 @@ export class QuotationWizardComponent implements OnInit {
       item.timeHours = material.laborMinutes / 60;
     }
     this.recalculate();
+  }
+
+  toggleApply5Percent(acc: AccessoryItem) {
+    acc.apply5Percent = !acc.apply5Percent;
+    this.recalculate();
+  }
+
+  getEffectiveUnitPrice(acc: AccessoryItem): number {
+    const base = acc.unitPrice || 0;
+    return acc.apply5Percent ? Math.round(base * 1.05 * 100) / 100 : base;
   }
 
 
