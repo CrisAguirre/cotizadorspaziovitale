@@ -5,6 +5,7 @@ export interface Material {
   code: string;
   description: string;
   provider: string;
+  brand?: string;
   color: string;
   dimension: string;
   unit: string;

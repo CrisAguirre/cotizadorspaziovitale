@@ -5,9 +5,98 @@
   </div>
 </div>
 
+<div class="card glass-panel">
+  <div class="filters-row">
+    <select [(ngModel)]="filterCategory" (change)="onSearch()" class="form-control">
+      <option *ngFor="let c of categories" [value]="c.value">{{ c.label }}</option>
+    </select>
+    <select [(ngModel)]="filterProvider" (change)="onSearch()" class="form-control">
+      <option value="">Todos los proveedores</option>
+      <option *ngFor="let p of providers" [value]="p">{{ p }}</option>
+    </select>
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar código, descripción..."
+      [(ngModel)]="searchTerm"
+      (keyup.enter)="onSearch()"
+    />
+    <select [(ngModel)]="filterBrand" (change)="onSearch()" class="form-control">
+      <option value="">Todas las marcas</option>
+      <option *ngFor="let b of brands" [value]="b">{{ b }}</option>
+    </select>
+    <button type="button" class="btn-secondary" (click)="onSearch()">Buscar</button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loader"></div>
+    <p>Cargando materiales...</p>
+  </div>
+
+  <div *ngIf="!isLoading && totalItems > 0" class="results-info">
+    <span>Mostrando {{ (currentPage - 1) * pageSize + 1 }}–{{ currentPage * pageSize > totalItems ? totalItems : currentPage * pageSize }} de <strong>{{ totalItems }}</strong> materiales</span>
+  </div>
+
+  <div class="table-responsive" *ngIf="!isLoading">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th (click)="sortBy('category')" class="sortable">
+            Categoría
+            <span *ngIf="sortColumn === 'category'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th (click)="sortBy('provider')" class="sortable">
+            Proveedor
+            <span *ngIf="sortColumn === 'provider'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th>Marca</th>
+          <th (click)="sortBy('code')" class="sortable">
+            Código
+            <span *ngIf="sortColumn === 'code'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th (click)="sortBy('description')" class="sortable">
+            Descripción
+            <span *ngIf="sortColumn === 'description'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+          <th>Unidad</th>
+          <th (click)="sortBy('unitPrice')" class="sortable">
+            Precio s/ IVA
+            <span *ngIf="sortColumn === 'unitPrice'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let m of materials">
+          <td data-label="Categoría"><span class="badge">{{ m.category }}</span></td>
+          <td data-label="Proveedor">{{ m.provider }}</td>
+          <td data-label="Marca">{{ m.brand || '—' }}</td>
+          <td data-label="Código">{{ m.code }}</td>
+          <td data-label="Descripción">{{ m.description }}</td>
+          <td data-label="Unidad">{{ m.unit }}</td>
+          <td data-label="Precio s/ IVA">{{ m.unitPrice | currency:'COP':'symbol':'1.0-0' }}</td>
+        </tr>
+        <tr *ngIf="materials.length === 0">
+          <td colspan="7" class="text-center">No hay materiales. Importe un Excel de proveedor.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-bar" *ngIf="!isLoading && totalPages > 1">
+    <button class="btn-secondary btn-sm" [disabled]="currentPage === 1" (click)="prevPage()">← Anterior</button>
+    <div class="page-numbers">
+      <button *ngFor="let p of [].constructor(totalPages); let i = index"
+              class="page-btn" [class.active]="currentPage === i + 1"
+              (click)="goToPage(i + 1)">{{ i + 1 }}</button>
+    </div>
+    <button class="btn-secondary btn-sm" [disabled]="currentPage === totalPages" (click)="nextPage()">Siguiente →</button>
+  </div>
+</div>
+
 <div class="card glass-panel import-panel">
   <h3>Importar desde Excel</h3>
-  <p class="text-muted">Formatos: Hejercol, Ferramenta Italiana, Volpato, Iberway (cocina). Precios sin IVA.</p>
+  <p class="text-muted">Formatos: Hejercol, Ferramenta Italiana, Volpato, Iberway (cocina), TECNIFACIL. Precios sin IVA.</p>
 
   <div class="import-grid">
     <div class="form-group">
@@ -64,89 +153,6 @@
         {{ isImporting ? 'Importando…' : 'Confirmar importación' }}
       </button>
     </div>
-  </div>
-</div>
-
-<div class="card glass-panel">
-  <div class="filters-row">
-    <select [(ngModel)]="filterCategory" (change)="onSearch()" class="form-control">
-      <option *ngFor="let c of categories" [value]="c.value">{{ c.label }}</option>
-    </select>
-    <select [(ngModel)]="filterProvider" (change)="onSearch()" class="form-control">
-      <option value="">Todos los proveedores</option>
-      <option *ngFor="let p of providers" [value]="p">{{ p }}</option>
-    </select>
-    <input
-      type="text"
-      class="form-control"
-      placeholder="Buscar código, descripción..."
-      [(ngModel)]="searchTerm"
-      (keyup.enter)="onSearch()"
-    />
-    <button type="button" class="btn-secondary" (click)="onSearch()">Buscar</button>
-  </div>
-
-  <div *ngIf="isLoading" class="loading-state">
-    <div class="loader"></div>
-    <p>Cargando materiales...</p>
-  </div>
-
-  <div *ngIf="!isLoading && totalItems > 0" class="results-info">
-    <span>Mostrando {{ (currentPage - 1) * pageSize + 1 }}–{{ currentPage * pageSize > totalItems ? totalItems : currentPage * pageSize }} de <strong>{{ totalItems }}</strong> materiales</span>
-  </div>
-
-  <div class="table-responsive" *ngIf="!isLoading">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th (click)="sortBy('category')" class="sortable">
-            Categoría
-            <span *ngIf="sortColumn === 'category'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-          </th>
-          <th (click)="sortBy('provider')" class="sortable">
-            Proveedor
-            <span *ngIf="sortColumn === 'provider'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-          </th>
-          <th (click)="sortBy('code')" class="sortable">
-            Código
-            <span *ngIf="sortColumn === 'code'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-          </th>
-          <th (click)="sortBy('description')" class="sortable">
-            Descripción
-            <span *ngIf="sortColumn === 'description'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-          </th>
-          <th>Unidad</th>
-          <th (click)="sortBy('unitPrice')" class="sortable">
-            Precio s/ IVA
-            <span *ngIf="sortColumn === 'unitPrice'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let m of materials">
-          <td data-label="Categoría"><span class="badge">{{ m.category }}</span></td>
-          <td data-label="Proveedor">{{ m.provider }}</td>
-          <td data-label="Código">{{ m.code }}</td>
-          <td data-label="Descripción">{{ m.description }}</td>
-          <td data-label="Unidad">{{ m.unit }}</td>
-          <td data-label="Precio s/ IVA">{{ m.unitPrice | currency:'COP':'symbol':'1.0-0' }}</td>
-        </tr>
-        <tr *ngIf="materials.length === 0">
-          <td colspan="6" class="text-center">No hay materiales. Importe un Excel de proveedor.</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Pagination -->
-  <div class="pagination-bar" *ngIf="!isLoading && totalPages > 1">
-    <button class="btn-secondary btn-sm" [disabled]="currentPage === 1" (click)="prevPage()">← Anterior</button>
-    <div class="page-numbers">
-      <button *ngFor="let p of [].constructor(totalPages); let i = index"
-              class="page-btn" [class.active]="currentPage === i + 1"
-              (click)="goToPage(i + 1)">{{ i + 1 }}</button>
-    </div>
-    <button class="btn-secondary btn-sm" [disabled]="currentPage === totalPages" (click)="nextPage()">Siguiente →</button>
   </div>
 </div>
 

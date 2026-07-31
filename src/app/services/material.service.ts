@@ -59,7 +59,9 @@ export class MaterialService {
       const lowerQuery = query.toLowerCase();
       filtered = filtered.filter(m => 
         m.description.toLowerCase().includes(lowerQuery) ||
-        m.code.toLowerCase().includes(lowerQuery)
+        m.code.toLowerCase().includes(lowerQuery) ||
+        (m.brand || '').toLowerCase().includes(lowerQuery) ||
+        (m.provider || '').toLowerCase().includes(lowerQuery)
       );
     }
 
@@ -126,5 +128,9 @@ export class MaterialService {
 
   getProviders(): Observable<ApiResponse<string[]>> {
     return this.http.get<ApiResponse<string[]>>(`${this.apiUrl}/providers`);
+  }
+
+  getBrands(): Observable<ApiResponse<string[]>> {
+    return this.http.get<ApiResponse<string[]>>(`${this.apiUrl}/brands`);
   }
 }

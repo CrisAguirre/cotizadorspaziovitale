@@ -26,6 +26,7 @@ interface RawFields {
   description: string;
   price: number;
   unit: string;
+  brand: string;
   color: string;
   section: string;
   extras: Record<string, string>;
@@ -37,6 +38,7 @@ interface SupplierColumnMap {
   price: string;
   priceFallback?: string;
   unit?: string;
+  brand?: string;
   color?: string;
   section: string;
   extras?: Record<string, string>;
@@ -75,7 +77,7 @@ const SUPPLIER_CONFIGS: Record<SupplierImportFormat, SupplierImportConfig> = {
     normalizeUnit: true,
     columns: {
       code: 'A', description: 'C', price: 'E',
-      color: 'B', unit: 'D', section: 'A'
+      brand: 'B', unit: 'D', section: 'A'
     },
     isEmptyRow: (f) => !f.code && !f.description,
     isSectionRow: (f) => !!f.section && !/^\d+$/.test(f.section) && !f.description,
@@ -283,6 +285,7 @@ export class SupplierImportService {
         price: getCellNum(cells, cols.price, row) ||
           (cols.priceFallback ? getCellNum(cells, cols.priceFallback, row) : 0),
         unit: cols.unit ? getCell(cells, cols.unit, row) : '',
+        brand: cols.brand ? getCell(cells, cols.brand, row) : '',
         color: cols.color ? getCell(cells, cols.color, row) : '',
         section: getCell(cells, cols.section, row),
         extras: {}
@@ -320,6 +323,7 @@ export class SupplierImportService {
         code,
         description,
         provider: config.provider,
+        brand: fields.brand || '',
         unit: unit || config.defaultUnit,
         unitPrice: fields.price,
         color: fields.color || '',
@@ -355,6 +359,7 @@ export class SupplierImportService {
       code: partial.code || '',
       description: partial.description || '',
       provider: partial.provider || '',
+      brand: partial.brand || '',
       color: partial.color || '',
       dimension: partial.dimension || '',
       unit: partial.unit || 'UNIDAD',
