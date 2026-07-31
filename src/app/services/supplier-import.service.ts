@@ -345,6 +345,7 @@ export class SupplierImportService {
     if (u.includes('LAM')) return 'LAMINA';
     if (u.includes('JGO') || u.includes('JUEGO')) return 'JUEGO';
     if (u.includes('KIT')) return 'KIT';
+    if (u.includes('TIRO')) return 'TIRO';
     return 'UNIDAD';
   }
 
