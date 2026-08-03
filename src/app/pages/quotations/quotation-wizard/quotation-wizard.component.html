@@ -742,7 +742,7 @@
             <table class="budget-table" *ngIf="furn.supplies?.length">
               <thead>
                 <tr>
-                  <th>Buscar lista</th>
+                  <th>Lámina / Grupo de color</th>
                   <th>Descripción</th>
                   <th>Cant. / m²</th>
                   <th>Precio Und</th>
@@ -753,8 +753,19 @@
               <tbody>
                 <tr *ngFor="let sup of furn.supplies; let i = index" [class.estimated-row]="sup.unitPrice == null || sup.unitPrice <= 0">
                   <td>
-                    <app-material-picker category="melamina" placeholder="Melamina / tablero..."
-                      (materialSelected)="applySupplyMaterial(furn, sup, $event)"></app-material-picker>
+                    <div style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
+                      <select class="form-control-sm" [(ngModel)]="sup._lamina"
+                        (ngModelChange)="onLaminaSelect(furn, sup)">
+                        <option value="">-- Selecciona lámina --</option>
+                        <option *ngFor="let l of insumoLaminas" [ngValue]="l.description">{{ l.description }}</option>
+                      </select>
+                      <select class="form-control-sm" *ngIf="hasColorGroups(sup)"
+                        [(ngModel)]="sup._colorGroup" (ngModelChange)="onColorGroupSelect(furn, sup)">
+                        <option value="">-- Grupo de color --</option>
+                        <option *ngFor="let g of colorGroupsFor(sup)" [ngValue]="g">{{ g }}</option>
+                      </select>
+                      <span class="picker-meta" *ngIf="sup._materialLabel">{{ sup._materialLabel }}</span>
+                    </div>
                   </td>
                   <td><input type="text" [(ngModel)]="sup.description" class="form-control-sm"></td>
                   <td>

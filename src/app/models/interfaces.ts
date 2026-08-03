@@ -1,7 +1,7 @@
 // ===== MATERIAL =====
 export interface Material {
   _id?: string;
-  category: 'melamina' | 'canto' | 'accesorio' | 'herraje' | 'vidrio' | 'meson' | 'otro';
+  category: 'melamina' | 'canto' | 'accesorio' | 'herraje' | 'vidrio' | 'meson' | 'laminado' | 'compactslab' | 'duraopak' | 'tablero' | 'otro';
   code: string;
   description: string;
   provider: string;
@@ -74,6 +74,10 @@ export interface SupplyItem {
   total: number;
   unitPrice: number;
   totalPrice: number;
+  // Transitorios del dropdown de láminas (no se persisten en BD)
+  _lamina?: string;
+  _colorGroup?: string;
+  _materialLabel?: string;
 }
 
 export interface EdgeBandItem {

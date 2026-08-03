@@ -16,6 +16,11 @@ export class MaterialService {
 
   constructor(private http: HttpClient) { }
 
+  /** Acceso a los materiales ya precargados (se llena con preloadAllMaterials) */
+  get preloadedMaterials(): Material[] {
+    return this.allMaterials;
+  }
+
   preloadAllMaterials(): Observable<PaginatedResponse<Material>> {
     const params = new HttpParams().set('limit', '10000').set('active', 'true');
     return this.http.get<PaginatedResponse<Material>>(this.apiUrl, { params }).pipe(

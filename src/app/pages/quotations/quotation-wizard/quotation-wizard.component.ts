@@ -283,7 +283,7 @@ export class QuotationWizardComponent implements OnInit {
     });
 
     // Precargar todos los materiales en segundo plano para que el buscador sea inmediato
-    this.materialService.preloadAllMaterials().subscribe();
+    this.materialService.preloadAllMaterials().subscribe(() => this.buildInsumoLaminas());
   }
 
   loadQuotation(id: string) {
@@ -806,6 +806,88 @@ export class QuotationWizardComponent implements OnInit {
     }
 
     this.recalculate();
+  }
+
+  // ===== Dropdown de láminas para la sección "1. Insumos" =====
+  readonly insumoCategories = ['melamina', 'laminado', 'duraopak', 'tablero'];
+  insumoLaminas: { description: string; colorGroups: string[]; materials: Material[] }[] = [];
+
+  buildInsumoLaminas(): void {
+    const mats = this.materialService.preloadedMaterials
+      .filter((m) => this.insumoCategories.includes(m.category) && m.active);
+    const map = new Map<string, { colorGroups: Set<string>; materials: Material[] }>();
+    mats.forEach((m) => {
+      if (!map.has(m.description)) map.set(m.description, { colorGroups: new Set(), materials: [] });
+      const e = map.get(m.description)!;
+      e.materials.push(m);
+      if (m.color) e.colorGroups.add(m.color);
+    });
+    this.insumoLaminas = [...map.entries()]
+      .map(([description, e]) => ({
+        description,
+        colorGroups: [...e.colorGroups].sort(),
+        materials: e.materials.sort((a, b) => a.pricePerSqm - b.pricePerSqm)
+      }))
+      .sort((a, b) => a.description.localeCompare(b.description));
+
+    // Re-sincronizar filas ya cargadas con el dropdown
+    this.activeQuotation.areas?.forEach((a) =>
+      a.furniture?.forEach((f) =>
+        f.supplies?.forEach((s) => {
+          if (s.description && !s._lamina) {
+            s._lamina = s.description;
+            const e = this.insumoLaminas.find((x) => x.description === s.description);
+            if (e && e.materials.length) s._colorGroup = e.colorGroups.length ? e.colorGroups[0] : '';
+          }
+        })
+      )
+    );
+  }
+
+  colorGroupsFor(sup: SupplyItem): string[] {
+    if (!sup || !sup._lamina) return [];
+    const e = this.insumoLaminas.find((x) => x.description === sup._lamina);
+    return e ? e.colorGroups : [];
+  }
+
+  hasColorGroups(sup: SupplyItem): boolean {
+    return this.colorGroupsFor(sup).length > 0;
+  }
+
+  onLaminaSelect(furn: Furniture, sup: SupplyItem): void {
+    sup._colorGroup = '';
+    sup._materialLabel = '';
+    const e = this.insumoLaminas.find((x) => x.description === sup._lamina);
+    if (!e || e.materials.length === 0) return;
+    // Con un solo grupo (o ninguno) se aplica de inmediato; con varios se espera al grupo de color
+    if (e.colorGroups.length === 1) {
+      sup._colorGroup = e.colorGroups[0];
+    }
+    if (e.colorGroups.length <= 1) {
+      this.applyResolvedSupply(furn, sup);
+    }
+  }
+
+  onColorGroupSelect(furn: Furniture, sup: SupplyItem): void {
+    this.applyResolvedSupply(furn, sup);
+  }
+
+  /** Resuelve la variante concreta (proveedor/marca/precio) a partir de lámina + grupo de color */
+  resolveSupplyMaterial(sup: SupplyItem): Material | undefined {
+    if (!sup || !sup._lamina) return undefined;
+    const e = this.insumoLaminas.find((x) => x.description === sup._lamina);
+    if (!e || e.materials.length === 0) return undefined;
+    const candidates = sup._colorGroup
+      ? e.materials.filter((m) => m.color === sup._colorGroup)
+      : e.materials;
+    return candidates.length ? candidates[0] : undefined;
+  }
+
+  applyResolvedSupply(furn: Furniture, sup: SupplyItem): void {
+    const material = this.resolveSupplyMaterial(sup);
+    if (!material) return;
+    sup._materialLabel = `${material.provider} · ${material.brand || ''} · $${material.pricePerSqm.toLocaleString('es-CO')}/m²`;
+    this.applySupplyMaterial(furn, sup, material);
   }
 
   applyEdgeMaterial(furn: Furniture, item: EdgeBandItem, material: Material): void {
