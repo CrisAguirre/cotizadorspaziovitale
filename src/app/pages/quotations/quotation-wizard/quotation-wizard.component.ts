@@ -44,10 +44,13 @@ export class QuotationWizardComponent implements OnInit {
     if (step === 2) {
       const c = this.activeQuotation.wizardConfig;
       if (!c.clientPriceMode) return false;
+      // En modo "Venta de productos y servicios" no aplican las preguntas 2-5 de configuración
+      if (this.isProductsMode()) return true;
       if (c.requiresDesignFiles === null) return false;
       if (!c.areaDisplayMode) return false;
       if (!c.mesonMode) return false;
-      if (!c.pricingTier) return false;
+      // En modo "Ingreso manual" la lista de precios (pregunta 5) no aplica
+      if (!this.isManualMode() && !c.pricingTier) return false;
       return true;
     }
     if (this.isProductsMode()) {
@@ -148,6 +151,17 @@ export class QuotationWizardComponent implements OnInit {
 
   isProductsMode(): boolean {
     return this.activeQuotation.wizardConfig?.clientPriceMode === 'products';
+  }
+
+  isManualMode(): boolean {
+    return this.activeQuotation.wizardConfig?.clientPriceMode === 'manual';
+  }
+
+  get maxWizardStep(): number {
+    // En modo productos solo existe la pregunta 1; en manual se omite la lista de precios (5)
+    if (this.isProductsMode()) return 1;
+    if (this.isManualMode()) return this.TOTAL_WIZARD_QUESTIONS - 1;
+    return this.TOTAL_WIZARD_QUESTIONS;
   }
 
   get maxSteps(): number {
@@ -469,7 +483,12 @@ export class QuotationWizardComponent implements OnInit {
 
   // Config wizard sub-navigation
   nextWizardQuestion() {
-    if (this.wizardStep < this.TOTAL_WIZARD_QUESTIONS) {
+    // En modo venta no hay más preguntas internas: ir directo a Productos y servicios
+    if (this.isProductsMode()) {
+      this.nextStep();
+      return;
+    }
+    if (this.wizardStep < this.maxWizardStep) {
       this.wizardStep++;
     }
   }
@@ -478,6 +497,15 @@ export class QuotationWizardComponent implements OnInit {
     if (this.wizardStep > 1) {
       this.wizardStep--;
     }
+  }
+
+  goToWizardStep(step: number) {
+    if (step > this.maxWizardStep) return;
+    this.wizardStep = step;
+  }
+
+  onClientPriceModeChange() {
+    this.wizardStep = 1;
   }
 
   isWizardComplete(): boolean {

@@ -1,10 +1,10 @@
-<div class="page-header">
+﻿<div class="page-header">
   <div>
     <h1>Cotizaciones</h1>
-    <p>Historial y gestión de cotizaciones.</p>
+    <p>Historial y gestiÃ³n de cotizaciones.</p>
   </div>
   <div class="header-actions">
-    <button class="btn-primary" routerLink="/quotations/new">➕ Nueva Cotización</button>
+    <button class="btn-primary" routerLink="/quotations/new">âž• Nueva CotizaciÃ³n</button>
   </div>
 </div>
 
@@ -12,10 +12,10 @@
 <div class="tabs-bar">
   <div style="display: flex; gap: 10px; align-items: center;">
     <button class="btn-tab" [class.active]="activeTab === 'activas'" (click)="activeTab = 'activas'">
-      📋 Activas ({{ quotations.length }})
+      ðŸ“‹ Activas ({{ quotations.length }})
     </button>
     <button class="btn-tab" [class.active]="activeTab === 'archivo'" (click)="activeTab = 'archivo'">
-      🗄️ Archivo ({{ archivedQuotations.length }})
+      ðŸ—„ï¸ Archivo ({{ archivedQuotations.length }})
     </button>
   </div>
 </div>
@@ -23,10 +23,10 @@
 <div class="card glass-panel">
   
   <div class="filters-row">
-    <span class="filter-label">Filtros rápidos:</span>
+    <span class="filter-label">Filtros rÃ¡pidos:</span>
     <button class="filter-chip" [class.active]="!filterStatus" (click)="setFilter(null)">Todas</button>
     <button class="filter-chip badge nuevo" [class.active]="filterStatus === 'nuevo'" (click)="setFilter('nuevo')">Nuevas</button>
-    <button class="filter-chip badge en_revision" [class.active]="filterStatus === 'en_revision'" (click)="setFilter('en_revision')">En Revisión</button>
+    <button class="filter-chip badge en_revision" [class.active]="filterStatus === 'en_revision'" (click)="setFilter('en_revision')">En RevisiÃ³n</button>
     <button class="filter-chip badge aceptada" [class.active]="filterStatus === 'aceptada'" (click)="setFilter('aceptada')">Aceptadas</button>
     <button class="filter-chip badge rechazada" [class.active]="filterStatus === 'rechazada'" (click)="setFilter('rechazada')">Rechazadas</button>
   </div>
@@ -41,28 +41,28 @@
       <thead>
         <tr>
           <th (click)="sortBy('number')" class="sortable">
-            N°
-            <span *ngIf="sortColumn === 'number'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+            NÂ°
+            <span *ngIf="sortColumn === 'number'">{{ sortDirection === 'asc' ? 'â–²' : 'â–¼' }}</span>
           </th>
           <th (click)="sortBy('date')" class="sortable">
             Fecha
-            <span *ngIf="sortColumn === 'date'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+            <span *ngIf="sortColumn === 'date'">{{ sortDirection === 'asc' ? 'â–²' : 'â–¼' }}</span>
           </th>
           <th (click)="sortBy('client.name')" class="sortable">
             Cliente
-            <span *ngIf="sortColumn === 'client.name'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+            <span *ngIf="sortColumn === 'client.name'">{{ sortDirection === 'asc' ? 'â–²' : 'â–¼' }}</span>
           </th>
           <th (click)="sortBy('city')" class="sortable">
             Ciudad
-            <span *ngIf="sortColumn === 'city'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+            <span *ngIf="sortColumn === 'city'">{{ sortDirection === 'asc' ? 'â–²' : 'â–¼' }}</span>
           </th>
           <th (click)="sortBy('totals.grandTotal')" class="sortable">
             Total
-            <span *ngIf="sortColumn === 'totals.grandTotal'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+            <span *ngIf="sortColumn === 'totals.grandTotal'">{{ sortDirection === 'asc' ? 'â–²' : 'â–¼' }}</span>
           </th>
           <th (click)="sortBy('status')" class="sortable">
             Estado
-            <span *ngIf="sortColumn === 'status'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+            <span *ngIf="sortColumn === 'status'">{{ sortDirection === 'asc' ? 'â–²' : 'â–¼' }}</span>
           </th>
           <th>Ciclo de Vida</th>
           <th>Acciones</th>
@@ -70,61 +70,61 @@
       </thead>
       <tbody>
         <tr *ngFor="let q of getDisplayList()">
-          <td data-label="N°">{{ q.number }}</td>
+          <td data-label="NÂ°">{{ q.number }}</td>
           <td data-label="Fecha">{{ q.date | date:'dd/MM/yyyy' }}</td>
           <td data-label="Cliente">{{ q.client.name }}</td>
           <td data-label="Ciudad">{{ q.city }}</td>
-          <td data-label="Total">{{ q.totals.grandTotal | currency:'COP':'symbol':'1.0-0' }}</td>
+          <td data-label="Total">{{ q.totals.grandTotal | currency:'COP':'symbol':'1.0-2' }}</td>
           <td data-label="Estado">
             <span class="badge" [ngClass]="getStatusClass(q.status)">{{ getStatusLabel(q.status) }}</span>
           </td>
           <td data-label="Ciclo de Vida" class="lifecycle-actions">
-            <!-- Estado: Nuevo → Enviar a revisión -->
+            <!-- Estado: Nuevo â†’ Enviar a revisiÃ³n -->
             <button *ngIf="q.status === 'nuevo' || q.status === 'borrador'"
                     class="btn-primary btn-sm"
                     title="Marcar como enviada al cliente"
                     (click)="changeStatus(q, 'en_revision')">
-              📤 Enviar
+              ðŸ“¤ Enviar
             </button>
   
-            <!-- Estado: En Revisión → Aceptar / Rechazar / Devolver -->
+            <!-- Estado: En RevisiÃ³n â†’ Aceptar / Rechazar / Devolver -->
             <ng-container *ngIf="q.status === 'en_revision' || q.status === 'auditada' || q.status === 'enviada'">
               <button class="btn-success btn-sm"
                       title="Aceptar" 
                       (click)="changeStatus(q, 'aceptada')">
-                ✅ Aceptar
+                âœ… Aceptar
               </button>
               <button class="btn-danger btn-sm"
                       title="Rechazar" 
                       (click)="changeStatus(q, 'rechazada')">
-                ❌ Rechazar
+                âŒ Rechazar
               </button>
               <button class="btn-secondary btn-sm"
                       title="Retomar/Editar" 
                       (click)="editQuotation(q._id)">
-                ✏️ Retomar
+                âœï¸ Retomar
               </button>
             </ng-container>
   
-            <!-- Estado: Aceptada o Rechazada → Archivar -->
+            <!-- Estado: Aceptada o Rechazada â†’ Archivar -->
             <button *ngIf="q.status === 'aceptada' || q.status === 'aprobada'"
                     class="btn-secondary btn-sm"
                     title="Archivar" 
                     (click)="changeStatus(q, 'archivada_aceptada')">
-              📁 Archivar
+              ðŸ“ Archivar
             </button>
             <button *ngIf="q.status === 'rechazada'"
                     class="btn-secondary btn-sm"
                     title="Archivar" 
                     (click)="changeStatus(q, 'archivada_rechazada')">
-              📁 Archivar
+              ðŸ“ Archivar
             </button>
           </td>
           <td data-label="Acciones" class="actions-cell">
-            <button class="btn-icon" title="Ver Resumen" (click)="viewQuotation(q._id)">👁️</button>
-            <button class="btn-icon" title="Editar" (click)="editQuotation(q._id)">✏️</button>
-            <button class="btn-icon" title="Descargar PDF" (click)="downloadPdf(q)">📄</button>
-            <button class="btn-icon" title="Eliminar" (click)="deleteQuotation(q._id, q.number)" style="color: #ff6b6b;">🗑️</button>
+            <button class="btn-icon" title="Ver Resumen" (click)="viewQuotation(q._id)">ðŸ‘ï¸</button>
+            <button class="btn-icon" title="Editar" (click)="editQuotation(q._id)">âœï¸</button>
+            <button class="btn-icon" title="Descargar PDF" (click)="downloadPdf(q)">ðŸ“„</button>
+            <button class="btn-icon" title="Eliminar" (click)="deleteQuotation(q._id, q.number)" style="color: #ff6b6b;">ðŸ—‘ï¸</button>
           </td>
         </tr>
         <tr *ngIf="getDisplayList().length === 0">

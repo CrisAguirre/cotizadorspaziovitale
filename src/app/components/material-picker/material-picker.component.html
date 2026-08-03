@@ -1,4 +1,4 @@
-<div class="material-picker">
+﻿<div class="material-picker">
   <input
     type="text"
     class="form-control-sm picker-input"
@@ -18,11 +18,11 @@
     >
       <span class="picker-code">{{ m.code }}</span>
       <span class="picker-desc">{{ m.description }}</span>
-      <span class="picker-meta" *ngIf="m.unit === 'LAMINA' && m.pricePerSqm > 0">{{ m.provider }} · {{ m.pricePerSqm | currency:'COP':'symbol':'1.0-0' }}/m²</span>
-      <span class="picker-meta" *ngIf="!(m.unit === 'LAMINA' && m.pricePerSqm > 0)">{{ m.provider }} · {{ m.unitPrice | currency:'COP':'symbol':'1.0-0' }}</span>
+      <span class="picker-meta" *ngIf="m.unit === 'LAMINA' && m.pricePerSqm > 0">{{ m.provider }} Â· {{ m.pricePerSqm | currency:'COP':'symbol':'1.0-2' }}/mÂ²</span>
+      <span class="picker-meta" *ngIf="!(m.unit === 'LAMINA' && m.pricePerSqm > 0)">{{ m.provider }} Â· {{ m.unitPrice | currency:'COP':'symbol':'1.0-2' }}</span>
     </button>
     <div *ngIf="!isLoading && totalResults > results.length" class="picker-item muted">
-      Mostrando {{ results.length }} de {{ totalResults }} — escribe para filtrar
+      Mostrando {{ results.length }} de {{ totalResults }} â€” escribe para filtrar
     </div>
     <div *ngIf="!isLoading && !results.length" class="picker-item muted">Sin resultados</div>
   </div>

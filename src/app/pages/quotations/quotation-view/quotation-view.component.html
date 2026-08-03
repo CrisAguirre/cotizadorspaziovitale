@@ -1,12 +1,12 @@
-<div class="view-container">
+﻿<div class="view-container">
   <div class="header-actions">
-    <button class="btn-secondary" (click)="goBack()">← Volver al Listado</button>
-    <button class="btn-primary" (click)="downloadPdf()" [disabled]="!quotation">📄 Descargar PDF</button>
+    <button class="btn-secondary" (click)="goBack()">â† Volver al Listado</button>
+    <button class="btn-primary" (click)="downloadPdf()" [disabled]="!quotation">ðŸ“„ Descargar PDF</button>
   </div>
 
   <div *ngIf="isLoading" class="loading-state glass-panel">
     <div class="loader"></div>
-    <p>Cargando cotización...</p>
+    <p>Cargando cotizaciÃ³n...</p>
   </div>
 
   <div *ngIf="error" class="error-state glass-panel">
@@ -17,7 +17,7 @@
     <!-- Header info -->
     <div class="header-info">
       <div>
-        <h2>Cotización No. {{ quotation.number }}</h2>
+        <h2>CotizaciÃ³n No. {{ quotation.number }}</h2>
         <p class="text-muted">{{ quotation.title }}</p>
       </div>
       <div class="status-badge" [ngClass]="quotation.status || 'nuevo'">
@@ -27,14 +27,14 @@
 
     <!-- Client info -->
     <div class="client-info mt-4">
-      <h3>Información del Cliente</h3>
+      <h3>InformaciÃ³n del Cliente</h3>
       <div class="grid-2">
         <p><strong>Nombre:</strong> {{ quotation.client.name }}</p>
         <p><strong>Ciudad:</strong> {{ quotation.client.city || 'N/A' }}</p>
-        <p><strong>Dirección:</strong> {{ quotation.client.address || 'N/A' }}</p>
-        <p><strong>Teléfono:</strong> {{ quotation.client.phone || 'N/A' }}</p>
+        <p><strong>DirecciÃ³n:</strong> {{ quotation.client.address || 'N/A' }}</p>
+        <p><strong>TelÃ©fono:</strong> {{ quotation.client.phone || 'N/A' }}</p>
         <p><strong>Email:</strong> {{ quotation.client.email || 'N/A' }}</p>
-        <p><strong>Dirección Instalación:</strong> {{ quotation.sameAddress ? quotation.client.address : (quotation.installationAddress || 'N/A') }}</p>
+        <p><strong>DirecciÃ³n InstalaciÃ³n:</strong> {{ quotation.sameAddress ? quotation.client.address : (quotation.installationAddress || 'N/A') }}</p>
       </div>
     </div>
 
@@ -45,8 +45,8 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>Código</th>
-              <th>Descripción</th>
+              <th>CÃ³digo</th>
+              <th>DescripciÃ³n</th>
               <th>Unidad</th>
               <th>Cant.</th>
               <th>Precio Unit. c/ IVA</th>
@@ -59,8 +59,8 @@
               <td>{{ item.description }}</td>
               <td>{{ item.unit }}</td>
               <td>{{ item.quantity }}</td>
-              <td>{{ (item.unitPriceWithTax || 0) | currency:'COP':'symbol':'1.0-0' }}</td>
-              <td>{{ (item.quantity * item.unitPriceWithTax) | currency:'COP':'symbol':'1.0-0' }}</td>
+              <td>{{ (item.unitPriceWithTax || 0) | currency:'COP':'symbol':'1.0-2' }}</td>
+              <td>{{ (item.quantity * item.unitPriceWithTax) | currency:'COP':'symbol':'1.0-2' }}</td>
             </tr>
           </tbody>
         </table>
@@ -74,7 +74,7 @@
         <h4 class="area-title">
           {{ area.name }}
           <span *ngIf="quotation.wizardConfig?.areaDisplayMode === 'subtotals'" style="float: right; color: var(--primary-color);">
-            Subtotal: {{ getAreaSubtotal(area) | currency:'COP':'symbol':'1.0-0' }}
+            Subtotal: {{ getAreaSubtotal(area) | currency:'COP':'symbol':'1.0-2' }}
           </span>
         </h4>
         <div class="table-responsive">
@@ -82,7 +82,7 @@
             <thead>
               <tr>
                 <th>Mueble</th>
-                <th>Descripción / Medidas</th>
+                <th>DescripciÃ³n / Medidas</th>
                 <th>Cant.</th>
                 <th>Valor Unit.</th>
                 <th>Valor Total</th>
@@ -93,37 +93,37 @@
                 <td><strong>{{ furn.name }}</strong></td>
                 <td>
                   <ng-container *ngIf="furn.type !== 'meson'">
-                    {{ furn.description || 'Sin descripción' }}<br>
+                    {{ furn.description || 'Sin descripciÃ³n' }}<br>
                     <small class="text-muted">{{ furn.measurements || 'Sin medidas' }}</small>
                   </ng-container>
                   <ng-container *ngIf="furn.type === 'meson'">
                     <span style="cursor:pointer;" (click)="toggleMesonExpand(aIndex, fIndex)">
-                      {{ furn.mesonDetails?.materialName || furn.description || 'Mesón' }}
-                      <small class="text-muted">[Ver desglose {{ isMesonExpanded[aIndex+'-'+fIndex] ? '▲' : '▼' }}]</small>
+                      {{ furn.mesonDetails?.materialName || furn.description || 'MesÃ³n' }}
+                      <small class="text-muted">[Ver desglose {{ isMesonExpanded[aIndex+'-'+fIndex] ? 'â–²' : 'â–¼' }}]</small>
                     </span>
                     <div *ngIf="isMesonExpanded[aIndex+'-'+fIndex] && furn.mesonDetails" class="meson-breakdown" style="margin-top: 8px; padding: 8px; background: var(--bg-secondary); border-radius: 6px; font-size: 12px;">
-                      <div>Precio M² sin IVA: <strong>$ {{ furn.mesonDetails.basePricePerM2 | number }}</strong></div>
-                      <div>× Fondo: <strong>{{ furn.mesonDetails.depth }}</strong></div>
-                      <div>= Precio Lineal: <strong>$ {{ furn.mesonDetails.linearPrice | number }}</strong></div>
-                      <div>+ Transporte y M.O.: <strong>$ {{ furn.mesonDetails.transportCost | number }}</strong></div>
+                      <div>Precio MÂ² sin IVA: <strong>$ {{ furn.mesonDetails.basePricePerM2 | number:'1.0-2' }}</strong></div>
+                      <div>Ã— Fondo: <strong>{{ furn.mesonDetails.depth }}</strong></div>
+                      <div>= Precio Lineal: <strong>$ {{ furn.mesonDetails.linearPrice | number:'1.0-2' }}</strong></div>
+                      <div>+ Transporte y M.O.: <strong>$ {{ furn.mesonDetails.transportCost | number:'1.0-2' }}</strong></div>
                       <div style="border-top: 1px dashed #ccc; margin: 4px 0;"></div>
-                      <div>= VR. CON TRANSPORTE: <strong>$ {{ furn.mesonDetails.baseCost | number }}</strong></div>
-                      <div>+ Utilidad {{ furn.mesonDetails.profitPercentage }}%: <strong>$ {{ furn.mesonDetails.profitAmount | number }}</strong></div>
+                      <div>= VR. CON TRANSPORTE: <strong>$ {{ furn.mesonDetails.baseCost | number:'1.0-2' }}</strong></div>
+                      <div>+ Utilidad {{ furn.mesonDetails.profitPercentage }}%: <strong>$ {{ furn.mesonDetails.profitAmount | number:'1.0-2' }}</strong></div>
                       <div style="border-top: 1px dashed #ccc; margin: 4px 0;"></div>
-                      <div>= SUBTOTAL: <strong>$ {{ furn.mesonDetails.subtotal | number }}</strong></div>
-                      <div>+ IVA {{ furn.mesonDetails.taxPercentage }}%: <strong>$ {{ furn.mesonDetails.taxAmount | number }}</strong></div>
+                      <div>= SUBTOTAL: <strong>$ {{ furn.mesonDetails.subtotal | number:'1.0-2' }}</strong></div>
+                      <div>+ IVA {{ furn.mesonDetails.taxPercentage }}%: <strong>$ {{ furn.mesonDetails.taxAmount | number:'1.0-2' }}</strong></div>
                       <div style="border-top: 1px solid #999; margin: 4px 0;"></div>
-                      <div><strong>VR. FINAL POR ML: $ {{ furn.mesonDetails.finalPricePerMl | number }}</strong></div>
-                      <div style="color: var(--primary-color); font-weight: bold; margin-top: 6px;">Total Mesón (× {{ furn.quantity || 1 }} × {{ furn.areaSqm || 1 }} ML): $ {{ furn.totalBudget | number }}</div>
+                      <div><strong>VR. FINAL POR ML: $ {{ furn.mesonDetails.finalPricePerMl | number:'1.0-2' }}</strong></div>
+                      <div style="color: var(--primary-color); font-weight: bold; margin-top: 6px;">Total MesÃ³n (Ã— {{ furn.quantity || 1 }} Ã— {{ furn.areaSqm || 1 }} ML): $ {{ furn.totalBudget | number:'1.0-2' }}</div>
                     </div>
                   </ng-container>
                 </td>
                 <td>{{ furn.quantity }}</td>
-                <td>{{ (getFurnitureClientPrice(furn) / (furn.quantity || 1)) | currency:'COP':'symbol':'1.0-0' }}</td>
-                <td style="font-weight: 500;">{{ getFurnitureClientPrice(furn) | currency:'COP':'symbol':'1.0-0' }}</td>
+                <td>{{ (getFurnitureClientPrice(furn) / (furn.quantity || 1)) | currency:'COP':'symbol':'1.0-2' }}</td>
+                <td style="font-weight: 500;">{{ getFurnitureClientPrice(furn) | currency:'COP':'symbol':'1.0-2' }}</td>
               </tr>
               <tr *ngIf="!area.furniture || area.furniture.length === 0">
-                <td colspan="5" class="text-center text-muted">No hay muebles en esta área.</td>
+                <td colspan="5" class="text-center text-muted">No hay muebles en esta Ã¡rea.</td>
               </tr>
             </tbody>
           </table>
@@ -137,19 +137,19 @@
       <div class="totals-box">
         <div class="total-row">
           <span>Subtotal antes de IVA:</span>
-          <strong>{{ (quotation.totals.subtotal || 0) | currency:'COP':'symbol':'1.0-0' }}</strong>
+          <strong>{{ (quotation.totals.subtotal || 0) | currency:'COP':'symbol':'1.0-2' }}</strong>
         </div>
         <div class="total-row">
           <span>IVA:</span>
-          <span>{{ (quotation.totals.taxAmount || 0) | currency:'COP':'symbol':'1.0-0' }}</span>
+          <span>{{ (quotation.totals.taxAmount || 0) | currency:'COP':'symbol':'1.0-2' }}</span>
         </div>
         <div class="total-row" *ngIf="quotation.totals.viaticos > 0">
-          <span>Viáticos (sin %):</span>
-          <span>{{ (quotation.totals.viaticos || 0) | currency:'COP':'symbol':'1.0-0' }}</span>
+          <span>ViÃ¡ticos (sin %):</span>
+          <span>{{ (quotation.totals.viaticos || 0) | currency:'COP':'symbol':'1.0-2' }}</span>
         </div>
         <div class="total-row grand-total mt-2">
           <span>VALOR TOTAL:</span>
-          <span>{{ (quotation.totals.grandTotal || 0) | currency:'COP':'symbol':'1.0-0' }}</span>
+          <span>{{ (quotation.totals.grandTotal || 0) | currency:'COP':'symbol':'1.0-2' }}</span>
         </div>
       </div>
     </div>
@@ -158,7 +158,7 @@
     <div class="conditions-section mt-4">
       <h3>Condiciones Comerciales</h3>
       <p><strong>Forma de pago:</strong> {{ quotation.paymentTerms || 'No especificada' }}</p>
-      <p><strong>Validez de la oferta:</strong> {{ quotation.validityDays || 15 }} días</p>
+      <p><strong>Validez de la oferta:</strong> {{ quotation.validityDays || 15 }} dÃ­as</p>
       <p *ngIf="quotation.notes"><strong>Notas adicionales:</strong> {{ quotation.notes }}</p>
     </div>
   </div>

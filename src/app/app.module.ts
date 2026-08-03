@@ -21,6 +21,7 @@ import { HeaderComponent } from './components/header/header.component';
 import { MaterialPickerComponent } from './components/material-picker/material-picker.component';
 import { ToastComponent } from './components/toast/toast.component';
 import { ActivityComponent } from './pages/activity/activity.component';
+import { CurrencyInputDirective } from './directives/currency-input.directive';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -58,7 +59,8 @@ const routes: Routes = [
     HeaderComponent,
     MaterialPickerComponent,
     ToastComponent,
-    ActivityComponent
+    ActivityComponent,
+    CurrencyInputDirective
   ],
   imports: [
     BrowserModule,
