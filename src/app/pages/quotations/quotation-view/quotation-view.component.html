@@ -38,6 +38,35 @@
       </div>
     </div>
 
+    <!-- Productos y servicios (modo venta) -->
+    <div class="products-section mt-4" *ngIf="quotation.products && quotation.products.length">
+      <h3>Productos y Servicios</h3>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Unidad</th>
+              <th>Cant.</th>
+              <th>Precio Unit. c/ IVA</th>
+              <th>Total c/ IVA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of quotation.products">
+              <td>{{ item.code }}</td>
+              <td>{{ item.description }}</td>
+              <td>{{ item.unit }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ (item.unitPriceWithTax || 0) | currency:'COP':'symbol':'1.0-0' }}</td>
+              <td>{{ (item.quantity * item.unitPriceWithTax) | currency:'COP':'symbol':'1.0-0' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Areas & Furniture -->
     <div class="areas-section mt-4">
       <h3>Detalle de Muebles</h3>

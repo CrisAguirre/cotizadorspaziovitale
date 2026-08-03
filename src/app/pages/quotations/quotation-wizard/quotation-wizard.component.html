@@ -2,9 +2,15 @@
   <div class="wizard-header glass-panel">
     <div class="step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">1. Cliente</div>
     <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">2. Configuración</div>
-    <div class="step" [class.active]="currentStep === 3" [class.completed]="currentStep > 3">3. Muebles</div>
-    <div class="step" [class.active]="currentStep === 4" [class.completed]="currentStep > 4">4. Presupuesto</div>
-    <div class="step" [class.active]="currentStep === 5" [class.completed]="currentStep > 5">5. Resumen</div>
+    <ng-container *ngIf="isProductsMode(); else normalSteps">
+      <div class="step" [class.active]="currentStep === 3" [class.completed]="currentStep > 3">3. Productos y servicios</div>
+      <div class="step" [class.active]="currentStep === 4" [class.completed]="currentStep > 4">4. Resumen</div>
+    </ng-container>
+    <ng-template #normalSteps>
+      <div class="step" [class.active]="currentStep === 3" [class.completed]="currentStep > 3">3. Muebles</div>
+      <div class="step" [class.active]="currentStep === 4" [class.completed]="currentStep > 4">4. Presupuesto</div>
+      <div class="step" [class.active]="currentStep === 5" [class.completed]="currentStep > 5">5. Resumen</div>
+    </ng-template>
   </div>
 
   <div class="wizard-body glass-panel">
@@ -57,11 +63,6 @@
           <label>Email <span class="text-error">*</span></label>
           <input type="email" formControlName="email" class="form-control">
         </div>
-        <div class="form-group">
-          <label>Valor de Viáticos (COP) <span class="text-muted">— se suma al final sin porcentajes</span></label>
-          <input type="number" formControlName="viaticos" min="0" step="1000" class="form-control"
-            placeholder="Ej. 300000" (input)="syncViaticos()">
-        </div>
       </div>
 
       <div class="form-grid mt-3">
@@ -81,6 +82,11 @@
         <div class="form-group">
           <label>Dirección Instalación</label>
           <input type="text" formControlName="installationAddress" class="form-control" placeholder="Av. 5 #10-20">
+        </div>
+        <div formGroupName="client" class="form-group">
+          <label>Valor Viáticos</label>
+          <input type="number" formControlName="viaticos" min="0" step="1000" class="form-control"
+            placeholder="Ej. 300000" (input)="syncViaticos()">
         </div>
       </div>
     </form>
@@ -156,6 +162,17 @@
               <div>
                 <strong>Tercerización</strong>
                 <p>Incluye: tapizados, pinturas, sillas, accesorios y electrodomésticos</p>
+              </div>
+            </div>
+          </label>
+          <label class="option-card" [class.selected]="activeQuotation.wizardConfig.clientPriceMode === 'products'">
+            <input type="radio" name="clientPriceMode" value="products"
+              [(ngModel)]="activeQuotation.wizardConfig.clientPriceMode">
+            <div class="option-content">
+              <span class="option-letter">D</span>
+              <div>
+                <strong>Venta de productos y servicios</strong>
+                <p>Cotización directa de productos/servicios; cambia los pasos a 3. Productos y 4. Resumen</p>
               </div>
             </div>
           </label>
@@ -347,8 +364,89 @@
       </div>
     </div>
 
+    <!-- PASO 3 (modo venta): PRODUCTOS Y SERVICIOS -->
+    <div *ngIf="currentStep === 3 && isProductsMode()">
+      <div class="flex-between mb-2">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <h2>Productos y Servicios</h2>
+        </div>
+      </div>
+      <p class="text-muted">Selecciona los ítems de la cotización. Los precios ya incluyen IVA.</p>
+
+      <div class="form-group" style="max-width: 420px;">
+        <input type="text" [(ngModel)]="productSearch" class="form-control" placeholder="Buscar producto o servicio…">
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 40px;">Sel.</th>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Unidad</th>
+              <th>Precio Unit. (c/ IVA)</th>
+              <th style="width: 110px;">Cantidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of getFilteredSampleProducts()">
+              <td>
+                <input type="checkbox" [checked]="(productSelection[p.code] || 0) > 0"
+                  (change)="toggleProductSelection(p, $event)">
+              </td>
+              <td>{{ p.code }}</td>
+              <td>{{ p.description }}</td>
+              <td>{{ p.unit }}</td>
+              <td>$ {{ p.unitPriceWithTax | number }}</td>
+              <td>
+                <input type="number" [value]="productSelection[p.code] || 0" min="0" step="1"
+                  (input)="setProductQty(p, $event)" class="form-control-sm num-input" style="width: 90px;">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <button type="button" class="btn-primary mt-3" (click)="addSelectedProducts()">Agregar seleccionados a la cotización</button>
+
+      <h3 class="mt-4">Ítems de la cotización</h3>
+      <div class="table-responsive" *ngIf="activeQuotation.products && activeQuotation.products.length">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Unidad</th>
+              <th>Cantidad</th>
+              <th>Precio Unit. c/ IVA</th>
+              <th>Total c/ IVA</th>
+              <th style="width: 50px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of activeQuotation.products; let i = index">
+              <td>{{ item.code }}</td>
+              <td>{{ item.description }}</td>
+              <td>{{ item.unit }}</td>
+              <td>
+                <input type="number" [value]="item.quantity" min="0" step="1"
+                  (input)="updateProductQty(i, $event)" class="form-control-sm num-input" style="width: 80px;">
+              </td>
+              <td>$ {{ item.unitPriceWithTax | number }}</td>
+              <td>$ {{ item.quantity * item.unitPriceWithTax | number }}</td>
+              <td><button type="button" class="btn-icon" (click)="removeProduct(i)" title="Quitar ítem">🗑️</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p *ngIf="!activeQuotation.products || activeQuotation.products.length === 0" class="text-muted">
+        Aún no hay productos seleccionados.
+      </p>
+    </div>
+
     <!-- PASO 3: ÁREAS Y MUEBLES (was step 2) -->
-    <div *ngIf="currentStep === 3">
+    <div *ngIf="currentStep === 3 && !isProductsMode()">
       <div class="flex-between mb-4">
         <div style="display: flex; align-items: center; gap: 10px;">
           <h2>Áreas y Muebles del Proyecto</h2>
@@ -487,7 +585,7 @@
     </div>
 
     <!-- PASO 4: PRESUPUESTO MATEMÁTICO (was step 3) -->
-    <div *ngIf="currentStep === 4">
+    <div *ngIf="currentStep === 4 && !isProductsMode()">
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
         <h2 style="margin: 0;">Presupuesto Detallado</h2>
         <button type="button" class="btn-icon" (click)="showTip[4] = !showTip[4]"
@@ -1028,6 +1126,58 @@
       </div>
     </div>
 
+    <!-- PASO 4 (modo venta): RESUMEN DE PRODUCTOS Y SERVICIOS -->
+    <div *ngIf="currentStep === 4 && isProductsMode()" class="summary-section">
+      <div class="flex-between mb-2">
+        <h2 style="margin: 0;">Resumen de Cotización <span *ngIf="activeQuotation.number">No. {{ activeQuotation.number }}</span></h2>
+      </div>
+      <p class="text-muted"><strong>{{ activeQuotation.client.name || 'Cliente' }}</strong> · {{ activeQuotation.client.city || '' }}</p>
+
+      <div class="table-responsive" *ngIf="activeQuotation.products && activeQuotation.products.length">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Unidad</th>
+              <th>Cantidad</th>
+              <th>Precio Unit. c/ IVA</th>
+              <th>Total c/ IVA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of activeQuotation.products">
+              <td>{{ item.code }}</td>
+              <td>{{ item.description }}</td>
+              <td>{{ item.unit }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>$ {{ item.unitPriceWithTax | number }}</td>
+              <td>$ {{ item.quantity * item.unitPriceWithTax | number }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="totals-card primary-border mt-3">
+        <h3>Totales</h3>
+        <div class="flex-between">
+          <span>Subtotal (sin IVA):</span>
+          <span>$ {{ activeQuotation.totals.subtotal | number }}</span>
+        </div>
+        <div class="flex-between">
+          <span>IVA ({{ activeQuotation.totals.taxPercent }}%):</span>
+          <span>$ {{ activeQuotation.totals.taxAmount | number }}</span>
+        </div>
+        <div class="flex-between" *ngIf="activeQuotation.totals.viaticos > 0">
+          <span>Viáticos (sin %):</span>
+          <span>$ {{ activeQuotation.totals.viaticos | number }}</span>
+        </div>
+        <div class="grand-total mt-2">
+          <h3>VALOR TOTAL: $ {{ activeQuotation.totals.grandTotal | number }}</h3>
+        </div>
+      </div>
+    </div>
+
     <!-- PASO 5: RESUMEN Y TOTALES GLOBALES (was step 4) -->
     <div *ngIf="currentStep === 5" class="summary-section">
       <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
@@ -1107,14 +1257,14 @@
   <!-- BOTONERA -->
   <div class="wizard-footer mt-4">
     <button type="button" class="btn-secondary" *ngIf="currentStep > 1" (click)="prevStep()">← Anterior</button>
-    <button type="button" class="btn-primary" *ngIf="currentStep === TOTAL_STEPS" (click)="generatePdf()"
+    <button type="button" class="btn-primary" *ngIf="currentStep === maxSteps" (click)="generatePdf()"
       style="margin-left: 10px;">📄 Generar PDF</button>
-    <button type="button" class="btn-primary ml-auto" *ngIf="currentStep < TOTAL_STEPS" (click)="nextStep()"
+    <button type="button" class="btn-primary ml-auto" *ngIf="currentStep < maxSteps" (click)="nextStep()"
       [disabled]="!isStepValid(currentStep)">Siguiente →</button>
-    <div *ngIf="currentStep === 4 && !isStepValid(4)" class="text-error" style="margin-left: 10px; align-self: center;">
+    <div *ngIf="currentStep === 4 && !isProductsMode() && !isStepValid(4)" class="text-error" style="margin-left: 10px; align-self: center;">
       ⚠️ Por favor, revisa los ítems marcados en rojo. Todos los insumos y herrajes deben tener un precio asignado.
     </div>
-    <button type="button" class="btn-success ml-auto" *ngIf="currentStep === TOTAL_STEPS" (click)="saveQuotation()"
+    <button type="button" class="btn-success ml-auto" *ngIf="currentStep === maxSteps" (click)="saveQuotation()"
       [disabled]="isLoading || !isStepValid(currentStep)">Guardar Cotización</button>
   </div>
 </div>

@@ -93,6 +93,64 @@ export class PdfGeneratorService {
       margin: [0, 0, 0, 20]
     });
 
+    // Modo "Venta de productos y servicios": documento simplificado
+    if (quotation.wizardConfig?.clientPriceMode === 'products') {
+      const ptotals = quotation.totals || { subtotal: 0, taxAmount: 0, taxPercent: 19, viaticos: 0, grandTotal: 0 };
+
+      const prodBody: any[][] = [
+        [{ text: 'Código', bold: true }, { text: 'Descripción', bold: true }, { text: 'Unidad', bold: true },
+         { text: 'Cant.', bold: true }, { text: 'Precio Unit. (c/ IVA)', bold: true, alignment: 'right' as 'right' }, { text: 'Total c/ IVA', bold: true, alignment: 'right' as 'right' }]
+      ];
+      (quotation.products || []).forEach((p) => {
+        prodBody.push([
+          p.code || '',
+          p.description || '',
+          p.unit || '',
+          p.quantity ?? 0,
+          { text: this.formatCurrency(p.unitPriceWithTax || 0), alignment: 'right' as 'right' },
+          { text: this.formatCurrency((p.quantity || 0) * (p.unitPriceWithTax || 0)), alignment: 'right' as 'right' }
+        ]);
+      });
+
+      content.push({ text: 'Productos y Servicios', style: 'sectionTitle' });
+      content.push({
+        table: { widths: ['12%', '*', '12%', '8%', '20%', '20%'], body: prodBody },
+        layout: 'lightHorizontalLines',
+        margin: [0, 5, 0, 0]
+      });
+
+      content.push({
+        columns: [
+          { width: '*', text: '' },
+          {
+            width: '40%',
+            table: {
+              widths: ['*', 'auto'],
+              body: [
+                [{ text: 'SUBTOTAL (sin IVA):', bold: true }, { text: this.formatCurrency(ptotals.subtotal), alignment: 'right' as 'right', bold: true }],
+                [`IVA (${ptotals.taxPercent}%):`, { text: this.formatCurrency(ptotals.taxAmount), alignment: 'right' as 'right' }],
+                ...((ptotals.viaticos || 0) > 0 ? [['Viáticos (sin %):', { text: this.formatCurrency(ptotals.viaticos), alignment: 'right' as 'right' }]] : []),
+                [{ text: 'VALOR TOTAL:', style: 'grandTotalLabel' }, { text: this.formatCurrency(ptotals.grandTotal), style: 'grandTotalValue', alignment: 'right' as 'right' }]
+              ]
+            },
+            layout: 'noBorders'
+          }
+        ],
+        margin: [0, 20, 0, 40]
+      });
+
+      content.push({ text: 'Condiciones Comerciales', style: 'sectionTitle' });
+      content.push({
+        ul: [
+          `Forma de pago: ${quotation.paymentTerms || 'No especificada'}`,
+          `Validez de la oferta: ${quotation.validityDays || 15} días`,
+          ...(quotation.notes ? [`Notas adicionales: ${quotation.notes}`] : [])
+        ],
+        margin: [0, 5, 0, 0]
+      });
+      return content;
+    }
+
     // Mapeo lógico de configuración con fallback
     const wConfig = quotation.wizardConfig || {
       clientPriceMode: 'unit_sqm',

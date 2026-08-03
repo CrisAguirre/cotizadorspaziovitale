@@ -11,6 +11,12 @@ export class QuotationCalculatorService {
    * Fórmulas alineadas con `src/assets/data/excel-formulas.md`.
    */
   public recalculateAll(quotation: Quotation, config: AppConfig): Quotation {
+    // Modo "Venta de productos y servicios": totales directos sobre quotation.products
+    if (quotation.wizardConfig?.clientPriceMode === 'products') {
+      quotation.totals = this.calculateProductsTotals(quotation, config);
+      return quotation;
+    }
+
     let globalTotalSqm = 0;
     let globalTotalCost = 0; // Costo bruto para cálculo global
     let globalMesonesSubtotal = 0; // Subtotal ya liquidado
@@ -313,5 +319,45 @@ export class QuotationCalculatorService {
   /** Precio de lista con IVA → precio sin IVA (columna C del Excel). */
   public priceWithoutTax(priceWithTax: number, taxPercent = 19): number {
     return priceWithTax / (1 + taxPercent / 100);
+  }
+
+  private calculateProductsTotals(quotation: Quotation, config: AppConfig): QuotationTotals {
+    const existing = quotation.totals;
+    const taxPercent = existing?.taxPercent ?? config.taxPercent ?? 19;
+    const viaticos = Number(quotation.client?.viaticos || 0);
+
+    let subtotal = 0; // suma sin IVA
+    let taxAmount = 0; // IVA total
+    const products = quotation.products || [];
+    for (const p of products) {
+      p.totalWithTax = Math.round((p.quantity || 0) * (p.unitPriceWithTax || 0));
+      const net = p.totalWithTax / (1 + taxPercent / 100);
+      subtotal += net;
+      taxAmount += p.totalWithTax - net;
+    }
+    subtotal = Math.round(subtotal);
+    taxAmount = Math.round(taxAmount);
+    const grandTotal = subtotal + taxAmount + viaticos;
+    const totalSqm = 0;
+
+    return {
+      totalCost: 0,
+      unforeseenPercent: existing?.unforeseenPercent ?? config.unforeseenPercent,
+      unforeseenAmount: 0,
+      profitPercent: existing?.profitPercent ?? config.profitPercent,
+      profitAmount: 0,
+      indirectPercent: existing?.indirectPercent ?? config.indirectPercent,
+      indirectAmount: 0,
+      subtotal,
+      taxPercent,
+      taxAmount,
+      totalWithTax: subtotal + taxAmount,
+      discountPercent: 0,
+      discountAmount: 0,
+      grandTotal,
+      totalSqm,
+      pricePerSqm: 0,
+      viaticos
+    };
   }
 }

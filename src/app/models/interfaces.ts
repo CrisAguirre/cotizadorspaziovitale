@@ -261,10 +261,21 @@ export interface QuotationClient {
   viaticos?: number;
 }
 
+// Ítems de venta de productos y servicios (clientPriceMode === 'products')
+export interface ProductItem {
+  code?: string;
+  description: string;
+  unit: string;
+  quantity: number;
+  /** Precio unitario CON IVA incluido (precio de venta) */
+  unitPriceWithTax: number;
+  totalWithTax: number;
+}
+
 // ===== WIZARD CONFIG (FASE 0.5) =====
 export interface WizardConfig {
   /** Modo de precio: unit_sqm = Precio unitario x M²/Lineal (básica), manual = Ingreso manual (Premium), outsource = Tercerización */
-  clientPriceMode: 'unit_sqm' | 'manual' | 'outsource' | '';
+  clientPriceMode: 'unit_sqm' | 'manual' | 'outsource' | 'products' | '';
   /** Modo herrajes — migrado al Paso 3 (Muebles) desde reunión 17-jun */
   hardwareDisplayMode: 'table' | 'included' | 'selective' | '';
   /** Modo tiempos MO — migrado al Paso 3 (Muebles) desde reunión 17-jun */
@@ -290,6 +301,7 @@ export interface Quotation {
   client: QuotationClient;
   title: string;
   areas: Area[];
+  products?: ProductItem[];
   totals: QuotationTotals;
   wizardConfig: WizardConfig;
   status: 'nuevo' | 'en_revision' | 'aceptada' | 'rechazada' | 'archivada_aceptada' | 'archivada_rechazada' | 'borrador' | 'auditada' | 'enviada' | 'aprobada';

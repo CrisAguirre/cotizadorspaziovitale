@@ -50,6 +50,12 @@ export class QuotationWizardComponent implements OnInit {
       if (!c.pricingTier) return false;
       return true;
     }
+    if (this.isProductsMode()) {
+      if (step === 3) {
+        return !!(this.activeQuotation.products && this.activeQuotation.products.length > 0);
+      }
+      return true; // Paso 4 Resumen siempre válido
+    }
     if (step === 3) {
       // Must have at least one area with a name, and each area must have at least one furniture with a name.
       if (!this.activeQuotation.areas || this.activeQuotation.areas.length === 0) return false;
@@ -104,6 +110,7 @@ export class QuotationWizardComponent implements OnInit {
     title: 'VENTA, ELABORACIÓN E INSTALACIÓN DE MOBILIARIO',
     client: { name: '', email: '', phone: '', city: '', address: '', viaticos: 0 },
     areas: [],
+    products: [],
     totals: {
       totalCost: 0, unforeseenPercent: 10, unforeseenAmount: 0, profitPercent: 35, profitAmount: 0,
       indirectPercent: 32, indirectAmount: 0, subtotal: 0, taxPercent: 19, taxAmount: 0, totalWithTax: 0,
@@ -126,6 +133,80 @@ export class QuotationWizardComponent implements OnInit {
     { step: 4, title: 'Mesones', icon: '🍽️' },
     { step: 5, title: 'Lista de Precios', icon: '🏷️' }
   ];
+
+  // ===== Modo "Venta de productos y servicios" =====
+  // Catálogo de ejemplo — será reemplazado por el catálogo real cuando se cargue el Excel
+  readonly sampleProducts: { code: string; description: string; unit: string; unitPriceWithTax: number }[] = [
+    { code: 'SV-001', description: 'Silla ergonómica ejecutiva', unit: 'UNIDAD', unitPriceWithTax: 450000 },
+    { code: 'SV-002', description: 'Tapizado de silla', unit: 'SERVICIO', unitPriceWithTax: 120000 },
+    { code: 'SV-003', description: 'Pintura electrostática por M²', unit: 'M²', unitPriceWithTax: 85000 },
+    { code: 'SV-004', description: 'Lámpara LED sobre gabinete', unit: 'UNIDAD', unitPriceWithTax: 65000 },
+    { code: 'SV-005', description: 'Instalación y montaje de accesorios', unit: 'SERVICIO', unitPriceWithTax: 95000 }
+  ];
+  productSelection: { [code: string]: number } = {};
+  productSearch = '';
+
+  isProductsMode(): boolean {
+    return this.activeQuotation.wizardConfig?.clientPriceMode === 'products';
+  }
+
+  get maxSteps(): number {
+    return this.isProductsMode() ? 4 : this.TOTAL_STEPS;
+  }
+
+  getFilteredSampleProducts() {
+    const q = (this.productSearch || '').trim().toLowerCase();
+    return this.sampleProducts.filter(
+      (p) => !q || p.description.toLowerCase().includes(q) || (p.code || '').toLowerCase().includes(q)
+    );
+  }
+
+  private inputNumber(event: Event): number {
+    return Math.max(0, Number((event.target as HTMLInputElement).value) || 0);
+  }
+
+  setProductQty(item: { code: string }, event: Event): void {
+    this.productSelection[item.code] = this.inputNumber(event);
+  }
+
+  toggleProductSelection(item: { code: string }, event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.productSelection[item.code] = checked ? (this.productSelection[item.code] || 1) : 0;
+  }
+
+  addSelectedProducts(): void {
+    if (!this.activeQuotation.products) this.activeQuotation.products = [];
+    for (const item of this.sampleProducts) {
+      const qty = this.productSelection[item.code] || 0;
+      if (qty <= 0) continue;
+      const existing = this.activeQuotation.products.find((p) => p.code === item.code);
+      if (existing) {
+        existing.quantity = qty;
+      } else {
+        this.activeQuotation.products.push({
+          code: item.code,
+          description: item.description,
+          unit: item.unit,
+          quantity: qty,
+          unitPriceWithTax: item.unitPriceWithTax,
+          totalWithTax: 0
+        });
+      }
+    }
+    this.recalculate();
+  }
+
+  updateProductQty(index: number, event: Event): void {
+    const p = this.activeQuotation.products?.[index];
+    if (!p) return;
+    p.quantity = this.inputNumber(event);
+    this.recalculate();
+  }
+
+  removeProduct(index: number): void {
+    this.activeQuotation.products?.splice(index, 1);
+    this.recalculate();
+  }
 
   appConfig!: AppConfig;
 
@@ -272,8 +353,8 @@ export class QuotationWizardComponent implements OnInit {
     let stepName = 'Inicio';
     if (this.currentStep === 1) stepName = 'Cliente';
     if (this.currentStep === 2) stepName = 'Configuración';
-    if (this.currentStep === 3) stepName = 'Muebles';
-    if (this.currentStep === 4) stepName = 'Presupuesto';
+    if (this.currentStep === 3) stepName = this.isProductsMode() ? 'Productos y servicios' : 'Muebles';
+    if (this.currentStep === 4) stepName = this.isProductsMode() ? 'Resumen' : 'Presupuesto';
     if (this.currentStep === 5) stepName = 'Resumen';
 
     const clientName = this.quotationForm.value.client?.name || 'Borrador sin cliente';
@@ -349,11 +430,11 @@ export class QuotationWizardComponent implements OnInit {
       this.recalculate();
     }
 
-    if (this.currentStep < this.TOTAL_STEPS) {
+    if (this.currentStep < this.maxSteps) {
       this.currentStep++;
     }
 
-    if (this.currentStep === 5) {
+    if (this.currentStep === this.maxSteps) {
       this.recalculate();
     }
     
