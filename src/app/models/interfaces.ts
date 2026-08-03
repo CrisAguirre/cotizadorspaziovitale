@@ -249,6 +249,7 @@ export interface QuotationTotals {
   grandTotal: number;
   totalSqm: number;
   pricePerSqm: number;
+  viaticos: number;
 }
 
 export interface QuotationClient {
@@ -257,6 +258,7 @@ export interface QuotationClient {
   phone: string;
   email: string;
   address: string;
+  viaticos?: number;
 }
 
 // ===== WIZARD CONFIG (FASE 0.5) =====

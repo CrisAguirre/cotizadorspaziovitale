@@ -139,6 +139,44 @@
   animation: slideDown 0.3s ease;
 }
 
+.server-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+}
+
+.server-status.ready {
+  color: #7bd88f;
+  border-color: rgba(123, 216, 143, 0.4);
+  background-color: rgba(123, 216, 143, 0.08);
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  animation: statusPulse 1.2s ease-in-out infinite;
+}
+
+.server-status.ready .status-dot {
+  background-color: #7bd88f;
+  animation: none;
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
 .btn-primary {
   width: 100%;
   padding: 14px;

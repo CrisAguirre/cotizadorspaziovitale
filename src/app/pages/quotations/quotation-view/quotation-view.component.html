@@ -114,6 +114,10 @@
           <span>IVA:</span>
           <span>{{ (quotation.totals.taxAmount || 0) | currency:'COP':'symbol':'1.0-0' }}</span>
         </div>
+        <div class="total-row" *ngIf="quotation.totals.viaticos > 0">
+          <span>Viáticos (sin %):</span>
+          <span>{{ (quotation.totals.viaticos || 0) | currency:'COP':'symbol':'1.0-0' }}</span>
+        </div>
         <div class="total-row grand-total mt-2">
           <span>VALOR TOTAL:</span>
           <span>{{ (quotation.totals.grandTotal || 0) | currency:'COP':'symbol':'1.0-0' }}</span>

@@ -57,6 +57,11 @@
           <label>Email <span class="text-error">*</span></label>
           <input type="email" formControlName="email" class="form-control">
         </div>
+        <div class="form-group">
+          <label>Valor de Viáticos (COP) <span class="text-muted">— se suma al final sin porcentajes</span></label>
+          <input type="number" formControlName="viaticos" min="0" step="1000" class="form-control"
+            placeholder="Ej. 300000" (input)="syncViaticos()">
+        </div>
       </div>
 
       <div class="form-grid mt-3">
@@ -1086,6 +1091,8 @@
 
           <p class="flex-between mt-2"><span>Total con IVA:</span> <strong>$ {{ activeQuotation.totals.totalWithTax |
               number }}</strong></p>
+          <p class="flex-between" *ngIf="activeQuotation.totals.viaticos > 0"><span>Viáticos (sin %):</span> <strong>$ {{
+              activeQuotation.totals.viaticos | number }}</strong></p>
           <p class="flex-between" *ngIf="activeQuotation.totals.totalSqm > 0"><span>Precio por M²:</span> <strong>$ {{
               activeQuotation.totals.pricePerSqm | number }}</strong></p>
 

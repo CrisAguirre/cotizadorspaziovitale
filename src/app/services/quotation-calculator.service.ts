@@ -96,7 +96,8 @@ export class QuotationCalculatorService {
       config,
       quotation.totals,
       globalMesonesSubtotal,
-      globalMesonesTax
+      globalMesonesTax,
+      Number(quotation.client?.viaticos || 0)
     );
     return quotation;
   }
@@ -244,7 +245,8 @@ export class QuotationCalculatorService {
     config: AppConfig,
     existing?: QuotationTotals,
     totalMesonesSubtotal: number = 0,
-    totalMesonesTax: number = 0
+    totalMesonesTax: number = 0,
+    viaticos: number = 0
   ): QuotationTotals {
     const unforeseenPercent = existing?.unforeseenPercent ?? config.unforeseenPercent;
     const profitPercent = existing?.profitPercent ?? config.profitPercent;
@@ -262,7 +264,8 @@ export class QuotationCalculatorService {
 
     // Excel: I91 = I90 * H91; I92 = I90 - I91 (descuento)
     const discountAmount = totalWithTax * (discountPercent / 100);
-    const grandTotal = totalWithTax - discountAmount;
+    // Los viáticos se suman al final sin aplicarle ningún porcentaje
+    const grandTotal = totalWithTax - discountAmount + viaticos;
     const pricePerSqm = totalSqm > 0 ? grandTotal / totalSqm : 0;
 
     return {
@@ -281,7 +284,8 @@ export class QuotationCalculatorService {
       discountAmount,
       grandTotal,
       totalSqm,
-      pricePerSqm
+      pricePerSqm,
+      viaticos
     };
   }
 

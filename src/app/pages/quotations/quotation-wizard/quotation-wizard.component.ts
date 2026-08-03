@@ -102,12 +102,12 @@ export class QuotationWizardComponent implements OnInit {
     installationAddress: '',
     sameAddress: true,
     title: 'VENTA, ELABORACIÓN E INSTALACIÓN DE MOBILIARIO',
-    client: { name: '', email: '', phone: '', city: '', address: '' },
+    client: { name: '', email: '', phone: '', city: '', address: '', viaticos: 0 },
     areas: [],
     totals: {
       totalCost: 0, unforeseenPercent: 10, unforeseenAmount: 0, profitPercent: 35, profitAmount: 0,
       indirectPercent: 32, indirectAmount: 0, subtotal: 0, taxPercent: 19, taxAmount: 0, totalWithTax: 0,
-      discountPercent: 10, discountAmount: 0, grandTotal: 0, totalSqm: 0, pricePerSqm: 0
+      discountPercent: 10, discountAmount: 0, grandTotal: 0, totalSqm: 0, pricePerSqm: 0, viaticos: 0
     },
     wizardConfig: { ...this.defaultWizardConfig },
     status: 'nuevo' as const,
@@ -155,7 +155,8 @@ export class QuotationWizardComponent implements OnInit {
         city: ['', Validators.required],
         phone: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
-        address: ['']
+        address: [''],
+        viaticos: [0]
       }),
       paymentTerms: [''],
       validityDays: [15]
@@ -367,6 +368,12 @@ export class QuotationWizardComponent implements OnInit {
       this.quotationForm.get('city')?.setValue(clientCity || '');
       this.quotationForm.get('installationAddress')?.setValue(clientAddress || '');
     }
+  }
+
+  syncViaticos() {
+    const v = this.quotationForm.get('client.viaticos')?.value;
+    this.activeQuotation.client.viaticos = Number(v) || 0;
+    this.recalculate();
   }
 
   prevStep() {

@@ -102,7 +102,7 @@ export class PdfGeneratorService {
     
     // Totales fallback
     const totals = quotation.totals || {
-      totalCost: 0, grandTotal: 0, subtotal: 0, taxAmount: 0, discountAmount: 0, pricePerSqm: 0
+      totalCost: 0, grandTotal: 0, subtotal: 0, taxAmount: 0, discountAmount: 0, pricePerSqm: 0, viaticos: 0
     };
     const markupFactor = totals.totalCost > 0 ? totals.grandTotal / totals.totalCost : 1;
     const allAccessories: { furnName: string, acc: AccessoryItem, clientPrice: number }[] = [];
@@ -316,6 +316,7 @@ export class PdfGeneratorService {
               [{ text: 'SUBTOTAL ANTES DE IVA:', bold: true }, { text: this.formatCurrency(totals.subtotal), alignment: 'right' as 'right', bold: true }],
               ['IVA:', { text: this.formatCurrency(totals.taxAmount), alignment: 'right' as 'right' }],
               ...(totals.discountAmount > 0 ? [['Recargo / Otros:', { text: this.formatCurrency(totals.discountAmount), alignment: 'right' as 'right' }]] : []),
+              ...((totals.viaticos || 0) > 0 ? [['Viáticos (sin %):', { text: this.formatCurrency(totals.viaticos), alignment: 'right' as 'right' }]] : []),
               [{ text: 'VALOR TOTAL:', style: 'grandTotalLabel' }, { text: this.formatCurrency(totals.grandTotal), style: 'grandTotalValue', alignment: 'right' as 'right' }]
             ]
           },

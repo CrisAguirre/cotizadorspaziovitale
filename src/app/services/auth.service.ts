@@ -15,6 +15,10 @@ export class AuthService {
     return this.http.post(this.apiUrl, credentials, { withCredentials: true });
   }
 
+  wakeUp(): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/ping`);
+  }
+
   saveUser(user: any, expiresAt?: number): void {
     localStorage.setItem('user', JSON.stringify(user));
     if (expiresAt) {

@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { interval, Subscription, of } from 'rxjs';
+import { switchMap, catchError } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -9,10 +11,13 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./login.component.css'],
   standalone: false
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
   loginForm: FormGroup;
   errorMessage: string = '';
   isLoading: boolean = false;
+  serverReady: boolean = false;
+  wakeSeconds: number = 0;
+  private wakeSub?: Subscription;
 
   constructor(
     private fb: FormBuilder,
@@ -25,7 +30,26 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.startWakeUp();
+  }
+
+  ngOnDestroy(): void {
+    this.wakeSub?.unsubscribe();
+  }
+
+  private startWakeUp(): void {
+    const source = interval(2000).pipe(
+      switchMap(() => this.authService.wakeUp().pipe(catchError(() => of(null))))
+    );
+    this.wakeSub = source.subscribe((res) => {
+      this.wakeSeconds++;
+      if (res) {
+        this.serverReady = true;
+        this.wakeSub?.unsubscribe();
+      }
+    });
+  }
 
   onSubmit(): void {
     if (this.loginForm.valid) {

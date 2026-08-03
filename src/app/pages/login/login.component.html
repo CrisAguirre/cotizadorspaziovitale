@@ -11,6 +11,12 @@
       <p>Sistema de Cotizaciones 2026</p>
     </div>
 
+    <div class="server-status" [class.ready]="serverReady">
+      <span class="status-dot"></span>
+      <span *ngIf="!serverReady">Conectando al servidor… ({{ wakeSeconds }}s)</span>
+      <span *ngIf="serverReady">Servidor listo</span>
+    </div>
+
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
       <div class="form-group">
         <label for="email">Correo Electrónico</label>
