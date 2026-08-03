@@ -9,23 +9,23 @@
   </div>
   <nav class="nav-menu">
     <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
-      <span>?? Dashboard</span>
+      <span>🏠 Dashboard</span>
     </a>
     <a routerLink="/quotations" routerLinkActive="active" class="nav-item">
-      <span>?? Cotizaciones</span>
+      <span>📄 Cotizaciones</span>
     </a>
     <a routerLink="/price-list" routerLinkActive="active" class="nav-item">
-      <span>?? Lista de Precios</span>
+      <span>💰 Lista de Precios</span>
     </a>
     <a *ngIf="authService.getUser()?.role === 'admin'" routerLink="/activity" routerLinkActive="active" class="nav-item">
-      <span>?? Actividad</span>
+      <span>📋 Actividad</span>
     </a>
-    <!-- Solo admin ve configuraci�n -->
+    <!-- Solo admin ve configuración -->
     <a *ngIf="authService.getUser()?.role === 'admin'" routerLink="/settings" routerLinkActive="active" class="nav-item">
-      <span>?? Configuraci�n</span>
+      <span>⚙️ Configuración</span>
     </a>
 
-    <!-- SECCI�N TEMPORALES -->
+    <!-- SECCIÓN TEMPORALES -->
     <div class="nav-section-title" *ngIf="temporals.length > 0" style="padding: 10px 20px; font-size: 0.8em; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 15px;">
       Temporales
     </div>
@@ -40,7 +40,7 @@
   </nav>
   <div class="logout-container" style="display: flex; justify-content: center; padding-bottom: 20px;">
     <button class="btn-danger" style="width: 90%;" (click)="logout()">
-      <span>?? Cerrar Sesi�n</span>
+      <span>🚪 Cerrar Sesión</span>
     </button>
   </div>
 </aside>

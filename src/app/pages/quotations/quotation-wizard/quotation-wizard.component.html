@@ -365,16 +365,16 @@
       <!-- Config wizard sub-navigation -->
       <div class="wizard-sub-footer mt-4">
         <ng-container *ngIf="!isProductsMode(); else productsConfigFooter">
-          <button type="button" class="btn-secondary" *ngIf="wizardStep > 1" (click)="prevWizardQuestion()">?
+          <button type="button" class="btn-secondary" *ngIf="wizardStep > 1" (click)="prevWizardQuestion()">←
             Anterior</button>
           <button type="button" class="btn-primary ml-auto" *ngIf="wizardStep < maxWizardStep"
-            (click)="nextWizardQuestion()">Siguiente ?</button>
-          <span class="config-ready" *ngIf="wizardStep === maxWizardStep">? Configuraci�n lista � presiona
+            (click)="nextWizardQuestion()">Siguiente →</button>
+          <span class="config-ready" *ngIf="wizardStep === maxWizardStep">✅ Configuración lista — presiona
             <strong>Siguiente</strong> arriba para continuar</span>
         </ng-container>
         <ng-template #productsConfigFooter>
-          <span class="config-ready">? Modo venta activado � solo quedan los pasos <strong>Productos y servicios</strong> y <strong>Resumen</strong></span>
-          <button type="button" class="btn-primary ml-auto" (click)="nextStep()">Continuar a Productos ?</button>
+          <span class="config-ready">✅ Modo venta activado — solo quedan los pasos <strong>Productos y servicios</strong> y <strong>Resumen</strong></span>
+          <button type="button" class="btn-primary ml-auto" (click)="nextStep()">Continuar a Productos →</button>
         </ng-template>
       </div>
     </div>

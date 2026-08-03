@@ -1,6 +1,6 @@
 <div class="page-header mb-4">
   <div style="display: flex; justify-content: center; align-items: center; gap: 15px;">
-    <h1>?? Historial de Actividad</h1>
+    <h1>📋 Historial de Actividad</h1>
   </div>
   <p class="text-muted" style="text-align: center; margin-top: 5px;">
     Monitoreo de entradas y salidas de usuarios
@@ -13,7 +13,7 @@
   </div>
 
   <div *ngIf="!isLoading && activities.length === 0" class="text-center p-4 text-muted">
-    No hay actividad registrada a�n.
+    No hay actividad registrada aún.
   </div>
 
   <div class="table-responsive" *ngIf="!isLoading && activities.length > 0">
@@ -22,7 +22,7 @@
         <tr>
           <th>Usuario</th>
           <th>Rol</th>
-          <th>Acci�n</th>
+          <th>Acción</th>
           <th>Fecha y Hora</th>
         </tr>
       </thead>
@@ -31,10 +31,10 @@
           <td data-label="Usuario">{{ act.userEmail }}</td>
           <td data-label="Rol">
             <span class="badge" [class.badge-designer]="act.role === 'designer'" [class.badge-admin]="act.role === 'admin'">
-              {{ act.role === 'designer' ? 'Dise�ador' : act.role | uppercase }}
+              {{ act.role === 'designer' ? 'Diseñador' : act.role | uppercase }}
             </span>
           </td>
-          <td data-label="Acci�n">
+          <td data-label="Acción">
             <span class="badge action-badge" [class.badge-login]="act.action === 'login'" [class.badge-logout]="act.action === 'logout'">
               {{ act.action === 'login' ? 'Entrada' : 'Salida' }}
             </span>

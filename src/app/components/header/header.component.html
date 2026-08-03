@@ -9,15 +9,15 @@
     </div>
     <div class="user-details">
       <span class="user-email">{{ authService.getUser()?.email || 'Usuario' }}</span>
-      <span class="user-role">{{ authService.getUser()?.role === 'admin' ? 'Administrador' : 'Dise�ador' }}</span>
+      <span class="user-role">{{ authService.getUser()?.role === 'admin' ? 'Administrador' : 'Diseñador' }}</span>
     </div>
     </div>
   </div>
   
   <div class="actions">
     <button class="theme-toggle-header" (click)="themeService.toggleTheme()" [attr.title]="themeService.isDarkTheme() ? 'Cambiar a modo diurno' : 'Cambiar a modo nocturno'">
-      <span *ngIf="themeService.isDarkTheme()">??</span>
-      <span *ngIf="!themeService.isDarkTheme()">??</span>
+      <span *ngIf="themeService.isDarkTheme()">☀️</span>
+      <span *ngIf="!themeService.isDarkTheme()">🌙</span>
     </button>
   </div>
 </header>
