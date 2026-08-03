@@ -1,13 +1,13 @@
 <div class="page-header">
   <div>
-    <h1>Configuración del Sistema</h1>
-    <p>Parámetros globales y tablas de desperdicio.</p>
+    <h1>Configuraci�n del Sistema</h1>
+    <p>Par�metros globales y tablas de desperdicio.</p>
   </div>
 </div>
 
 <div *ngIf="isLoading" class="loading-state">
   <div class="loader"></div>
-  <p>Cargando configuración...</p>
+  <p>Cargando configuraci�n...</p>
 </div>
 
 <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
@@ -23,11 +23,11 @@
         <input type="text" currencyInput formControlName="laborRatePerHour" class="form-control" inputmode="decimal">
       </div>
       <div class="form-group">
-        <label>Valor Hora Diseñador ($)</label>
+        <label>Valor Hora Dise�ador ($)</label>
         <input type="text" currencyInput formControlName="designRatePerHour" class="form-control" inputmode="decimal">
       </div>
       <div class="form-group">
-        <label>Consecutivo Siguiente Cotización</label>
+        <label>Consecutivo Siguiente Cotizaci�n</label>
         <input type="number" formControlName="nextQuotationNumber" class="form-control">
       </div>
     </div>
@@ -57,9 +57,9 @@
       </div>
     </div>
 
-    <!-- Información de Empresa / Cotización -->
+    <!-- Informaci�n de Empresa / Cotizaci�n -->
     <div class="card glass-panel">
-      <h3>Información General</h3>
+      <h3>Informaci�n General</h3>
       <div class="form-group">
         <label>Nombre de la Empresa</label>
         <input type="text" formControlName="companyName" class="form-control">
@@ -69,16 +69,16 @@
         <input type="text" formControlName="city" class="form-control">
       </div>
       <div class="form-group">
-        <label>Validez Cotización (Días)</label>
+        <label>Validez Cotizaci�n (D�as)</label>
         <input type="number" formControlName="validityDays" class="form-control">
       </div>
       
       <div class="payment-terms-section">
         <div class="section-header">
-          <span class="icon">📄</span>
-          <label>Términos y Forma de Pago por Defecto</label>
+          <span class="icon">??</span>
+          <label>T�rminos y Forma de Pago por Defecto</label>
         </div>
-        <p class="helper-text">Este texto aparecerá en todas las cotizaciones nuevas como las condiciones predeterminadas.</p>
+        <p class="helper-text">Este texto aparecer� en todas las cotizaciones nuevas como las condiciones predeterminadas.</p>
         <textarea formControlName="paymentTerms" class="form-control premium-textarea" rows="4" placeholder="Ej: 50% de anticipo, 50% contra entrega..."></textarea>
       </div>
     </div>
@@ -94,8 +94,8 @@
         <table class="data-table mt-2">
           <thead>
             <tr>
-              <th>Mínimo (ML)</th>
-              <th>Máximo (ML)</th>
+              <th>M�nimo (ML)</th>
+              <th>M�ximo (ML)</th>
               <th>Factor (Ej: 0.35)</th>
               <th></th>
             </tr>
@@ -106,7 +106,7 @@
               <td><input type="number" formControlName="maxMl" class="form-control table-input"></td>
               <td><input type="number" step="0.01" formControlName="factor" class="form-control table-input"></td>
               <td>
-                <button type="button" class="btn-icon" (click)="removeWasteRange(i)" title="Eliminar Rango">🗑️</button>
+                <button type="button" class="btn-icon" (click)="removeWasteRange(i)" title="Eliminar Rango">???</button>
               </td>
             </tr>
           </tbody>

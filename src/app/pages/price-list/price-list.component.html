@@ -1,7 +1,7 @@
-﻿<div class="page-header">
+<div class="page-header">
   <div>
     <h1>Lista de precios</h1>
-    <p>CatÃ¡logo de proveedores para auditar el presupuesto interno.</p>
+    <p>Catálogo de proveedores para auditar el presupuesto interno.</p>
   </div>
 </div>
 
@@ -17,7 +17,7 @@
     <input
       type="text"
       class="form-control"
-      placeholder="Buscar cÃ³digo, descripciÃ³n..."
+      placeholder="Buscar código, descripción..."
       [(ngModel)]="searchTerm"
       (keyup.enter)="onSearch()"
     />
@@ -34,7 +34,7 @@
   </div>
 
   <div *ngIf="!isLoading && totalItems > 0" class="results-info">
-    <span>Mostrando {{ (currentPage - 1) * pageSize + 1 }}â€“{{ currentPage * pageSize > totalItems ? totalItems : currentPage * pageSize }} de <strong>{{ totalItems }}</strong> materiales</span>
+    <span>Mostrando {{ (currentPage - 1) * pageSize + 1 }}–{{ currentPage * pageSize > totalItems ? totalItems : currentPage * pageSize }} de <strong>{{ totalItems }}</strong> materiales</span>
   </div>
 
   <div class="table-responsive" *ngIf="!isLoading">
@@ -42,36 +42,36 @@
       <thead>
         <tr>
           <th (click)="sortBy('category')" class="sortable">
-            CategorÃ­a
-            <span *ngIf="sortColumn === 'category'">{{ sortDirection === 'asc' ? 'â–²' : 'â–¼' }}</span>
+            Categoría
+            <span *ngIf="sortColumn === 'category'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
           </th>
           <th (click)="sortBy('provider')" class="sortable">
             Proveedor
-            <span *ngIf="sortColumn === 'provider'">{{ sortDirection === 'asc' ? 'â–²' : 'â–¼' }}</span>
+            <span *ngIf="sortColumn === 'provider'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
           </th>
           <th>Marca</th>
           <th (click)="sortBy('code')" class="sortable">
-            CÃ³digo
-            <span *ngIf="sortColumn === 'code'">{{ sortDirection === 'asc' ? 'â–²' : 'â–¼' }}</span>
+            Código
+            <span *ngIf="sortColumn === 'code'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
           </th>
           <th (click)="sortBy('description')" class="sortable">
-            DescripciÃ³n
-            <span *ngIf="sortColumn === 'description'">{{ sortDirection === 'asc' ? 'â–²' : 'â–¼' }}</span>
+            Descripción
+            <span *ngIf="sortColumn === 'description'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
           </th>
           <th>Unidad</th>
           <th (click)="sortBy('unitPrice')" class="sortable">
             Precio s/ IVA
-            <span *ngIf="sortColumn === 'unitPrice'">{{ sortDirection === 'asc' ? 'â–²' : 'â–¼' }}</span>
+            <span *ngIf="sortColumn === 'unitPrice'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
           </th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let m of materials">
-          <td data-label="CategorÃ­a"><span class="badge">{{ m.category }}</span></td>
+          <td data-label="Categoría"><span class="badge">{{ m.category }}</span></td>
           <td data-label="Proveedor">{{ m.provider }}</td>
-          <td data-label="Marca">{{ m.brand || 'â€”' }}</td>
-          <td data-label="CÃ³digo">{{ m.code }}</td>
-          <td data-label="DescripciÃ³n">{{ m.description }}</td>
+          <td data-label="Marca">{{ m.brand || '—' }}</td>
+          <td data-label="Código">{{ m.code }}</td>
+          <td data-label="Descripción">{{ m.description }}</td>
           <td data-label="Unidad">{{ m.unit }}</td>
           <td data-label="Precio s/ IVA">{{ m.unitPrice | currency:'COP':'symbol':'1.0-2' }}</td>
         </tr>
@@ -84,13 +84,13 @@
 
   <!-- Pagination -->
   <div class="pagination-bar" *ngIf="!isLoading && totalPages > 1">
-    <button class="btn-secondary btn-sm" [disabled]="currentPage === 1" (click)="prevPage()">â† Anterior</button>
+    <button class="btn-secondary btn-sm" [disabled]="currentPage === 1" (click)="prevPage()">← Anterior</button>
     <div class="page-numbers">
       <button *ngFor="let p of [].constructor(totalPages); let i = index"
               class="page-btn" [class.active]="currentPage === i + 1"
               (click)="goToPage(i + 1)">{{ i + 1 }}</button>
     </div>
-    <button class="btn-secondary btn-sm" [disabled]="currentPage === totalPages" (click)="nextPage()">Siguiente â†’</button>
+    <button class="btn-secondary btn-sm" [disabled]="currentPage === totalPages" (click)="nextPage()">Siguiente →</button>
   </div>
 </div>
 
@@ -114,7 +114,7 @@
   <div class="form-group checkbox-row" style="margin-bottom: 16px;">
     <label>
       <input type="checkbox" [(ngModel)]="replaceProviderOnImport" />
-      Reemplazar todos los Ã­tems del proveedor antes de importar
+      Reemplazar todos los ítems del proveedor antes de importar
     </label>
   </div>
 
@@ -123,34 +123,34 @@
 
   <div *ngIf="preview" class="preview-box">
     <p>
-      <strong>{{ preview.fileName }}</strong> â€” {{ preview.materials.length }} materiales
+      <strong>{{ preview.fileName }}</strong> — {{ preview.materials.length }} materiales
       <span *ngIf="preview.skipped"> ({{ preview.skipped }} filas omitidas)</span>
     </p>
     <div class="table-responsive">
       <table class="data-table compact">
         <thead>
           <tr>
-            <th>CÃ³digo</th>
-            <th>DescripciÃ³n</th>
+            <th>Código</th>
+            <th>Descripción</th>
             <th>Unidad</th>
             <th>Precio</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let m of preview.materials | slice:0:8">
-            <td data-label="CÃ³digo">{{ m.code }}</td>
-            <td data-label="DescripciÃ³n">{{ m.description }}</td>
+            <td data-label="Código">{{ m.code }}</td>
+            <td data-label="Descripción">{{ m.description }}</td>
             <td data-label="Unidad">{{ m.unit }}</td>
             <td data-label="Precio">{{ m.unitPrice | currency:'COP':'symbol':'1.0-2' }}</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <p *ngIf="preview.materials.length > 8" class="text-muted">â€¦ y {{ preview.materials.length - 8 }} mÃ¡s</p>
+    <p *ngIf="preview.materials.length > 8" class="text-muted">… y {{ preview.materials.length - 8 }} más</p>
     <div class="preview-actions">
       <button type="button" class="btn-secondary" (click)="cancelPreview()">Cancelar</button>
       <button type="button" class="btn-primary" (click)="confirmImport()" [disabled]="isImporting">
-        {{ isImporting ? 'Importandoâ€¦' : 'Confirmar importaciÃ³n' }}
+        {{ isImporting ? 'Importando…' : 'Confirmar importación' }}
       </button>
     </div>
   </div>

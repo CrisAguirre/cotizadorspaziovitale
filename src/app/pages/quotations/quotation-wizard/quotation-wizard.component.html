@@ -1,7 +1,7 @@
-﻿<div class="wizard-container">
+<div class="wizard-container">
   <div class="wizard-header glass-panel">
     <div class="step" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">1. Cliente</div>
-    <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">2. ConfiguraciÃ³n</div>
+    <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">2. Configuración</div>
     <ng-container *ngIf="isProductsMode(); else normalSteps">
       <div class="step" [class.active]="currentStep === 3" [class.completed]="currentStep > 3">3. Productos y servicios</div>
       <div class="step" [class.active]="currentStep === 4" [class.completed]="currentStep > 4">4. Resumen</div>
@@ -14,26 +14,26 @@
   </div>
 
   <div class="wizard-body glass-panel">
-    <!-- PASO 1: INFORMACIÃ“N DEL CLIENTE (Formulario Reactivo) -->
+    <!-- PASO 1: INFORMACIÓN DEL CLIENTE (Formulario Reactivo) -->
     <form *ngIf="currentStep === 1" [formGroup]="quotationForm">
       <div class="flex-between mb-2">
         <div style="display: flex; align-items: center; gap: 10px;">
-          <h2>InformaciÃ³n del Proyecto y Cliente</h2>
+          <h2>Información del Proyecto y Cliente</h2>
           <button type="button" class="btn-icon" (click)="showTip[1] = !showTip[1]"
-            title="Ver ayuda de este paso">ðŸ’¡</button>
+            title="Ver ayuda de este paso">💡</button>
         </div>
       </div>
       <div class="wizard-tip" *ngIf="showTip[1]">
-        <strong>ðŸ’¡ Objetivo:</strong> Ingresa los datos corporativos obligatorios del cliente y el consecutivo de la
-        cotizaciÃ³n para inicializar el documento de forma oficial.
+        <strong>💡 Objetivo:</strong> Ingresa los datos corporativos obligatorios del cliente y el consecutivo de la
+        cotización para inicializar el documento de forma oficial.
       </div>
       <div class="form-grid">
         <div class="form-group">
-          <label>No. CotizaciÃ³n</label>
+          <label>No. Cotización</label>
           <input type="number" formControlName="number" class="form-control" placeholder="Ej. 1001">
         </div>
         <div class="form-group">
-          <label>TÃ­tulo del Proyecto <span class="text-error">*</span></label>
+          <label>Título del Proyecto <span class="text-error">*</span></label>
           <input type="text" formControlName="title" class="form-control" placeholder="Ej. Cocina Casa Campo">
         </div>
         <div class="form-group">
@@ -52,11 +52,11 @@
           <input type="text" formControlName="city" class="form-control">
         </div>
         <div class="form-group">
-          <label>DirecciÃ³n Residencia</label>
+          <label>Dirección Residencia</label>
           <input type="text" formControlName="address" class="form-control" placeholder="Cra. 1 #2-3">
         </div>
         <div class="form-group">
-          <label>TelÃ©fono <span class="text-error">*</span></label>
+          <label>Teléfono <span class="text-error">*</span></label>
           <input type="text" formControlName="phone" class="form-control">
         </div>
         <div class="form-group">
@@ -69,45 +69,45 @@
         <div class="form-group">
           <label class="checkbox-label">
             <input type="checkbox" formControlName="sameAddress" (change)="onSameAddressChange()">
-            La instalaciÃ³n se realiza en la misma direcciÃ³n del cliente
+            La instalación se realiza en la misma dirección del cliente
           </label>
         </div>
       </div>
 
       <div class="form-grid" *ngIf="!quotationForm.get('sameAddress')?.value">
         <div class="form-group">
-          <label>Ciudad InstalaciÃ³n <span class="text-error">*</span></label>
+          <label>Ciudad Instalación <span class="text-error">*</span></label>
           <input type="text" formControlName="city" class="form-control">
         </div>
         <div class="form-group">
-          <label>DirecciÃ³n InstalaciÃ³n</label>
+          <label>Dirección Instalación</label>
           <input type="text" formControlName="installationAddress" class="form-control" placeholder="Av. 5 #10-20">
         </div>
         <div formGroupName="client" class="form-group">
-          <label>Valor ViÃ¡ticos</label>
+          <label>Valor Viáticos</label>
           <input type="text" currencyInput formControlName="viaticos" class="form-control" inputmode="decimal"
             (input)="syncViaticos()">
         </div>
       </div>
     </form>
 
-    <!-- PASO 2: WIZARD DE CONFIGURACIÃ“N INICIAL (ReuniÃ³n 17-jun: 6â†’4 preguntas) -->
+    <!-- PASO 2: WIZARD DE CONFIGURACIÓN INICIAL (Reunión 17-jun: 6→4 preguntas) -->
     <!-- NOTA: Q2 Herrajes y Q3 Tiempos MO fueron migradas al Paso 3 (Muebles) -->
     <div *ngIf="currentStep === 2">
       <div class="config-wizard-header">
         <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
-          <h2 style="margin: 0;">âš™ï¸ ConfiguraciÃ³n de la CotizaciÃ³n</h2>
+          <h2 style="margin: 0;">⚙️ Configuración de la Cotización</h2>
           <button type="button" class="btn-icon" (click)="showTip[2] = !showTip[2]"
-            title="Ver ayuda de este paso">ðŸ’¡</button>
+            title="Ver ayuda de este paso">💡</button>
         </div>
         <div class="wizard-tip" *ngIf="showTip[2]" style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>ðŸ’¡ Objetivo:</strong> Responde estas 4 preguntas clave para definir la estrategia comercial del
+          <strong>💡 Objetivo:</strong> Responde estas 4 preguntas clave para definir la estrategia comercial del
           proyecto. Las opciones de Herrajes y Tiempos de M.O. se configuran en el siguiente paso (Muebles).
         </div>
-        <div class="wizard-progress">
+        <div class="wizard-progress" *ngIf="!isProductsMode()">
           <div class="wizard-progress-bar" [style.width.%]="(wizardStep / maxWizardStep) * 100"></div>
         </div>
-        <div class="wizard-dots">
+        <div class="wizard-dots" *ngIf="!isProductsMode()">
           <span *ngFor="let q of wizardQuestions" class="wizard-dot" [class.active]="wizardStep === q.step"
             [class.completed]="wizardStep > q.step"
             [class.disabled]="q.step > maxWizardStep"
@@ -117,23 +117,28 @@
             {{ q.icon }}
           </span>
         </div>
+        <div class="wizard-tip config-mode-banner" *ngIf="isProductsMode()"
+          style="text-align: center; margin: 0 auto 20px; max-width: 800px; color: var(--success-color, #27ae60);">
+          ✅ <strong>Modo "Venta de productos y servicios":</strong> las preguntas de configuración (2-5) no aplican.
+          Solo continúas a <strong>3. Productos y servicios</strong> y <strong>4. Resumen</strong>.
+        </div>
       </div>
 
-      <!-- Q1: Modo de precio (ReuniÃ³n 17-jun: 3 opciones nuevas) -->
+      <!-- Q1: Modo de precio (Reunión 17-jun: 3 opciones nuevas) -->
       <div *ngIf="wizardStep === 1" class="config-question">
         <div class="question-header">
           <span class="question-number">1 / 5</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <h3 style="margin: 0;">ðŸ’° Â¿CÃ³mo se calcularÃ¡ el precio de cada mueble que verÃ¡ el cliente?</h3>
+            <h3 style="margin: 0;">💰 ¿Cómo se calculará el precio de cada mueble que verá el cliente?</h3>
             <button type="button" class="btn-icon" (click)="showTipConfig[1] = !showTipConfig[1]"
-              title="Ver ayuda de esta pregunta">ðŸ’¡</button>
+              title="Ver ayuda de esta pregunta">💡</button>
           </div>
         </div>
         <div class="wizard-tip" *ngIf="showTipConfig[1]"
           style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>ðŸ’¡ Objetivo:</strong> Define la metodologÃ­a de cÃ¡lculo del precio visible para el cliente segÃºn el
-          tipo de proyecto: cocinas bÃ¡sicas usan precio por MÂ²/Lineal, cocinas Premium requieren ingreso manual, y los
-          trabajos tercerizados (tapizados/pinturas/sillas/accesorios/electrodomisticos ) tienen su propia lÃ³gica.
+          <strong>💡 Objetivo:</strong> Define la metodología de cálculo del precio visible para el cliente según el
+          tipo de proyecto: cocinas básicas usan precio por M²/Lineal, cocinas Premium requieren ingreso manual, y los
+          trabajos tercerizados (tapizados/pinturas/sillas/accesorios/electrodomisticos ) tienen su propia lógica.
         </div>
         <div class="option-cards">
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.clientPriceMode === 'unit_sqm'">
@@ -142,8 +147,8 @@
             <div class="option-content">
               <span class="option-letter">A</span>
               <div>
-                <strong>Precio unitario Ã— MÂ² o Lineal</strong>
-                <p>Ãšselo para construir una cocina bÃ¡sica</p>
+                <strong>Precio unitario × M² o Lineal</strong>
+                <p>Úselo para construir una cocina básica</p>
               </div>
             </div>
           </label>
@@ -154,7 +159,7 @@
               <span class="option-letter">B</span>
               <div>
                 <strong>Ingreso manual</strong>
-                <p>Para elaboraciÃ³n de cocinas Premium</p>
+                <p>Para elaboración de cocinas Premium</p>
               </div>
             </div>
           </label>
@@ -164,8 +169,8 @@
             <div class="option-content">
               <span class="option-letter">C</span>
               <div>
-                <strong>TercerizaciÃ³n</strong>
-                <p>Incluye: tapizados, pinturas, sillas, accesorios y electrodomÃ©sticos</p>
+                <strong>Tercerización</strong>
+                <p>Incluye: tapizados, pinturas, sillas, accesorios y electrodomésticos</p>
               </div>
             </div>
           </label>
@@ -176,29 +181,29 @@
               <span class="option-letter">D</span>
               <div>
                 <strong>Venta de productos y servicios</strong>
-                <p>CotizaciÃ³n directa de productos/servicios; cambia los pasos a 3. Productos y 4. Resumen</p>
+                <p>Cotización directa de productos/servicios; cambia los pasos a 3. Productos y 4. Resumen</p>
               </div>
             </div>
           </label>
         </div>
       </div>
 
-      <!-- Q2: DiseÃ±o y medidas (ReuniÃ³n 17-jun: reemplaza despiece grÃ¡fico, 2 opciones) -->
-      <div *ngIf="wizardStep === 2" class="config-question">
+      <!-- Q2: Diseño y medidas (Reunión 17-jun: reemplaza despiece gráfico, 2 opciones) -->
+      <div *ngIf="wizardStep === 2 && !isProductsMode()" class="config-question">
         <div class="question-header">
           <span class="question-number">2 / 5</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px;">
-            <h3 style="margin: 0;">ðŸ“ Â¿Desea adjuntar archivos de diseÃ±o y medidas?</h3>
+            <h3 style="margin: 0;">📐 ¿Desea adjuntar archivos de diseño y medidas?</h3>
             <button type="button" class="btn-icon" (click)="showTipConfig[2] = !showTipConfig[2]"
-              title="Ver ayuda de esta pregunta">ðŸ’¡</button>
+              title="Ver ayuda de esta pregunta">💡</button>
           </div>
-          <p class="text-muted">Los archivos de diseÃ±o y medidas respaldan la cotizaciÃ³n y permiten auditar los
+          <p class="text-muted">Los archivos de diseño y medidas respaldan la cotización y permiten auditar los
             despieces.</p>
         </div>
         <div class="wizard-tip" *ngIf="showTipConfig[2]"
           style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>ðŸ’¡ Objetivo:</strong> Si adjunta archivos, el sistema los guardarÃ¡ junto con el presupuesto como
-          evidencia de los planos y medidas usados para la cotizaciÃ³n.
+          <strong>💡 Objetivo:</strong> Si adjunta archivos, el sistema los guardará junto con el presupuesto como
+          evidencia de los planos y medidas usados para la cotización.
         </div>
         <div class="option-cards">
           <label class="option-card" [class.selected]="getDesignFilesMode() === 'attach'">
@@ -208,7 +213,7 @@
               <span class="option-letter">A</span>
               <div>
                 <strong>Adjuntar archivos</strong>
-                <p>SÃ­, adjuntar archivos de diseÃ±o, planos y medidas del proyecto</p>
+                <p>Sí, adjuntar archivos de diseño, planos y medidas del proyecto</p>
               </div>
             </div>
           </label>
@@ -218,28 +223,28 @@
             <div class="option-content">
               <span class="option-letter">B</span>
               <div>
-                <strong>Declinar opciÃ³n</strong>
-                <p>No adjuntar archivos de diseÃ±o en esta cotizaciÃ³n</p>
+                <strong>Declinar opción</strong>
+                <p>No adjuntar archivos de diseño en esta cotización</p>
               </div>
             </div>
           </label>
         </div>
       </div>
 
-      <!-- Q3: Estructura de Ã¡reas (sin cambios, era Q5) -->
-      <div *ngIf="wizardStep === 3" class="config-question">
+      <!-- Q3: Estructura de áreas (sin cambios, era Q5) -->
+      <div *ngIf="wizardStep === 3 && !isProductsMode()" class="config-question">
         <div class="question-header">
           <span class="question-number">3 / 5</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <h3 style="margin: 0;">ðŸ  Â¿Esta cotizaciÃ³n tiene mÃ¡s de un espacio o Ã¡rea?</h3>
+            <h3 style="margin: 0;">🏠 ¿Esta cotización tiene más de un espacio o área?</h3>
             <button type="button" class="btn-icon" (click)="showTipConfig[3] = !showTipConfig[3]"
-              title="Ver ayuda de esta pregunta">ðŸ’¡</button>
+              title="Ver ayuda de esta pregunta">💡</button>
           </div>
         </div>
         <div class="wizard-tip" *ngIf="showTipConfig[3]"
           style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>ðŸ’¡ Objetivo:</strong> Organiza visualmente el presupuesto. Si agrupas los muebles por Ã¡reas (Cocina,
-          BaÃ±o, Vestier), puedes mostrarle al cliente el subtotal de cada zona por separado para mayor claridad.
+          <strong>💡 Objetivo:</strong> Organiza visualmente el presupuesto. Si agrupas los muebles por áreas (Cocina,
+          Baño, Vestier), puedes mostrarle al cliente el subtotal de cada zona por separado para mayor claridad.
         </div>
         <div class="option-cards">
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.areaDisplayMode === 'subtotals'">
@@ -248,8 +253,8 @@
             <div class="option-content">
               <span class="option-letter">A</span>
               <div>
-                <strong>SÃ­, mÃºltiples Ã¡reas con subtotal por Ã¡rea</strong>
-                <p>Cada Ã¡rea (Cocina, Alcoba, Salaâ€¦) tiene su propio subtotal visible para el cliente</p>
+                <strong>Sí, múltiples áreas con subtotal por área</strong>
+                <p>Cada área (Cocina, Alcoba, Sala…) tiene su propio subtotal visible para el cliente</p>
               </div>
             </div>
           </label>
@@ -259,8 +264,8 @@
             <div class="option-content">
               <span class="option-letter">B</span>
               <div>
-                <strong>SÃ­, mÃºltiples Ã¡reas pero solo 1 total global</strong>
-                <p>Se crean Ã¡reas para organizar, pero el cliente solo ve el total general</p>
+                <strong>Sí, múltiples áreas pero solo 1 total global</strong>
+                <p>Se crean áreas para organizar, pero el cliente solo ve el total general</p>
               </div>
             </div>
           </label>
@@ -270,28 +275,28 @@
             <div class="option-content">
               <span class="option-letter">C</span>
               <div>
-                <strong>No, es un solo espacio / Ã¡rea Ãºnica</strong>
-                <p>Todo queda en un Ã¡rea sin distinciÃ³n</p>
+                <strong>No, es un solo espacio / área única</strong>
+                <p>Todo queda en un área sin distinción</p>
               </div>
             </div>
           </label>
         </div>
       </div>
 
-      <!-- Q4: Mesones (ReuniÃ³n 17-jun: simplificado a 2 opciones) -->
-      <div *ngIf="wizardStep === 4" class="config-question">
+      <!-- Q4: Mesones (Reunión 17-jun: simplificado a 2 opciones) -->
+      <div *ngIf="wizardStep === 4 && !isProductsMode()" class="config-question">
         <div class="question-header">
           <span class="question-number">4 / 5</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <h3 style="margin: 0;">ðŸ½ï¸ Â¿Esta cotizaciÃ³n incluye mesones o superficies de trabajo?</h3>
+            <h3 style="margin: 0;">🍽️ ¿Esta cotización incluye mesones o superficies de trabajo?</h3>
             <button type="button" class="btn-icon" (click)="showTipConfig[4] = !showTipConfig[4]"
-              title="Ver ayuda de esta pregunta">ðŸ’¡</button>
+              title="Ver ayuda de esta pregunta">💡</button>
           </div>
         </div>
         <div class="wizard-tip" *ngIf="showTipConfig[4]"
           style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>ðŸ’¡ Objetivo:</strong> Indica si la cotizaciÃ³n incluye mesones de materiales como granito, quarztone,
-          piedra sinterizada o compactos. Esto activarÃ¡ la lÃ³gica de cÃ¡lculo especial para mesonerÃ­a.
+          <strong>💡 Objetivo:</strong> Indica si la cotización incluye mesones de materiales como granito, quarztone,
+          piedra sinterizada o compactos. Esto activará la lógica de cálculo especial para mesonería.
         </div>
         <div class="option-cards">
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.mesonMode === 'includes_meson'">
@@ -300,7 +305,7 @@
             <div class="option-content">
               <span class="option-letter">A</span>
               <div>
-                <strong>SÃ­, incluye mesÃ³n</strong>
+                <strong>Sí, incluye mesón</strong>
                 <p>Granito, quarztone, piedra sinterizada y compactos</p>
               </div>
             </div>
@@ -311,7 +316,7 @@
               <span class="option-letter">B</span>
               <div>
                 <strong>No incluye mesones o superficies de trabajo</strong>
-                <p>Esta cotizaciÃ³n no incluye mesonerÃ­a</p>
+                <p>Esta cotización no incluye mesonería</p>
               </div>
             </div>
           </label>
@@ -319,18 +324,18 @@
       </div>
 
       <!-- Q5: Tipo de Lista de Precios -->
-      <div *ngIf="wizardStep === 5" class="config-question">
+      <div *ngIf="wizardStep === 5 && !isProductsMode()" class="config-question">
         <div class="question-header">
           <span class="question-number">5 / 5</span>
           <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <h3 style="margin: 0;">ðŸ·ï¸ Â¿QuÃ© lista de precios se aplicarÃ¡ para los materiales?</h3>
+            <h3 style="margin: 0;">🏷️ ¿Qué lista de precios se aplicará para los materiales?</h3>
             <button type="button" class="btn-icon" (click)="showTipConfig[5] = !showTipConfig[5]"
-              title="Ver ayuda de esta pregunta">ðŸ’¡</button>
+              title="Ver ayuda de esta pregunta">💡</button>
           </div>
         </div>
         <div class="wizard-tip" *ngIf="showTipConfig[5]"
           style="text-align: left; margin: 0 auto 20px; max-width: 800px;">
-          <strong>ðŸ’¡ Objetivo:</strong> Indica si se utilizarÃ¡ la lista de precios de fÃ¡brica (Industrial) o la lista de precios para Venta Directa (PÃºblico).
+          <strong>💡 Objetivo:</strong> Indica si se utilizará la lista de precios de fábrica (Industrial) o la lista de precios para Venta Directa (Público).
         </div>
         <div class="option-cards">
           <label class="option-card" [class.selected]="activeQuotation.wizardConfig.pricingTier === 'industrial'">
@@ -339,8 +344,8 @@
             <div class="option-content">
               <span class="option-letter">A</span>
               <div>
-                <strong>Industrial (FabricaciÃ³n interna)</strong>
-                <p>Lista de precios base para elaboraciÃ³n de muebles propios</p>
+                <strong>Industrial (Fabricación interna)</strong>
+                <p>Lista de precios base para elaboración de muebles propios</p>
               </div>
             </div>
           </label>
@@ -349,7 +354,7 @@
             <div class="option-content">
               <span class="option-letter">B</span>
               <div>
-                <strong>PÃºblico (Venta directa)</strong>
+                <strong>Público (Venta directa)</strong>
                 <p>Lista de precios sugerida para venta directa de material</p>
               </div>
             </div>
@@ -360,16 +365,16 @@
       <!-- Config wizard sub-navigation -->
       <div class="wizard-sub-footer mt-4">
         <ng-container *ngIf="!isProductsMode(); else productsConfigFooter">
-          <button type="button" class="btn-secondary" *ngIf="wizardStep > 1" (click)="prevWizardQuestion()">←
+          <button type="button" class="btn-secondary" *ngIf="wizardStep > 1" (click)="prevWizardQuestion()">?
             Anterior</button>
           <button type="button" class="btn-primary ml-auto" *ngIf="wizardStep < maxWizardStep"
-            (click)="nextWizardQuestion()">Siguiente →</button>
-          <span class="config-ready" *ngIf="wizardStep === maxWizardStep">✅ Configuración lista — presiona
+            (click)="nextWizardQuestion()">Siguiente ?</button>
+          <span class="config-ready" *ngIf="wizardStep === maxWizardStep">? Configuraci�n lista � presiona
             <strong>Siguiente</strong> arriba para continuar</span>
         </ng-container>
         <ng-template #productsConfigFooter>
-          <span class="config-ready">✅ Modo venta activado — solo quedan los pasos <strong>Productos y servicios</strong> y <strong>Resumen</strong></span>
-          <button type="button" class="btn-primary ml-auto" (click)="nextStep()">Continuar a Productos →</button>
+          <span class="config-ready">? Modo venta activado � solo quedan los pasos <strong>Productos y servicios</strong> y <strong>Resumen</strong></span>
+          <button type="button" class="btn-primary ml-auto" (click)="nextStep()">Continuar a Productos ?</button>
         </ng-template>
       </div>
     </div>
@@ -381,10 +386,10 @@
           <h2>Productos y Servicios</h2>
         </div>
       </div>
-      <p class="text-muted">Selecciona los Ã­tems de la cotizaciÃ³n. Los precios ya incluyen IVA.</p>
+      <p class="text-muted">Selecciona los ítems de la cotización. Los precios ya incluyen IVA.</p>
 
       <div class="form-group" style="max-width: 420px;">
-        <input type="text" [(ngModel)]="productSearch" class="form-control" placeholder="Buscar producto o servicioâ€¦">
+        <input type="text" [(ngModel)]="productSearch" class="form-control" placeholder="Buscar producto o servicio…">
       </div>
 
       <div class="table-responsive">
@@ -392,8 +397,8 @@
           <thead>
             <tr>
               <th style="width: 40px;">Sel.</th>
-              <th>CÃ³digo</th>
-              <th>DescripciÃ³n</th>
+              <th>Código</th>
+              <th>Descripción</th>
               <th>Unidad</th>
               <th>Precio Unit. (c/ IVA)</th>
               <th style="width: 110px;">Cantidad</th>
@@ -418,15 +423,15 @@
         </table>
       </div>
 
-      <button type="button" class="btn-primary mt-3" (click)="addSelectedProducts()">Agregar seleccionados a la cotizaciÃ³n</button>
+      <button type="button" class="btn-primary mt-3" (click)="addSelectedProducts()">Agregar seleccionados a la cotización</button>
 
-      <h3 class="mt-4">Ãtems de la cotizaciÃ³n</h3>
+      <h3 class="mt-4">Ítems de la cotización</h3>
       <div class="table-responsive" *ngIf="activeQuotation.products && activeQuotation.products.length">
         <table class="data-table">
           <thead>
             <tr>
-              <th>CÃ³digo</th>
-              <th>DescripciÃ³n</th>
+              <th>Código</th>
+              <th>Descripción</th>
               <th>Unidad</th>
               <th>Cantidad</th>
               <th>Precio Unit. c/ IVA</th>
@@ -445,67 +450,67 @@
               </td>
               <td>$ {{ item.unitPriceWithTax | number:'1.0-2' }}</td>
               <td>$ {{ item.quantity * item.unitPriceWithTax | number:'1.0-2' }}</td>
-              <td><button type="button" class="btn-icon" (click)="removeProduct(i)" title="Quitar Ã­tem">ðŸ—‘ï¸</button></td>
+              <td><button type="button" class="btn-icon" (click)="removeProduct(i)" title="Quitar ítem">🗑️</button></td>
             </tr>
           </tbody>
         </table>
       </div>
       <p *ngIf="!activeQuotation.products || activeQuotation.products.length === 0" class="text-muted">
-        AÃºn no hay productos seleccionados.
+        Aún no hay productos seleccionados.
       </p>
     </div>
 
-    <!-- PASO 3: ÃREAS Y MUEBLES (was step 2) -->
+    <!-- PASO 3: ÁREAS Y MUEBLES (was step 2) -->
     <div *ngIf="currentStep === 3 && !isProductsMode()">
       <div class="flex-between mb-4">
         <div style="display: flex; align-items: center; gap: 10px;">
-          <h2>Ãreas y Muebles del Proyecto</h2>
+          <h2>Áreas y Muebles del Proyecto</h2>
           <button type="button" class="btn-icon" (click)="showTip[3] = !showTip[3]"
-            title="Ver ayuda de este paso">ðŸ’¡</button>
+            title="Ver ayuda de este paso">💡</button>
         </div>
-        <button type="button" class="btn-secondary" (click)="addArea()">+ Agregar Ãrea</button>
+        <button type="button" class="btn-secondary" (click)="addArea()">+ Agregar Área</button>
       </div>
       <div class="wizard-tip" *ngIf="showTip[3]">
-        <strong>ðŸ’¡ Objetivo:</strong> Estructura fÃ­sicamente el proyecto dividiÃ©ndolo por Ã¡reas (Ej. Cocina, BaÃ±os) y
+        <strong>💡 Objetivo:</strong> Estructura físicamente el proyecto dividiéndolo por áreas (Ej. Cocina, Baños) y
         lista los muebles que componen cada una.
       </div>
 
-      <!-- MIGRACIÃ“N: ConfiguraciÃ³n global de Muebles (Desde Paso 2) -->
+      <!-- MIGRACIÓN: Configuración global de Muebles (Desde Paso 2) -->
       <div class="global-furniture-config mt-4"
         style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; border: 1px dashed rgba(255, 255, 255, 0.2);">
-        <h4 style="margin-top: 0; margin-bottom: 15px;">âš™ï¸ ConfiguraciÃ³n Global de Muebles</h4>
+        <h4 style="margin-top: 0; margin-bottom: 15px;">⚙️ Configuración Global de Muebles</h4>
 
         <div class="form-grid">
-          <!-- ConfiguraciÃ³n Herrajes -->
+          <!-- Configuración Herrajes -->
           <div class="form-group">
-            <label>ðŸ”© VisualizaciÃ³n de Herrajes</label>
+            <label>🔩 Visualización de Herrajes</label>
             <select [(ngModel)]="activeQuotation.wizardConfig.hardwareDisplayMode" class="form-control">
               <option value="table">Tabla separada con precios</option>
               <option value="included">Incluidos en el precio del mueble</option>
-              <option value="selective">SelecciÃ³n manual (ocultar/mostrar)</option>
+              <option value="selective">Selección manual (ocultar/mostrar)</option>
             </select>
             <small class="text-muted" style="display: block; margin-top: 5px;">
-              <span *ngIf="activeQuotation.wizardConfig.hardwareDisplayMode === 'table'">El cliente verÃ¡ una tabla
-                detallada con precios por Ã­tem.</span>
+              <span *ngIf="activeQuotation.wizardConfig.hardwareDisplayMode === 'table'">El cliente verá una tabla
+                detallada con precios por ítem.</span>
               <span *ngIf="activeQuotation.wizardConfig.hardwareDisplayMode === 'included'">Los herrajes no aparecen por
                 separado, su costo se suma al mueble.</span>
-              <span *ngIf="activeQuotation.wizardConfig.hardwareDisplayMode === 'selective'">PodrÃ¡ elegir quÃ© herrajes
-                mostrar y cuÃ¡les ocultar.</span>
+              <span *ngIf="activeQuotation.wizardConfig.hardwareDisplayMode === 'selective'">Podrá elegir qué herrajes
+                mostrar y cuáles ocultar.</span>
             </small>
           </div>
 
-          <!-- ConfiguraciÃ³n Tiempos M.O. -->
+          <!-- Configuración Tiempos M.O. -->
           <div class="form-group">
-            <label>â±ï¸ MÃ©todo Tiempos de Mano de Obra</label>
+            <label>⏱️ Método Tiempos de Mano de Obra</label>
             <select [(ngModel)]="activeQuotation.wizardConfig.moTimeMode" class="form-control">
               <option value="manual">Ingreso manual cada vez</option>
               <option value="table">Usar tabla de referencia interna</option>
               <option value="mixed">Mixto (Tabla + Ajuste manual)</option>
             </select>
             <small class="text-muted" style="display: block; margin-top: 5px;">
-              <span *ngIf="activeQuotation.wizardConfig.moTimeMode === 'manual'">DeberÃ¡ escribir las horas manualmente
+              <span *ngIf="activeQuotation.wizardConfig.moTimeMode === 'manual'">Deberá escribir las horas manualmente
                 por mueble.</span>
-              <span *ngIf="activeQuotation.wizardConfig.moTimeMode === 'table'">La app sugerirÃ¡ tiempos basados en el
+              <span *ngIf="activeQuotation.wizardConfig.moTimeMode === 'table'">La app sugerirá tiempos basados en el
                 tipo de mueble.</span>
               <span *ngIf="activeQuotation.wizardConfig.moTimeMode === 'mixed'">La tabla es el punto de partida pero
                 permite modificaciones.</span>
@@ -517,10 +522,10 @@
       <div *ngFor="let area of activeQuotation.areas; let aIndex = index" class="area-card mt-4">
         <div class="flex-between area-header">
           <div class="form-group" style="width: 300px; margin-bottom: 0;">
-            <label>Nombre del Ãrea <span class="text-error">*</span></label>
+            <label>Nombre del Área <span class="text-error">*</span></label>
             <ng-container *ngIf="!isAreaCustom(area, aIndex)">
               <select [(ngModel)]="area.name" class="form-control" (change)="onAreaSelectChange(area, aIndex)">
-                <option value="" disabled selected>Seleccione un Ãrea...</option>
+                <option value="" disabled selected>Seleccione un Área...</option>
                 <option *ngFor="let cat of areaCategories" [value]="cat">{{ cat }}</option>
                 <option value="Otra / Personalizada">Otra / Personalizada</option>
               </select>
@@ -528,17 +533,17 @@
             <ng-container *ngIf="isAreaCustom(area, aIndex)">
               <div style="display: flex; gap: 5px;">
                 <input type="text" [(ngModel)]="area.name" class="form-control"
-                  placeholder="Escriba el nombre del Ã¡rea">
+                  placeholder="Escriba el nombre del área">
                 <button type="button" class="btn-icon" (click)="customAreaFlags[aIndex] = false; area.name = ''"
-                  title="Volver a la lista">â†©ï¸</button>
+                  title="Volver a la lista">↩️</button>
               </div>
             </ng-container>
           </div>
-          <button type="button" class="btn-icon text-error" (click)="removeArea(aIndex)">ðŸ—‘ï¸ Eliminar Ãrea</button>
+          <button type="button" class="btn-icon text-error" (click)="removeArea(aIndex)">🗑️ Eliminar Área</button>
         </div>
 
         <div class="furniture-list mt-4">
-          <h4>Muebles en {{ area.name || 'esta Ã¡rea' }}</h4>
+          <h4>Muebles en {{ area.name || 'esta área' }}</h4>
           <div *ngFor="let furn of area.furniture; let fIndex = index" class="furniture-card">
             <div class="form-grid">
               <div class="form-group">
@@ -557,13 +562,13 @@
                     <input type="text" [(ngModel)]="furn.name" class="form-control" placeholder="Nombre del mueble">
                     <button *ngIf="getFurnitureOptionsForArea(area.name).length > 0" type="button" class="btn-icon"
                       (click)="customFurnFlags[aIndex][fIndex] = false; furn.name = ''"
-                      title="Volver a la lista">â†©ï¸</button>
+                      title="Volver a la lista">↩️</button>
                   </div>
                 </ng-container>
                 <div style="margin-top: 8px;">
                   <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-weight: normal;">
                     <input type="checkbox" [checked]="furn.type === 'meson'" (change)="toggleMeson(furn, $event)">
-                    Cotizar como MesÃ³n
+                    Cotizar como Mesón
                   </label>
                 </div>
               </div>
@@ -594,16 +599,16 @@
       </div>
     </div>
 
-    <!-- PASO 4: PRESUPUESTO MATEMÃTICO (was step 3) -->
+    <!-- PASO 4: PRESUPUESTO MATEMÁTICO (was step 3) -->
     <div *ngIf="currentStep === 4 && !isProductsMode()">
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
         <h2 style="margin: 0;">Presupuesto Detallado</h2>
         <button type="button" class="btn-icon" (click)="showTip[4] = !showTip[4]"
-          title="Ver ayuda de este paso">ðŸ’¡</button>
+          title="Ver ayuda de este paso">💡</button>
       </div>
       <div class="wizard-tip" *ngIf="showTip[4]">
-        <strong>ðŸ’¡ Objetivo:</strong> Este es el motor matemÃ¡tico. Audita mueble por mueble agregando los insumos
-        requeridos; las bases de datos de proveedores cruzarÃ¡n los costos automÃ¡ticamente en tiempo real.
+        <strong>💡 Objetivo:</strong> Este es el motor matemático. Audita mueble por mueble agregando los insumos
+        requeridos; las bases de datos de proveedores cruzarán los costos automáticamente en tiempo real.
       </div>
 
       <div *ngFor="let area of activeQuotation.areas" class="mt-4">
@@ -615,7 +620,7 @@
           <!-- CALCULADORA DE MESONES -->
           <ng-container *ngIf="furn.type === 'meson' && furn.mesonDetails">
             <div class="budget-section">
-              <h5>Calculadora de Mesones (CotizaciÃ³n Exclusiva)</h5>
+              <h5>Calculadora de Mesones (Cotización Exclusiva)</h5>
               <table class="budget-table">
                 <thead>
                   <tr>
@@ -628,7 +633,7 @@
                 <tbody>
                   <tr [class.estimated-row]="furn.mesonDetails.basePricePerM2 == null || furn.mesonDetails.basePricePerM2 <= 0">
                     <td>
-                      <app-material-picker category="meson" placeholder="Buscar material de mesÃ³n..."
+                      <app-material-picker category="meson" placeholder="Buscar material de mesón..."
                         (materialSelected)="applyMesonMaterial(furn, $event)"></app-material-picker>
                       <small class="text-muted" *ngIf="furn.mesonDetails.materialName">{{ furn.mesonDetails.materialName }}</small>
                     </td>
@@ -651,7 +656,7 @@
                         <button type="button" class="btn-xs"
                           [class.btn-primary]="furn.mesonDetails.depth === 0.8"
                           [class.btn-outline]="furn.mesonDetails.depth !== 0.8"
-                          (click)="setDepth(furn, 0.8)" title="MesÃ³n estÃ¡ndar 80cm">0.80</button>
+                          (click)="setDepth(furn, 0.8)" title="Mesón estándar 80cm">0.80</button>
                         <button type="button" class="btn-xs"
                           [class.btn-primary]="furn.mesonDetails.depth === 0.9"
                           [class.btn-outline]="furn.mesonDetails.depth !== 0.9"
@@ -681,7 +686,7 @@
                   <input type="checkbox"
                     [checked]="mesonUIState.get(furn)?.calcMode === 'compac'"
                     (change)="toggleCalcMode(furn, $event)">
-                  Modo placa COMPAC (calcular MÂ² desde precio de placa)
+                  Modo placa COMPAC (calcular M² desde precio de placa)
                 </label>
               </div>
 
@@ -693,7 +698,7 @@
                     class="form-control num-input" placeholder="$ 0" inputmode="decimal">
                 </div>
                 <div>
-                  <label style="font-size: 12px;">Ãrea de la placa (MÂ²)</label>
+                  <label style="font-size: 12px;">Área de la placa (M²)</label>
                   <input type="number" [(ngModel)]="mesonUIState.get(furn)!.plateArea"
                     class="form-control num-input" step="0.01" placeholder="Ej: 5.60">
                 </div>
@@ -703,7 +708,7 @@
               <table class="budget-table mt-3" style="background-color: var(--bg-secondary); border-radius: 8px;">
                 <thead>
                   <tr>
-                    <th>VR. SIN IVA (MÂ²)</th>
+                    <th>VR. SIN IVA (M²)</th>
                     <th>VR CON TRANSP</th>
                     <th>UTILIDAD ({{ furn.mesonDetails.profitPercentage }}%)</th>
                     <th>SUBTOTAL</th>
@@ -722,7 +727,7 @@
               </table>
               
               <div class="text-right mt-2 text-muted">
-                <small>El valor total de este mesÃ³n ($ {{ furn.totalBudget | number:'1.0-2' }}) se sumarÃ¡ directamente al Gran Total.</small>
+                <small>El valor total de este mesón ($ {{ furn.totalBudget | number:'1.0-2' }}) se sumará directamente al Gran Total.</small>
               </div>
             </div>
           </ng-container>
@@ -731,15 +736,15 @@
             <!-- Insumos -->
             <div class="budget-section">
             <div class="flex-between">
-              <h5>1. Insumos (LÃ¡minas, etc.)</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'supplies')">+ AÃ±adir</button>
+              <h5>1. Insumos (Láminas, etc.)</h5>
+              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'supplies')">+ Añadir</button>
             </div>
             <table class="budget-table" *ngIf="furn.supplies?.length">
               <thead>
                 <tr>
                   <th>Buscar lista</th>
-                  <th>DescripciÃ³n</th>
-                  <th>Cant. / mÂ²</th>
+                  <th>Descripción</th>
+                  <th>Cant. / m²</th>
                   <th>Precio Und</th>
                   <th>Total</th>
                   <th></th>
@@ -756,20 +761,20 @@
                     <div class="sqm-input-wrapper">
                       <input type="number" [(ngModel)]="sup.quantity" (change)="recalculate()"
                         class="form-control-sm num-input" [attr.step]="sup.quantityMode === 'sqm' ? '0.01' : '1'"
-                        [attr.placeholder]="sup.quantityMode === 'sqm' ? 'mÂ²' : 'Cant.'">
-                      <span class="sqm-label" *ngIf="sup.quantityMode === 'sqm'">mÂ²</span>
+                        [attr.placeholder]="sup.quantityMode === 'sqm' ? 'm²' : 'Cant.'">
+                      <span class="sqm-label" *ngIf="sup.quantityMode === 'sqm'">m²</span>
                     </div>
                   </td>
                   <td>
                     <div class="sqm-input-wrapper">
                       <input type="text" currencyInput [(ngModel)]="sup.unitPrice" (change)="recalculate()"
                         class="form-control-sm num-input" readonly inputmode="decimal">
-                      <span class="sqm-label" *ngIf="sup.quantityMode === 'sqm'">/mÂ²</span>
+                      <span class="sqm-label" *ngIf="sup.quantityMode === 'sqm'">/m²</span>
                     </div>
                   </td>
                   <td>$ {{ sup.totalPrice | number:'1.0-2' }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
-                      (click)="removeItem(furn, 'supplies', i)">ðŸ—‘ï¸</button></td>
+                      (click)="removeItem(furn, 'supplies', i)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
@@ -778,14 +783,14 @@
           <!-- Cantos -->
           <div class="budget-section">
             <div class="flex-between">
-              <h5>2. Cantos (Desperdicio AutomÃ¡tico)</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'edgeBands')">+ AÃ±adir</button>
+              <h5>2. Cantos (Desperdicio Automático)</h5>
+              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'edgeBands')">+ Añadir</button>
             </div>
             <table class="budget-table" *ngIf="furn.edgeBands?.length">
               <thead>
                 <tr>
                   <th>Buscar</th>
-                  <th>DescripciÃ³n</th>
+                  <th>Descripción</th>
                   <th>Cant. ML</th>
                   <th>% Desperdicio</th>
                   <th>ML Totales</th>
@@ -809,26 +814,26 @@
                       class="form-control-sm num-input" readonly inputmode="decimal"></td>
                   <td>$ {{ edge.totalPrice | number:'1.0-2' }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
-                      (click)="removeItem(furn, 'edgeBands', i)">ðŸ—‘ï¸</button></td>
+                      (click)="removeItem(furn, 'edgeBands', i)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          <!-- DiseÃ±o -->
+          <!-- Diseño -->
           <div class="budget-section">
             <div class="flex-between">
-              <h5>3. AsesorÃ­a y DiseÃ±o</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'designTime')">+ AÃ±adir</button>
+              <h5>3. Asesoría y Diseño</h5>
+              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'designTime')">+ Añadir</button>
             </div>
             <label class="checkbox-inline">
               <input type="checkbox" [(ngModel)]="furn.clientPaidDesign" (change)="recalculate()">
-              Cliente ya pagÃ³ diseÃ±o ($0)
+              Cliente ya pagó diseño ($0)
             </label>
             <table class="budget-table" *ngIf="furn.designTime?.length">
               <thead>
                 <tr>
-                  <th>DescripciÃ³n</th>
+                  <th>Descripción</th>
                   <th>Horas</th>
                   <th>Precio Und</th>
                   <th>Total</th>
@@ -854,7 +859,7 @@
                       class="form-control-sm num-input" inputmode="decimal"></td>
                   <td>$ {{ d.totalPrice | number:'1.0-2' }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
-                      (click)="removeItem(furn, 'designTime', i)">ðŸ—‘ï¸</button></td>
+                      (click)="removeItem(furn, 'designTime', i)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
@@ -864,13 +869,13 @@
           <div class="budget-section">
             <div class="flex-between">
               <h5>4. Herrajes y Accesorios</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'accessories')">+ AÃ±adir</button>
+              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'accessories')">+ Añadir</button>
             </div>
             <table class="budget-table" *ngIf="furn.accessories?.length">
               <thead>
                 <tr>
                   <th>Buscar</th>
-                  <th>DescripciÃ³n</th>
+                  <th>Descripción</th>
                   <th>Cantidad</th>
                   <th>Tipo Medida</th>
                   <th>Precio unitario</th>
@@ -882,7 +887,7 @@
               </thead>
               <tbody>
                 <tr *ngFor="let acc of furn.accessories; let i = index"
-                  [class.estimated-row]="acc.description.includes('â§¦Est.') || acc.unitPrice == null || acc.unitPrice <= 0">
+                  [class.estimated-row]="acc.description.includes('⧦Est.') || acc.unitPrice == null || acc.unitPrice <= 0">
                   <td>
                     <app-material-picker category="accesorio,herraje" placeholder="Herraje / accesorio..."
                       (materialSelected)="applyAccessoryMaterial(acc, $event)"></app-material-picker>
@@ -905,7 +910,7 @@
                       title="Agrega 5% de flete al precio unitario">
                   </td>
                   <td><button class="btn-icon text-error" title="Eliminar"
-                      (click)="removeItem(furn, 'accessories', i)">ðŸ—‘ï¸</button></td>
+                      (click)="removeItem(furn, 'accessories', i)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
@@ -915,14 +920,14 @@
           <div class="budget-section">
             <div class="flex-between">
               <h5>5. Cortes Melaminas</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'cuts')">+ AÃ±adir</button>
+              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'cuts')">+ Añadir</button>
             </div>
             <table class="budget-table" *ngIf="furn.cuts?.length">
               <thead>
                 <tr>
-                  <th>DescripciÃ³n</th>
-                  <th>mÂ² (Calc)</th>
-                  <th>Hrs/mÂ²</th>
+                  <th>Descripción</th>
+                  <th>m² (Calc)</th>
+                  <th>Hrs/m²</th>
                   <th>Precio/Hr</th>
                   <th>Total</th>
                   <th></th>
@@ -939,13 +944,13 @@
                           lt.timeHours }}h)</option>
                       </select>
                       <input type="text" [(ngModel)]="cut.description" class="form-control-sm"
-                        placeholder="DescripciÃ³n">
+                        placeholder="Descripción">
                     </div>
                   </td>
                   <td>
                     <div class="sqm-input-wrapper">
                       <input type="number" [value]="cut.sqm" class="form-control-sm num-input" readonly>
-                      <span class="sqm-label">mÂ²</span>
+                      <span class="sqm-label">m²</span>
                     </div>
                   </td>
                   <td><input type="number" [(ngModel)]="cut.timeHours" (change)="recalculate()"
@@ -954,7 +959,7 @@
                       class="form-control-sm num-input" inputmode="decimal" [placeholder]="(appConfig.laborRatePerHour || 0).toString()"></td>
                   <td>$ {{ cut.totalPrice | number:'1.0-2' }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
-                      (click)="removeItem(furn, 'cuts', i)">ðŸ—‘ï¸</button></td>
+                      (click)="removeItem(furn, 'cuts', i)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
@@ -964,12 +969,12 @@
           <div class="budget-section">
             <div class="flex-between">
               <h5>6. Mano de Obra Armado</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'assembly')">+ AÃ±adir</button>
+              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'assembly')">+ Añadir</button>
             </div>
             <table class="budget-table" *ngIf="furn.assembly?.length">
               <thead>
                 <tr>
-                  <th>DescripciÃ³n</th>
+                  <th>Descripción</th>
                   <th>Medida</th>
                   <th>Unidad</th>
                   <th>Cant.</th>
@@ -981,7 +986,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let asm of furn.assembly; let i = index" [class.estimated-row]="asm.description.includes('â§¦Est.')">
+                <tr *ngFor="let asm of furn.assembly; let i = index" [class.estimated-row]="asm.description.includes('⧦Est.')">
                   <td>
                     <div style="display: flex; gap: 5px; flex-direction: column;">
                       <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
@@ -991,11 +996,11 @@
                           lt.timeHours }}h)</option>
                       </select>
                       <input type="text" [(ngModel)]="asm.description" class="form-control-sm"
-                        placeholder="DescripciÃ³n">
+                        placeholder="Descripción">
                     </div>
                   </td>
                   <td><input type="text" [(ngModel)]="asm.measurement" class="form-control-sm"
-                      placeholder="ej. 1.72 Ã— 0.36"></td>
+                      placeholder="ej. 1.72 × 0.36"></td>
                   <td><input type="text" [(ngModel)]="asm.unitOfMeasure" class="form-control-sm"
                       placeholder="ML, M2, ser"></td>
                   <td><input type="number" [(ngModel)]="asm.totalQuantity" (change)="recalculate()"
@@ -1008,22 +1013,22 @@
                       class="form-control-sm num-input" inputmode="decimal" [placeholder]="(appConfig.laborRatePerHour || 0).toString()"></td>
                   <td>$ {{ asm.totalPrice | number:'1.0-2' }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
-                      (click)="removeItem(furn, 'assembly', i)">ðŸ—‘ï¸</button></td>
+                      (click)="removeItem(furn, 'assembly', i)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          <!-- InstalaciÃ³n -->
+          <!-- Instalación -->
           <div class="budget-section">
             <div class="flex-between">
-              <h5>7. InstalaciÃ³n en obra (2 personas)</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'installation')">+ AÃ±adir</button>
+              <h5>7. Instalación en obra (2 personas)</h5>
+              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'installation')">+ Añadir</button>
             </div>
             <table class="budget-table" *ngIf="furn.installation?.length">
               <thead>
                 <tr>
-                  <th>DescripciÃ³n</th>
+                  <th>Descripción</th>
                   <th>Medida</th>
                   <th>Unidad</th>
                   <th>Cant.</th>
@@ -1035,7 +1040,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let inst of furn.installation; let i = index" [class.estimated-row]="inst.description.includes('â§¦Est.')">
+                <tr *ngFor="let inst of furn.installation; let i = index" [class.estimated-row]="inst.description.includes('⧦Est.')">
                   <td>
                     <div style="display: flex; gap: 5px; flex-direction: column;">
                       <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
@@ -1045,11 +1050,11 @@
                           lt.timeHours }}h)</option>
                       </select>
                       <input type="text" [(ngModel)]="inst.description" class="form-control-sm"
-                        placeholder="DescripciÃ³n">
+                        placeholder="Descripción">
                     </div>
                   </td>
                   <td><input type="text" [(ngModel)]="inst.measurement" class="form-control-sm"
-                      placeholder="ej. 2.10 Ã— 0.60"></td>
+                      placeholder="ej. 2.10 × 0.60"></td>
                   <td><input type="text" [(ngModel)]="inst.unitOfMeasure" class="form-control-sm"
                       placeholder="ML, M2, ser"></td>
                   <td><input type="number" [(ngModel)]="inst.totalQuantity" (change)="recalculate()"
@@ -1062,7 +1067,7 @@
                       class="form-control-sm num-input" inputmode="decimal" [placeholder]="(appConfig.laborRatePerHour || 0).toString()"></td>
                   <td>$ {{ inst.totalPrice | number:'1.0-2' }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
-                      (click)="removeItem(furn, 'installation', i)">ðŸ—‘ï¸</button></td>
+                      (click)="removeItem(furn, 'installation', i)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
@@ -1072,12 +1077,12 @@
           <div class="budget-section">
             <div class="flex-between">
               <h5>8. Enchape</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'veneer')">+ AÃ±adir</button>
+              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'veneer')">+ Añadir</button>
             </div>
             <table class="budget-table" *ngIf="furn.veneer?.length">
               <thead>
                 <tr>
-                  <th>DescripciÃ³n</th>
+                  <th>Descripción</th>
                   <th>ML (Calc)</th>
                   <th>Hrs/ML</th>
                   <th>Precio/Hr</th>
@@ -1096,7 +1101,7 @@
                           lt.timeHours }}h)</option>
                       </select>
                       <input type="text" [(ngModel)]="ven.description" class="form-control-sm"
-                        placeholder="DescripciÃ³n del enchape">
+                        placeholder="Descripción del enchape">
                     </div>
                   </td>
                   <td>
@@ -1111,7 +1116,7 @@
                       class="form-control-sm num-input" inputmode="decimal" [placeholder]="(appConfig.laborRatePerHour || 0).toString()"></td>
                   <td>$ {{ ven.totalPrice | number:'1.0-2' }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
-                      (click)="removeItem(furn, 'veneer', i)">ðŸ—‘ï¸</button></td>
+                      (click)="removeItem(furn, 'veneer', i)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
@@ -1120,11 +1125,11 @@
           <div class="section-totals text-muted" style="gap: 16px;">
             <span>Insumos: $ {{ furn.totalSupplies | number:'1.0-2' }}</span>
             <span>Cantos: $ {{ furn.totalEdgeBands | number:'1.0-2' }}</span>
-            <span>DiseÃ±o: $ {{ furn.totalDesignTime | number:'1.0-2' }}</span>
+            <span>Diseño: $ {{ furn.totalDesignTime | number:'1.0-2' }}</span>
             <span>Accesorios: $ {{ furn.totalAccessories | number:'1.0-2' }}</span>
             <span>Cortes: $ {{ furn.totalCuts | number:'1.0-2' }}</span>
             <span>Armado: $ {{ furn.totalAssembly | number:'1.0-2' }}</span>
-            <span>InstalaciÃ³n: $ {{ furn.totalInstallation | number:'1.0-2' }}</span>
+            <span>Instalación: $ {{ furn.totalInstallation | number:'1.0-2' }}</span>
             <span>Enchape: $ {{ furn.totalVeneer | number:'1.0-2' }}</span>
           </div>
           </ng-container>
@@ -1139,16 +1144,16 @@
     <!-- PASO 4 (modo venta): RESUMEN DE PRODUCTOS Y SERVICIOS -->
     <div *ngIf="currentStep === 4 && isProductsMode()" class="summary-section">
       <div class="flex-between mb-2">
-        <h2 style="margin: 0;">Resumen de CotizaciÃ³n <span *ngIf="activeQuotation.number">No. {{ activeQuotation.number }}</span></h2>
+        <h2 style="margin: 0;">Resumen de Cotización <span *ngIf="activeQuotation.number">No. {{ activeQuotation.number }}</span></h2>
       </div>
-      <p class="text-muted"><strong>{{ activeQuotation.client.name || 'Cliente' }}</strong> Â· {{ activeQuotation.client.city || '' }}</p>
+      <p class="text-muted"><strong>{{ activeQuotation.client.name || 'Cliente' }}</strong> · {{ activeQuotation.client.city || '' }}</p>
 
       <div class="table-responsive" *ngIf="activeQuotation.products && activeQuotation.products.length">
         <table class="data-table">
           <thead>
             <tr>
-              <th>CÃ³digo</th>
-              <th>DescripciÃ³n</th>
+              <th>Código</th>
+              <th>Descripción</th>
               <th>Unidad</th>
               <th>Cantidad</th>
               <th>Precio Unit. c/ IVA</th>
@@ -1179,7 +1184,7 @@
           <span>$ {{ activeQuotation.totals.taxAmount | number:'1.0-2' }}</span>
         </div>
         <div class="flex-between" *ngIf="activeQuotation.totals.viaticos > 0">
-          <span>ViÃ¡ticos (sin %):</span>
+          <span>Viáticos (sin %):</span>
           <span>$ {{ activeQuotation.totals.viaticos | number:'1.0-2' }}</span>
         </div>
         <div class="grand-total mt-2">
@@ -1191,21 +1196,21 @@
     <!-- PASO 5: RESUMEN Y TOTALES GLOBALES (was step 4) -->
     <div *ngIf="currentStep === 5" class="summary-section">
       <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px;">
-        <h2 style="margin: 0;">Resumen de CotizaciÃ³n <span *ngIf="activeQuotation.number">No. {{ activeQuotation.number
+        <h2 style="margin: 0;">Resumen de Cotización <span *ngIf="activeQuotation.number">No. {{ activeQuotation.number
             }}</span></h2>
         <button type="button" class="btn-icon" (click)="showTip[5] = !showTip[5]"
-          title="Ver ayuda de este paso">ðŸ’¡</button>
+          title="Ver ayuda de este paso">💡</button>
       </div>
       <div class="wizard-tip" *ngIf="showTip[5]">
-        <strong>ðŸ’¡ Objetivo:</strong> Verifica los costos base operacionales calculados y ajusta de ser necesario el AIU
-        para obtener el Precio de Venta final con IVA. Cuando estÃ© listo, guarda y genera tu PDF.
+        <strong>💡 Objetivo:</strong> Verifica los costos base operacionales calculados y ajusta de ser necesario el AIU
+        para obtener el Precio de Venta final con IVA. Cuando esté listo, guarda y genera tu PDF.
       </div>
 
 
       <div class="grid-2">
         <div class="totals-card">
           <h3>Resumen de Costos Directos</h3>
-          <p class="flex-between"><span>Costo Total Materiales/OperaciÃ³n:</span> <strong>$ {{
+          <p class="flex-between"><span>Costo Total Materiales/Operación:</span> <strong>$ {{
               activeQuotation.totals.totalCost | number:'1.0-2' }}</strong></p>
         </div>
         <div class="totals-card primary-border">
@@ -1251,9 +1256,9 @@
 
           <p class="flex-between mt-2"><span>Total con IVA:</span> <strong>$ {{ activeQuotation.totals.totalWithTax |
               number }}</strong></p>
-          <p class="flex-between" *ngIf="activeQuotation.totals.viaticos > 0"><span>ViÃ¡ticos (sin %):</span> <strong>$ {{
+          <p class="flex-between" *ngIf="activeQuotation.totals.viaticos > 0"><span>Viáticos (sin %):</span> <strong>$ {{
               activeQuotation.totals.viaticos | number:'1.0-2' }}</strong></p>
-          <p class="flex-between" *ngIf="activeQuotation.totals.totalSqm > 0"><span>Precio por MÂ²:</span> <strong>$ {{
+          <p class="flex-between" *ngIf="activeQuotation.totals.totalSqm > 0"><span>Precio por M²:</span> <strong>$ {{
               activeQuotation.totals.pricePerSqm | number:'1.0-2' }}</strong></p>
 
           <div class="grand-total mt-4">
@@ -1266,15 +1271,15 @@
 
   <!-- BOTONERA -->
   <div class="wizard-footer mt-4">
-    <button type="button" class="btn-secondary" *ngIf="currentStep > 1" (click)="prevStep()">â† Anterior</button>
+    <button type="button" class="btn-secondary" *ngIf="currentStep > 1" (click)="prevStep()">← Anterior</button>
     <button type="button" class="btn-primary" *ngIf="currentStep === maxSteps" (click)="generatePdf()"
-      style="margin-left: 10px;">ðŸ“„ Generar PDF</button>
+      style="margin-left: 10px;">📄 Generar PDF</button>
     <button type="button" class="btn-primary ml-auto" *ngIf="currentStep < maxSteps" (click)="nextStep()"
-      [disabled]="!isStepValid(currentStep)">Siguiente â†’</button>
+      [disabled]="!isStepValid(currentStep)">Siguiente →</button>
     <div *ngIf="currentStep === 4 && !isProductsMode() && !isStepValid(4)" class="text-error" style="margin-left: 10px; align-self: center;">
-      âš ï¸ Por favor, revisa los Ã­tems marcados en rojo. Todos los insumos y herrajes deben tener un precio asignado.
+      ⚠️ Por favor, revisa los ítems marcados en rojo. Todos los insumos y herrajes deben tener un precio asignado.
     </div>
     <button type="button" class="btn-success ml-auto" *ngIf="currentStep === maxSteps" (click)="saveQuotation()"
-      [disabled]="isLoading || !isStepValid(currentStep)">Guardar CotizaciÃ³n</button>
+      [disabled]="isLoading || !isStepValid(currentStep)">Guardar Cotización</button>
   </div>
 </div>

@@ -1,21 +1,21 @@
-﻿<div class="dashboard-wrapper">
+<div class="dashboard-wrapper">
   <div class="header-section">
     <h1>Dashboard</h1>
     <p>Resumen de actividad de cotizaciones</p>
     <div class="view-toggle mt-3" *ngIf="!isLoading && stats">
       <button class="btn" [class.btn-primary]="viewMode === 'month'" [class.btn-secondary]="viewMode !== 'month'" (click)="toggleViewMode('month')">Este Mes</button>
-      <button class="btn" [class.btn-primary]="viewMode === 'all'" [class.btn-secondary]="viewMode !== 'all'" (click)="toggleViewMode('all')">HistÃ³rico (Todas)</button>
+      <button class="btn" [class.btn-primary]="viewMode === 'all'" [class.btn-secondary]="viewMode !== 'all'" (click)="toggleViewMode('all')">Histórico (Todas)</button>
     </div>
   </div>
 
   <div *ngIf="isLoading" class="loading-state">
     <div class="loader"></div>
-    <p>Cargando estadÃ­sticas...</p>
+    <p>Cargando estadísticas...</p>
   </div>
 
   <div *ngIf="!isLoading && stats" class="stats-grid">
     <div class="stat-card glass-panel">
-      <div class="stat-icon info">ðŸ•’</div>
+      <div class="stat-icon info">🕒</div>
       <div class="stat-info">
         <h3>Hora Local (BOG)</h3>
         <span class="stat-value" style="font-size: 1.5rem;">{{ currentTime | date:'hh:mm:ss a' }}</span>
@@ -23,22 +23,22 @@
     </div>
 
     <div class="stat-card glass-panel">
-      <div class="stat-icon success">ðŸ’µ</div>
+      <div class="stat-icon success">💵</div>
       <div class="stat-info">
-        <h3>TRM DÃ³lar (Hoy)</h3>
+        <h3>TRM Dólar (Hoy)</h3>
         <span class="stat-value" style="font-size: 1.5rem;">
           <ng-container *ngIf="currentTrm !== null; else trmFallback">
             {{ currentTrm | currency:'COP':'symbol':'1.0-2' }}
           </ng-container>
           <ng-template #trmFallback>
             <span class="loading-text" style="font-size: 1rem; opacity: 0.7;" *ngIf="!trmError">Cargando...</span>
-            <span class="loading-text" style="font-size: 0.9rem; opacity: 0.7;" *ngIf="trmError" title="No se pudo obtener la TRM del dÃ­a">No disponible</span>
+            <span class="loading-text" style="font-size: 0.9rem; opacity: 0.7;" *ngIf="trmError" title="No se pudo obtener la TRM del día">No disponible</span>
           </ng-template>
         </span>
       </div>
     </div>
     <div class="stat-card glass-panel">
-      <div class="stat-icon primary">ðŸ“„</div>
+      <div class="stat-icon primary">📄</div>
       <div class="stat-info">
         <h3>Cotizaciones {{ viewMode === 'month' ? 'del Mes' : 'Totales' }}</h3>
         <span class="stat-value">{{ viewMode === 'month' ? stats.monthQuotations : stats.totalQuotations }}</span>
@@ -46,15 +46,15 @@
     </div>
 
     <div class="stat-card glass-panel">
-      <div class="stat-icon success">ðŸ’°</div>
+      <div class="stat-icon success">💰</div>
       <div class="stat-info">
-        <h3>Total {{ viewMode === 'month' ? 'del Mes' : 'HistÃ³rico' }}</h3>
+        <h3>Total {{ viewMode === 'month' ? 'del Mes' : 'Histórico' }}</h3>
         <span class="stat-value">{{ (viewMode === 'month' ? stats.monthTotal : stats.allTimeTotal) | currency:'COP':'symbol':'1.0-2' }}</span>
       </div>
     </div>
 
     <div class="stat-card glass-panel clickable" [routerLink]="['/quotations']" [queryParams]="{ filter: 'nuevo' }">
-      <div class="stat-icon warning">ðŸŸ¡</div>
+      <div class="stat-icon warning">🟡</div>
       <div class="stat-info">
         <h3>Nuevas</h3>
         <span class="stat-value">{{ (stats.statusCounts['nuevo'] || 0) + (stats.statusCounts['borrador'] || 0) }}</span>
@@ -62,15 +62,15 @@
     </div>
 
     <div class="stat-card glass-panel clickable" [routerLink]="['/quotations']" [queryParams]="{ filter: 'en_revision' }">
-      <div class="stat-icon info">ðŸ”µ</div>
+      <div class="stat-icon info">🔵</div>
       <div class="stat-info">
-        <h3>En RevisiÃ³n</h3>
+        <h3>En Revisión</h3>
         <span class="stat-value">{{ (stats.statusCounts['en_revision'] || 0) + (stats.statusCounts['auditada'] || 0) + (stats.statusCounts['enviada'] || 0) }}</span>
       </div>
     </div>
 
     <div class="stat-card glass-panel clickable" [routerLink]="['/quotations']" [queryParams]="{ filter: 'aceptada' }">
-      <div class="stat-icon success">âœ…</div>
+      <div class="stat-icon success">✅</div>
       <div class="stat-info">
         <h3>Aceptadas</h3>
         <span class="stat-value">{{ (stats.statusCounts['aceptada'] || 0) + (stats.statusCounts['aprobada'] || 0) }}</span>
@@ -78,7 +78,7 @@
     </div>
 
     <div class="stat-card glass-panel clickable" [routerLink]="['/quotations']" [queryParams]="{ filter: 'rechazada' }">
-      <div class="stat-icon danger">âŒ</div>
+      <div class="stat-icon danger">❌</div>
       <div class="stat-info">
         <h3>Rechazadas</h3>
         <span class="stat-value">{{ stats.statusCounts['rechazada'] || 0 }}</span>
@@ -88,7 +88,7 @@
 
   <div class="actions-section">
     <button class="btn-primary" routerLink="/quotations/new">
-      âž• Nueva CotizaciÃ³n
+      ➕ Nueva Cotización
     </button>
   </div>
 </div>
