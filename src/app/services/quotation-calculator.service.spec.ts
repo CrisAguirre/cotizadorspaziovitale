@@ -88,10 +88,8 @@ describe('QuotationCalculatorService', () => {
       accessories: [],
       designTime: [],
       clientPaidDesign: false,
-      cuts: [],
       assembly: [],
       installation: [],
-      veneer: [],
       mesonDetails: {
         materialName: 'QUARZTONE BLANCO POLAR',
         basePricePerM2: bpm,
@@ -110,10 +108,8 @@ describe('QuotationCalculatorService', () => {
       totalEdgeBands: 0,
       totalAccessories: 0,
       totalDesignTime: 0,
-      totalCuts: 0,
       totalAssembly: 0,
       totalInstallation: 0,
-      totalVeneer: 0,
       totalCost: 0,
       totalBudget: 0
     };
@@ -305,7 +301,7 @@ describe('QuotationCalculatorService', () => {
         unit: 'ML',
         type: 'meson',
         supplies: [], edgeBands: [], accessories: [], designTime: [],
-        clientPaidDesign: false, cuts: [], assembly: [], installation: [], veneer: [],
+        clientPaidDesign: false, assembly: [], installation: [],
         mesonDetails: {
           materialName: 'QUARZTONE CALACATA GRIS',
           basePricePerM2: 352941,
@@ -317,8 +313,8 @@ describe('QuotationCalculatorService', () => {
           subtotal: 0, taxAmount: 0, finalPricePerMl: 0
         },
         totalSupplies: 0, totalEdgeBands: 0, totalAccessories: 0,
-        totalDesignTime: 0, totalCuts: 0, totalAssembly: 0,
-        totalInstallation: 0, totalVeneer: 0, totalCost: 0, totalBudget: 0
+        totalDesignTime: 0, totalAssembly: 0,
+        totalInstallation: 0, totalCost: 0, totalBudget: 0
       };
 
       sample.areas![0].furniture.push(mesonFurn);

@@ -754,13 +754,26 @@
                 <tr *ngFor="let sup of furn.supplies; let i = index" [class.estimated-row]="sup.unitPrice == null || sup.unitPrice <= 0">
                   <td>
                     <div style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
-                      <input type="text" class="form-control-sm insumo-search"
-                        [(ngModel)]="sup._laminaSearch" placeholder="Buscar insumo por nombre...">
-                      <select class="form-control-sm" [(ngModel)]="sup._lamina"
-                        (ngModelChange)="onLaminaSelect(furn, sup)">
-                        <option value="">-- Selecciona lámina --</option>
-                        <option *ngFor="let l of filteredInsumoLaminas(sup)" [ngValue]="l.description">{{ l.description }}</option>
-                      </select>
+                      <div class="lamina-combobox">
+                        <input type="text" class="form-control-sm insumo-search"
+                          [(ngModel)]="sup._laminaSearch"
+                          (focus)="openLaminaPicker(sup)"
+                          (input)="onLaminaTyping(furn, sup)"
+                          (blur)="closeLaminaPicker(sup)"
+                          autocomplete="off"
+                          placeholder="Buscar lámina...">
+                        <div class="lamina-combobox-dropdown" *ngIf="sup._laminaOpen">
+                          <ng-container *ngIf="filteredInsumoLaminas(sup).length">
+                            <button type="button" class="picker-item"
+                              *ngFor="let l of filteredInsumoLaminas(sup)"
+                              (mousedown)="$event.preventDefault(); selectLamina(furn, sup, l.description)">
+                              <span class="picker-desc">{{ l.description }}</span>
+                              <span class="picker-meta" *ngIf="l.brands.length > 1">Marcas: {{ l.brands.join(', ') }}</span>
+                            </button>
+                          </ng-container>
+                          <div *ngIf="!filteredInsumoLaminas(sup).length" class="picker-item muted">Sin resultados</div>
+                        </div>
+                      </div>
                       <select class="form-control-sm" *ngIf="hasColorGroups(sup)"
                         [(ngModel)]="sup._colorGroup" (ngModelChange)="onColorGroupSelect(furn, sup)">
                         <option value="">-- Grupo de color --</option>
@@ -935,71 +948,21 @@
             </table>
           </div>
 
-          <!-- Cortes -->
+          <!-- M.O. Armado -->
           <div class="budget-section">
             <div class="flex-between">
-              <h5>5. Cortes Melaminas</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'cuts')">+ Añadir</button>
-            </div>
-            <table class="budget-table" *ngIf="furn.cuts?.length">
-              <thead>
-                <tr>
-                  <th>Descripción</th>
-                  <th>m² (Calc)</th>
-                  <th>Hrs/m²</th>
-                  <th>Precio/Hr</th>
-                  <th>Total</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let cut of furn.cuts; let i = index">
-                  <td>
-                    <div style="display: flex; gap: 5px; flex-direction: column;">
-                      <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
-                        (change)="onLaborTimeSelect(cut, $any($event.target).value, 'cuts')">
-                        <option value="">-- Tabla M.O --</option>
-                        <option *ngFor="let lt of availableLaborTimes" [value]="lt.code">{{ lt.activityName }} ({{
-                          lt.timeHours }}h)</option>
-                      </select>
-                      <input type="text" [(ngModel)]="cut.description" class="form-control-sm"
-                        placeholder="Descripción">
-                    </div>
-                  </td>
-                  <td>
-                    <div class="sqm-input-wrapper">
-                      <input type="number" [value]="cut.sqm" class="form-control-sm num-input" readonly>
-                      <span class="sqm-label">m²</span>
-                    </div>
-                  </td>
-                  <td><input type="number" [(ngModel)]="cut.timeHours" (change)="recalculate()"
-                      class="form-control-sm num-input" step="any"></td>
-                  <td><input type="text" currencyInput [(ngModel)]="cut.laborRate" (change)="recalculate()"
-                      class="form-control-sm num-input" inputmode="decimal" [placeholder]="(appConfig.laborRatePerHour || 0).toString()"></td>
-                  <td>$ {{ cut.totalPrice | number:'1.0-2' }}</td>
-                  <td><button class="btn-icon text-error" title="Eliminar"
-                      (click)="removeItem(furn, 'cuts', i)">🗑️</button></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Ensamble -->
-          <div class="budget-section">
-            <div class="flex-between">
-              <h5>6. Mano de Obra Armado</h5>
+              <h5>5. M.O. Armado</h5>
               <button class="btn-secondary btn-sm" (click)="addItem(furn, 'assembly')">+ Añadir</button>
             </div>
             <table class="budget-table" *ngIf="furn.assembly?.length">
               <thead>
                 <tr>
-                  <th>Descripción</th>
+                  <th>Actividad / referencias</th>
                   <th>Medida</th>
                   <th>Unidad</th>
                   <th>Cant.</th>
-                  <th>Hrs</th>
-                  <th>Operarios</th>
-                  <th>Precio/Hr</th>
+                  <th>Min</th>
+                  <th>$ Min</th>
                   <th>Total</th>
                   <th></th>
                 </tr>
@@ -1007,13 +970,27 @@
               <tbody>
                 <tr *ngFor="let asm of furn.assembly; let i = index" [class.estimated-row]="asm.description.includes('⧦Est.')">
                   <td>
-                    <div style="display: flex; gap: 5px; flex-direction: column;">
-                      <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
-                        (change)="onLaborTimeSelect(asm, $any($event.target).value, 'assembly')">
-                        <option value="">-- Tabla M.O --</option>
-                        <option *ngFor="let lt of availableLaborTimes" [value]="lt.code">{{ lt.activityName }} ({{
-                          lt.timeHours }}h)</option>
-                      </select>
+                    <div style="display: flex; gap: 5px; flex-direction: column; min-width: 220px;">
+                      <div class="lamina-combobox">
+                        <input type="text" class="form-control-sm insumo-search"
+                          [(ngModel)]="asm._activitySearch"
+                          (focus)="openMOPicker(asm)"
+                          (input)="onMOTyping(asm)"
+                          (blur)="closeMOPicker(asm)"
+                          autocomplete="off"
+                          placeholder="Buscar actividad de armado...">
+                        <div class="lamina-combobox-dropdown" *ngIf="asm._activityOpen">
+                          <ng-container *ngIf="filteredMOActivities('armado', asm).length">
+                            <button type="button" class="picker-item"
+                              *ngFor="let lt of filteredMOActivities('armado', asm)"
+                              (mousedown)="$event.preventDefault(); selectMOActivity(asm, 'armado', lt)">
+                              <span class="picker-desc">{{ lt.activityName }}</span>
+                              <span class="picker-meta">{{ lt.minutes }} min · ${{ lt.valorMinuto }}/min · {{ lt.unit }}</span>
+                            </button>
+                          </ng-container>
+                          <div *ngIf="!filteredMOActivities('armado', asm).length" class="picker-item muted">Sin resultados</div>
+                        </div>
+                      </div>
                       <input type="text" [(ngModel)]="asm.description" class="form-control-sm"
                         placeholder="Descripción">
                     </div>
@@ -1024,12 +1001,10 @@
                       placeholder="ML, M2, ser"></td>
                   <td><input type="number" [(ngModel)]="asm.totalQuantity" (change)="recalculate()"
                       class="form-control-sm num-input" step="any"></td>
-                  <td><input type="number" [(ngModel)]="asm.assemblyHours" (change)="recalculate()"
+                  <td><input type="number" [(ngModel)]="asm.minutes" (change)="recalculate()"
                       class="form-control-sm num-input" step="any"></td>
-                  <td><input type="number" [(ngModel)]="asm.persons" (change)="recalculate()"
-                      class="form-control-sm num-input" step="any"></td>
-                  <td><input type="text" currencyInput [(ngModel)]="asm.laborRate" (change)="recalculate()"
-                      class="form-control-sm num-input" inputmode="decimal" [placeholder]="(appConfig.laborRatePerHour || 0).toString()"></td>
+                  <td><input type="text" currencyInput [(ngModel)]="asm.valorMinuto" (change)="recalculate()"
+                      class="form-control-sm num-input" inputmode="decimal"></td>
                   <td>$ {{ asm.totalPrice | number:'1.0-2' }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'assembly', i)">🗑️</button></td>
@@ -1038,22 +1013,22 @@
             </table>
           </div>
 
-          <!-- Instalación -->
+          <!-- M.O. Instalación -->
           <div class="budget-section">
             <div class="flex-between">
-              <h5>7. Instalación en obra (2 personas)</h5>
+              <h5>6. M.O. Instalación</h5>
               <button class="btn-secondary btn-sm" (click)="addItem(furn, 'installation')">+ Añadir</button>
             </div>
             <table class="budget-table" *ngIf="furn.installation?.length">
               <thead>
                 <tr>
-                  <th>Descripción</th>
+                  <th>Actividad / referencias</th>
                   <th>Medida</th>
                   <th>Unidad</th>
                   <th>Cant.</th>
-                  <th>Hrs</th>
+                  <th>Min</th>
                   <th>Operarios</th>
-                  <th>Precio/Hr</th>
+                  <th>$ Min</th>
                   <th>Total</th>
                   <th></th>
                 </tr>
@@ -1061,13 +1036,27 @@
               <tbody>
                 <tr *ngFor="let inst of furn.installation; let i = index" [class.estimated-row]="inst.description.includes('⧦Est.')">
                   <td>
-                    <div style="display: flex; gap: 5px; flex-direction: column;">
-                      <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
-                        (change)="onLaborTimeSelect(inst, $any($event.target).value, 'installation')">
-                        <option value="">-- Tabla M.O --</option>
-                        <option *ngFor="let lt of availableLaborTimes" [value]="lt.code">{{ lt.activityName }} ({{
-                          lt.timeHours }}h)</option>
-                      </select>
+                    <div style="display: flex; gap: 5px; flex-direction: column; min-width: 220px;">
+                      <div class="lamina-combobox">
+                        <input type="text" class="form-control-sm insumo-search"
+                          [(ngModel)]="inst._activitySearch"
+                          (focus)="openMOPicker(inst)"
+                          (input)="onMOTyping(inst)"
+                          (blur)="closeMOPicker(inst)"
+                          autocomplete="off"
+                          placeholder="Buscar actividad de instalación...">
+                        <div class="lamina-combobox-dropdown" *ngIf="inst._activityOpen">
+                          <ng-container *ngIf="filteredMOActivities('instalacion', inst).length">
+                            <button type="button" class="picker-item"
+                              *ngFor="let lt of filteredMOActivities('instalacion', inst)"
+                              (mousedown)="$event.preventDefault(); selectMOActivity(inst, 'instalacion', lt)">
+                              <span class="picker-desc">{{ lt.activityName }}</span>
+                              <span class="picker-meta">{{ lt.minutes }} min · {{ lt.persons }} pers · ${{ lt.valorMinuto }}/min · {{ lt.unit }}</span>
+                            </button>
+                          </ng-container>
+                          <div *ngIf="!filteredMOActivities('instalacion', inst).length" class="picker-item muted">Sin resultados</div>
+                        </div>
+                      </div>
                       <input type="text" [(ngModel)]="inst.description" class="form-control-sm"
                         placeholder="Descripción">
                     </div>
@@ -1078,64 +1067,15 @@
                       placeholder="ML, M2, ser"></td>
                   <td><input type="number" [(ngModel)]="inst.totalQuantity" (change)="recalculate()"
                       class="form-control-sm num-input" step="any"></td>
-                  <td><input type="number" [(ngModel)]="inst.installHours" (change)="recalculate()"
+                  <td><input type="number" [(ngModel)]="inst.minutes" (change)="recalculate()"
                       class="form-control-sm num-input" step="any"></td>
                   <td><input type="number" [(ngModel)]="inst.persons" (change)="recalculate()"
                       class="form-control-sm num-input" step="any"></td>
-                  <td><input type="text" currencyInput [(ngModel)]="inst.laborRate" (change)="recalculate()"
-                      class="form-control-sm num-input" inputmode="decimal" [placeholder]="(appConfig.laborRatePerHour || 0).toString()"></td>
+                  <td><input type="text" currencyInput [(ngModel)]="inst.valorMinuto" (change)="recalculate()"
+                      class="form-control-sm num-input" inputmode="decimal"></td>
                   <td>$ {{ inst.totalPrice | number:'1.0-2' }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'installation', i)">🗑️</button></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Enchape -->
-          <div class="budget-section">
-            <div class="flex-between">
-              <h5>8. Enchape</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'veneer')">+ Añadir</button>
-            </div>
-            <table class="budget-table" *ngIf="furn.veneer?.length">
-              <thead>
-                <tr>
-                  <th>Descripción</th>
-                  <th>ML (Calc)</th>
-                  <th>Hrs/ML</th>
-                  <th>Precio/Hr</th>
-                  <th>Total</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let ven of furn.veneer; let i = index">
-                  <td>
-                    <div style="display: flex; gap: 5px; flex-direction: column;">
-                      <select *ngIf="activeQuotation.wizardConfig.moTimeMode !== 'manual'" class="form-control-sm"
-                        (change)="onLaborTimeSelect(ven, $any($event.target).value, 'veneer')">
-                        <option value="">-- Tabla M.O --</option>
-                        <option *ngFor="let lt of availableLaborTimes" [value]="lt.code">{{ lt.activityName }} ({{
-                          lt.timeHours }}h)</option>
-                      </select>
-                      <input type="text" [(ngModel)]="ven.description" class="form-control-sm"
-                        placeholder="Descripción del enchape">
-                    </div>
-                  </td>
-                  <td>
-                    <div class="sqm-input-wrapper">
-                      <input type="number" [value]="ven.ml" class="form-control-sm num-input" readonly>
-                      <span class="sqm-label">ML</span>
-                    </div>
-                  </td>
-                  <td><input type="number" [(ngModel)]="ven.timeHours" (change)="recalculate()"
-                      class="form-control-sm num-input" step="any"></td>
-                  <td><input type="text" currencyInput [(ngModel)]="ven.laborRate" (change)="recalculate()"
-                      class="form-control-sm num-input" inputmode="decimal" [placeholder]="(appConfig.laborRatePerHour || 0).toString()"></td>
-                  <td>$ {{ ven.totalPrice | number:'1.0-2' }}</td>
-                  <td><button class="btn-icon text-error" title="Eliminar"
-                      (click)="removeItem(furn, 'veneer', i)">🗑️</button></td>
                 </tr>
               </tbody>
             </table>
@@ -1146,11 +1086,10 @@
             <span>Cantos: $ {{ furn.totalEdgeBands | number:'1.0-2' }}</span>
             <span>Diseño: $ {{ furn.totalDesignTime | number:'1.0-2' }}</span>
             <span>Accesorios: $ {{ furn.totalAccessories | number:'1.0-2' }}</span>
-            <span>Cortes: $ {{ furn.totalCuts | number:'1.0-2' }}</span>
-            <span>Armado: $ {{ furn.totalAssembly | number:'1.0-2' }}</span>
-            <span>Instalación: $ {{ furn.totalInstallation | number:'1.0-2' }}</span>
-            <span>Enchape: $ {{ furn.totalVeneer | number:'1.0-2' }}</span>
+            <span>M.O. Armado: $ {{ furn.totalAssembly | number:'1.0-2' }}</span>
+            <span>M.O. Instalación: $ {{ furn.totalInstallation | number:'1.0-2' }}</span>
           </div>
+
           </ng-container>
 
           <div class="furniture-total text-right mt-2">

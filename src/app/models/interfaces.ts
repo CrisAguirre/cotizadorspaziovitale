@@ -32,6 +32,11 @@ export interface LaborTime {
   code: string;
   activityName: string;
   timeHours: number;
+  category: 'armado' | 'instalacion' | '';
+  minutes: number;
+  valorMinuto: number;
+  persons: number;
+  quantity: number;
   unit: string;
   isService: boolean;
   notes: string;
@@ -79,6 +84,7 @@ export interface SupplyItem {
   _colorGroup?: string;
   _brand?: string;
   _laminaSearch?: string;
+  _laminaOpen?: boolean;
   _materialLabel?: string;
   // Transitorios para cálculo de mano de obra por m² (regla de 3)
   _sqmPerSheet?: number;
@@ -121,15 +127,6 @@ export interface DesignTimeItem {
   totalPrice: number;
 }
 
-export interface CutItem {
-  description: string;
-  sqm: number;
-  timeHours: number;
-  quantity: number;
-  laborRate: number;
-  totalPrice: number;
-}
-
 export interface AssemblyItem {
   description: string;
   measurement: string;
@@ -139,6 +136,11 @@ export interface AssemblyItem {
   totalQuantity: number;
   laborRate: number;
   totalPrice: number;
+  _activitySearch?: string;
+  _activity?: string;
+  _activityOpen?: boolean;
+  minutes?: number;
+  valorMinuto?: number;
 }
 
 export interface InstallationItem {
@@ -150,14 +152,11 @@ export interface InstallationItem {
   totalQuantity: number;
   laborRate: number;
   totalPrice: number;
-}
-
-export interface VeneerItem {
-  description: string;
-  ml: number;
-  timeHours: number;
-  laborRate: number;
-  totalPrice: number;
+  _activitySearch?: string;
+  _activity?: string;
+  _activityOpen?: boolean;
+  minutes?: number;
+  valorMinuto?: number;
 }
 
 export interface MesonDetails {
@@ -191,19 +190,15 @@ export interface Furniture {
   accessories: AccessoryItem[];
   designTime: DesignTimeItem[];
   clientPaidDesign: boolean;
-  cuts: CutItem[];
   assembly: AssemblyItem[];
   installation: InstallationItem[];
-  veneer: VeneerItem[];
   mesonDetails?: MesonDetails;
   totalSupplies: number;
   totalEdgeBands: number;
   totalAccessories: number;
   totalDesignTime: number;
-  totalCuts: number;
   totalAssembly: number;
   totalInstallation: number;
-  totalVeneer: number;
   totalCost: number;
   totalBudget: number;
 }

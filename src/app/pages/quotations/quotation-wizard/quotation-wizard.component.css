@@ -370,3 +370,54 @@
   white-space: nowrap;
   font-weight: 600;
 }
+
+/* =========================================
+   COMBOBOX DE LÁMINAS (INSUMOS)
+========================================= */
+.lamina-combobox {
+  position: relative;
+  width: 100%;
+}
+.lamina-combobox .insumo-search {
+  width: 100%;
+}
+.lamina-combobox-dropdown {
+  position: absolute;
+  z-index: 60;
+  left: 0;
+  right: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  background: var(--card-bg, #1e293b);
+  border: 1px solid var(--border-color, #334155);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  text-align: left;
+}
+.lamina-combobox-dropdown .picker-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-color, #334155);
+}
+.lamina-combobox-dropdown .picker-item:hover {
+  background: rgba(59, 130, 246, 0.15);
+}
+.lamina-combobox-dropdown .picker-item.muted {
+  cursor: default;
+  opacity: 0.7;
+}
+.lamina-combobox-dropdown .picker-desc {
+  font-size: 0.85rem;
+}
+.lamina-combobox-dropdown .picker-meta {
+  font-size: 0.75rem;
+  color: var(--primary-color, #3b82f6);
+}

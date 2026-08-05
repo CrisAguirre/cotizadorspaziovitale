@@ -42,12 +42,6 @@ export class QuotationCalculatorService {
 
             if (furniture.areaSqm && furniture.areaSqm > 0) {
               globalTotalSqm += furniture.areaSqm * (furniture.quantity || 1);
-            } else if (furniture.cuts?.length) {
-              const fSqm = furniture.cuts.reduce(
-                (sum, cut) => sum + (cut.sqm || 0) * (cut.quantity || 1),
-                0
-              );
-              globalTotalSqm += fSqm * (furniture.quantity || 1);
             }
           });
         }
@@ -132,7 +126,6 @@ export class QuotationCalculatorService {
     //   costoMO = minutos × valor del minuto (laborRatePerHour / 60)
     //   precioUnitarioEfectivo = unitPrice + (costoMO ÷ m² digitado)
     furniture.totalSupplies = 0;
-    let totalMelaminaSqm = 0;
     const valorMinuto = (config.laborRatePerHour || 0) / 60;
     if (furniture.supplies) {
       furniture.supplies.forEach((s) => {
@@ -150,16 +143,11 @@ export class QuotationCalculatorService {
 
         s.totalPrice = qty * effectiveUnitPrice;
         furniture.totalSupplies! += s.totalPrice;
-
-        if (s.quantityMode === 'sqm') {
-          totalMelaminaSqm += qty;
-        }
       });
     }
 
     // 2. Cantos — G = ML + desperdicio; I = G × precio
     furniture.totalEdgeBands = 0;
-    let totalEdgeBandML = 0;
     if (furniture.edgeBands) {
       furniture.edgeBands.forEach((e) => {
         const factor = this.getWasteFactor(e.quantity || 0, config.wasteTable);
@@ -168,8 +156,6 @@ export class QuotationCalculatorService {
         e.total = (e.quantity || 0) + e.waste;
         e.totalPrice = e.total * (e.unitPrice || 0);
         furniture.totalEdgeBands! += e.totalPrice;
-        
-        totalEdgeBandML += e.total;
       });
     }
 
@@ -200,51 +186,39 @@ export class QuotationCalculatorService {
       });
     }
 
-    // 5. Cortes — G = M² × tiempo; I = G × valor hora
-    furniture.totalCuts = 0;
-    if (furniture.cuts) {
-      furniture.cuts.forEach((c) => {
-        c.sqm = totalMelaminaSqm;
-        const rate = c.laborRate || laborRate;
-        const workUnits = (c.sqm || 0) * (c.timeHours || 0);
-        c.totalPrice = workUnits * rate;
-        furniture.totalCuts! += c.totalPrice;
-      });
-    }
-
-    // 6. Armado — G = medida × #armado × personas; I = G × valor hora
+    // 5. M.O. Armado — total = minutos × cantidad × valor del minuto (× personas si aplica)
     furniture.totalAssembly = 0;
     if (furniture.assembly) {
       furniture.assembly.forEach((a) => {
-        const workUnits =
-          (a.totalQuantity || 0) * (a.assemblyHours || 0) * (a.persons || 1);
-        const rate = a.laborRate || laborRate;
-        a.totalPrice = workUnits * rate;
+        const qty = a.totalQuantity || 0;
+        if (a.minutes && a.minutes > 0 && a.valorMinuto) {
+          // Fórmula nueva: minutos del Excel × cantidad digitada × valorMinuto (× personas si hay)
+          const mult = (a.persons || 1);
+          a.totalPrice = (a.minutes || 0) * qty * (a.valorMinuto || 0) * mult;
+        } else {
+          // Fallback fórmula legado (horas × personas × tarifa hora)
+          const workUnits = qty * (a.assemblyHours || 0) * (a.persons || 1);
+          const rate = a.laborRate || laborRate;
+          a.totalPrice = workUnits * rate;
+        }
         furniture.totalAssembly! += a.totalPrice;
       });
     }
 
-    // 7. Instalación — misma lógica que armado
+    // 6. M.O. Instalación — misma lógica (minutos × cantidad × valor minuto × personas)
     furniture.totalInstallation = 0;
     if (furniture.installation) {
       furniture.installation.forEach((i) => {
-        const workUnits =
-          (i.totalQuantity || 0) * (i.installHours || 0) * (i.persons || 1);
-        const rate = i.laborRate || laborRate;
-        i.totalPrice = workUnits * rate;
+        const qty = i.totalQuantity || 0;
+        if (i.minutes !== undefined && i.minutes > 0 && i.valorMinuto !== undefined) {
+          const mult = (i.persons || 1);
+          i.totalPrice = (i.minutes || 0) * qty * (i.valorMinuto || 0) * mult;
+        } else {
+          const workUnits = qty * (i.installHours || 0) * (i.persons || 1);
+          const rate = i.laborRate || laborRate;
+          i.totalPrice = workUnits * rate;
+        }
         furniture.totalInstallation! += i.totalPrice;
-      });
-    }
-
-    // 8. Enchape — G = ML × tiempo; I = G × valor hora
-    furniture.totalVeneer = 0;
-    if (furniture.veneer) {
-      furniture.veneer.forEach((v) => {
-        v.ml = totalEdgeBandML;
-        const rate = v.laborRate || laborRate;
-        const workUnits = (v.ml || 0) * (v.timeHours || 0);
-        v.totalPrice = workUnits * rate;
-        furniture.totalVeneer! += v.totalPrice;
       });
     }
 
@@ -253,10 +227,8 @@ export class QuotationCalculatorService {
       (furniture.totalEdgeBands || 0) +
       (furniture.totalAccessories || 0) +
       (furniture.totalDesignTime || 0) +
-      (furniture.totalCuts || 0) +
       (furniture.totalAssembly || 0) +
-      (furniture.totalInstallation || 0) +
-      (furniture.totalVeneer || 0);
+      (furniture.totalInstallation || 0);
 
     furniture.totalBudget = furniture.totalCost;
   }

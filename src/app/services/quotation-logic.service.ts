@@ -54,22 +54,36 @@ export class QuotationLogicService {
 
     // M.O. helpers que buscan el código real en la BD; si no lo encuentran, usan fallback
     const moFromDB = (code: string, fallbackDesc: string, fallbackHours: number): AssemblyItem => {
-      const lt = availableLaborTimes.find(l => l.code === code);
+      let lt = availableLaborTimes.find(l => l.code === code);
+      if (!lt) {
+        lt = availableLaborTimes.find(l =>
+          l.category === 'armado' && l.activityName.toLowerCase().includes(fallbackDesc.toLowerCase())
+        );
+      }
       return {
         description: lt ? `${lt.activityName} [${code}]` : `${fallbackDesc} ⧦Est.`,
         assemblyHours: (lt && lt.timeHours > 0) ? lt.timeHours : fallbackHours,
-        persons: 1, totalQuantity: furn.quantity || 1, laborRate, totalPrice: 0,
-        measurement: '', unitOfMeasure: furn.unit || 'UNIDAD'
+        persons: lt ? (lt.persons || 1) : 1, totalQuantity: furn.quantity || 1, laborRate, totalPrice: 0,
+        measurement: '', unitOfMeasure: furn.unit || 'UNIDAD',
+        minutes: lt ? (lt.minutes || 0) : 0,
+        valorMinuto: lt ? (lt.valorMinuto || 0) : 0
       };
     };
 
     const instFromDB = (code: string, fallbackDesc: string, fallbackHours: number) => {
-      const lt = availableLaborTimes.find(l => l.code === code);
+      let lt = availableLaborTimes.find(l => l.code === code);
+      if (!lt) {
+        lt = availableLaborTimes.find(l =>
+          l.category === 'instalacion' && l.activityName.toLowerCase().includes(fallbackDesc.toLowerCase())
+        );
+      }
       return {
         description: lt ? `${lt.activityName} [${code}]` : `${fallbackDesc} ⧦Est.`,
         installHours: (lt && lt.timeHours > 0) ? lt.timeHours : fallbackHours,
-        persons: 1, totalQuantity: furn.quantity || 1, laborRate, totalPrice: 0,
-        measurement: '', unitOfMeasure: furn.unit || 'UNIDAD'
+        persons: lt ? (lt.persons || 1) : 1, totalQuantity: furn.quantity || 1, laborRate, totalPrice: 0,
+        measurement: '', unitOfMeasure: furn.unit || 'UNIDAD',
+        minutes: lt ? (lt.minutes || 0) : 0,
+        valorMinuto: lt ? (lt.valorMinuto || 0) : 0
       };
     };
 

@@ -50,14 +50,6 @@ export function buildQuotation2604Sample(): Quotation {
               { description: 'COORDINACIÓN', quantity: 3, laborRate: 0, totalPrice: 0 }
             ],
             clientPaidDesign: false,
-            cuts: [
-              { description: 'CORTE MELAMINAS', sqm: 0.60375, timeHours: 3, quantity: 2, laborRate: 0, totalPrice: 0 },
-              { description: 'Mueble bajo 2.08x0.46', sqm: 2.08, timeHours: 2, quantity: 2, laborRate: 0, totalPrice: 0 },
-              { description: 'Corte 1.75 m²', sqm: 1.75, timeHours: 1, quantity: 2, laborRate: 0, totalPrice: 0 },
-              { description: 'Corte 1.5 m²', sqm: 1.5, timeHours: 1, quantity: 1, laborRate: 0, totalPrice: 0 },
-              { description: 'Corte 5 m²', sqm: 5, timeHours: 0.25, quantity: 1, laborRate: 0, totalPrice: 0 },
-              { description: 'Corte 1 m²', sqm: 1, timeHours: 1, quantity: 1, laborRate: 0, totalPrice: 0 }
-            ],
             assembly: [],
             installation: [
               { description: 'Instalación base', measurement: '', unitOfMeasure: 'm2', installHours: 1, persons: 1, totalQuantity: 1, laborRate: 0, totalPrice: 0 },
@@ -69,15 +61,12 @@ export function buildQuotation2604Sample(): Quotation {
               { description: 'Alistamiento y limpieza', measurement: '', unitOfMeasure: 'SER', installHours: 1, persons: 1, totalQuantity: 1, laborRate: 0, totalPrice: 0 },
               { description: 'Instalación final', measurement: '', unitOfMeasure: 'SER', installHours: 1, persons: 1, totalQuantity: 1, laborRate: 0, totalPrice: 0 }
             ],
-            veneer: [],
             totalSupplies: 0,
             totalEdgeBands: 0,
             totalAccessories: 0,
             totalDesignTime: 0,
-            totalCuts: 0,
             totalAssembly: 0,
             totalInstallation: 0,
-            totalVeneer: 0,
             totalCost: 0,
             totalBudget: 0
           }

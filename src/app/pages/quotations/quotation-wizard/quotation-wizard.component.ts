@@ -5,7 +5,7 @@ import { ConfigService } from '../../../services/config.service';
 import { QuotationCalculatorService } from '../../../services/quotation-calculator.service';
 import { PdfGeneratorService } from '../../../services/pdf-generator.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { AppConfig, Quotation, Area, Furniture, Material, SupplyItem, EdgeBandItem, AccessoryItem, AssemblyItem, VeneerItem, WizardConfig, LaborTime } from '../../../models/interfaces';
+import { AppConfig, Quotation, Area, Furniture, Material, SupplyItem, EdgeBandItem, AccessoryItem, AssemblyItem, WizardConfig, LaborTime } from '../../../models/interfaces';
 import { LaborTimeService } from '../../../services/labor-time.service';
 import { TemporalService, TemporalData } from '../../../services/temporal.service';
 import { MaterialService } from '../../../services/material.service';
@@ -82,7 +82,7 @@ export class QuotationWizardComponent implements OnInit {
           const hasZeroPrice = (items: any[]) => items && items.some(i => i.unitPrice == null || i.unitPrice <= 0);
           
           if (hasEstimated(f.accessories) || hasEstimated(f.assembly) || hasEstimated(f.installation)) return false;
-          if (hasZeroPrice(f.supplies) || hasZeroPrice(f.edgeBands) || hasZeroPrice(f.accessories) || hasZeroPrice(f.veneer)) return false;
+          if (hasZeroPrice(f.supplies) || hasZeroPrice(f.edgeBands) || hasZeroPrice(f.accessories)) return false;
           
           return true;
         })
@@ -395,6 +395,7 @@ export class QuotationWizardComponent implements OnInit {
       next: (res: any) => {
         if (res.success && res.data) {
           this.availableLaborTimes = res.data;
+          this.buildMOActivities();
         }
       },
       error: (err: any) => console.error('Error loading labor times:', err)
@@ -605,18 +606,14 @@ export class QuotationWizardComponent implements OnInit {
       accessories: [],
       designTime: [],
       clientPaidDesign: false,
-      cuts: [],
       assembly: [],
       installation: [],
-      veneer: [],
       totalSupplies: 0,
       totalEdgeBands: 0,
       totalAccessories: 0,
       totalDesignTime: 0,
-      totalCuts: 0,
       totalAssembly: 0,
       totalInstallation: 0,
-      totalVeneer: 0,
       totalCost: 0,
       totalBudget: 0
     });
@@ -707,7 +704,7 @@ export class QuotationWizardComponent implements OnInit {
 
   addItem(
     furniture: Furniture,
-    type: 'supplies' | 'edgeBands' | 'accessories' | 'designTime' | 'cuts' | 'assembly' | 'installation' | 'veneer'
+    type: 'supplies' | 'edgeBands' | 'accessories' | 'designTime' | 'assembly' | 'installation'
   ) {
     if (!furniture[type]) furniture[type] = [];
     const item: Record<string, unknown> = { description: '' };
@@ -731,18 +728,15 @@ export class QuotationWizardComponent implements OnInit {
     if (type === 'designTime') {
       item['quantity'] = 0;
     }
-    if (type === 'cuts') {
-      item['sqm'] = 0;
-      item['timeHours'] = 0;
-      item['laborRate'] = 0;
-    }
     if (type === 'assembly') {
       item['measurement'] = '';
       item['unitOfMeasure'] = 'm2';
       item['assemblyHours'] = 0;
-      item['persons'] = 2;
+      item['persons'] = 1;
       item['totalQuantity'] = 1;
       item['laborRate'] = 0;
+      item['minutes'] = 0;
+      item['valorMinuto'] = 0;
     }
     if (type === 'installation') {
       item['measurement'] = '';
@@ -751,11 +745,8 @@ export class QuotationWizardComponent implements OnInit {
       item['persons'] = 2;
       item['totalQuantity'] = 1;
       item['laborRate'] = 0;
-    }
-    if (type === 'veneer') {
-      item['ml'] = 0;
-      item['timeHours'] = 0;
-      item['laborRate'] = 0;
+      item['minutes'] = 0;
+      item['valorMinuto'] = 0;
     }
 
     (furniture[type] as unknown[]).push(item);
@@ -793,17 +784,6 @@ export class QuotationWizardComponent implements OnInit {
     if (material.unit === 'LAMINA' && material.pricePerSqm > 0) {
       item.quantityMode = 'sqm';
       item.unitPrice = material.pricePerSqm;
-      
-      // Auto-agregar fila de Cortes si no existe
-      if (!furn.cuts || furn.cuts.length === 0) {
-        if (!furn.cuts) furn.cuts = [];
-        this.addItem(furn, 'cuts');
-      }
-      // Auto-agregar fila de Armado si no existe
-      if (!furn.assembly || furn.assembly.length === 0) {
-        if (!furn.assembly) furn.assembly = [];
-        this.addItem(furn, 'assembly');
-      }
     } else {
       item.quantityMode = 'unit';
       item.unitPrice = material.unitPrice;
@@ -842,6 +822,7 @@ export class QuotationWizardComponent implements OnInit {
         f.supplies?.forEach((s) => {
           if (s.description && !s._lamina) {
             s._lamina = s.description;
+            s._laminaSearch = s.description;
             const e = this.insumoLaminas.find((x) => x.description === s.description);
             if (e && e.materials.length) s._colorGroup = e.colorGroups.length ? e.colorGroups[0] : '';
           }
@@ -900,6 +881,30 @@ export class QuotationWizardComponent implements OnInit {
     this.applyResolvedSupply(furn, sup);
   }
 
+  // ===== Combobox de láminas (escribir para buscar y desplegar) =====
+  openLaminaPicker(sup: SupplyItem): void {
+    sup._laminaOpen = true;
+  }
+
+  onLaminaTyping(furn: Furniture, sup: SupplyItem): void {
+    sup._laminaOpen = true;
+    // Si se editó el texto, invalidar la selección previa hasta volver a elegir
+    if (sup._lamina) {
+      this.onLaminaSelect(furn, sup);
+    }
+  }
+
+  closeLaminaPicker(sup: SupplyItem): void {
+    setTimeout(() => (sup._laminaOpen = false), 150);
+  }
+
+  selectLamina(furn: Furniture, sup: SupplyItem, description: string): void {
+    sup._lamina = description;
+    sup._laminaSearch = description;
+    sup._laminaOpen = false;
+    this.onLaminaSelect(furn, sup);
+  }
+
   /** Resuelve la variante concreta (proveedor/marca/precio) a partir de lámina + grupo de color + marca */
   resolveSupplyMaterial(sup: SupplyItem): Material | undefined {
     if (!sup || !sup._lamina) return undefined;
@@ -924,13 +929,7 @@ export class QuotationWizardComponent implements OnInit {
     item.unitPrice = material.unitPrice;
     item.color = material.color || material.provider;
     item.unitOfMeasure = material.unit || 'ML';
-    
-    // Auto-agregar fila de Enchape si no existe
-    if (!furn.veneer || furn.veneer.length === 0) {
-      if (!furn.veneer) furn.veneer = [];
-      this.addItem(furn, 'veneer');
-    }
-    
+
     this.recalculate();
   }
 
@@ -974,22 +973,94 @@ export class QuotationWizardComponent implements OnInit {
   onLaborTimeSelect(item: any, laborTimeCode: string, type: string) {
     const laborTime = this.availableLaborTimes.find(lt => lt.code === laborTimeCode);
     if (!laborTime) return;
-    
-    if (type === 'cuts') {
-      item.description = laborTime.activityName;
-      item.timeHours = laborTime.timeHours;
-    } else if (type === 'assembly') {
-      item.description = laborTime.activityName;
-      item.assemblyHours = laborTime.timeHours;
+
+    if (type === 'assembly') {
+      this.applyLaborActivity(item, laborTime, 'armado');
     } else if (type === 'installation') {
-      item.description = laborTime.activityName;
-      item.installHours = laborTime.timeHours;
+      this.applyLaborActivity(item, laborTime, 'instalacion');
     } else if (type === 'designTime') {
       item.description = laborTime.activityName;
       item.quantity = laborTime.timeHours;
-    } else if (type === 'veneer') {
-      item.description = laborTime.activityName;
-      item.timeHours = laborTime.timeHours;
+    }
+    this.recalculate();
+  }
+
+  // ===== Actividades de M.O. (Armado / Instalación) — estilo Insumos =====
+  armadoActivities: LaborTime[] = [];
+  instalacionActivities: LaborTime[] = [];
+
+  private buildMOActivities(): void {
+    this.armadoActivities = this.availableLaborTimes
+      .filter((l) => l.category === 'armado')
+      .sort((a, b) => a.activityName.localeCompare(b.activityName));
+    this.instalacionActivities = this.availableLaborTimes
+      .filter((l) => l.category === 'instalacion')
+      .sort((a, b) => a.activityName.localeCompare(b.activityName));
+
+    // Re-sincronizar filas ya cargadas con el listado
+    this.activeQuotation.areas?.forEach((a) =>
+      a.furniture?.forEach((f) => {
+        f.assembly?.forEach((it) => {
+          if (it.description && !it._activity) {
+            it._activity = it.description;
+            it._activitySearch = it.description;
+            const lt = this.armadoActivities.find((x) => x.activityName === it.description);
+            if (lt) { it.minutes = lt.minutes; it.valorMinuto = lt.valorMinuto; it.persons = lt.persons; }
+          }
+        });
+        f.installation?.forEach((it) => {
+          if (it.description && !it._activity) {
+            it._activity = it.description;
+            it._activitySearch = it.description;
+            const lt = this.instalacionActivities.find((x) => x.activityName === it.description);
+            if (lt) { it.minutes = lt.minutes; it.valorMinuto = lt.valorMinuto; it.persons = lt.persons; }
+          }
+        });
+      })
+    );
+  }
+
+  filteredMOActivities(category: 'armado' | 'instalacion', item: any): LaborTime[] {
+    const list = category === 'armado' ? this.armadoActivities : this.instalacionActivities;
+    const q = (item?._activitySearch || '').trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((l) => {
+      const hay = `${l.activityName} ${l.unit} ${l.persons}`.toLowerCase();
+      return q.split(/\s+/).every((part: string) => hay.includes(part));
+    });
+  }
+
+  openMOPicker(item: any): void {
+    item._activityOpen = true;
+    if (item._activity) this.onMOTyping(item);
+  }
+
+  onMOTyping(item: any): void {
+    item._activityOpen = true;
+    if (item._activity) {
+      item._activity = '';
+    }
+  }
+
+  closeMOPicker(item: any): void {
+    setTimeout(() => (item._activityOpen = false), 150);
+  }
+
+  selectMOActivity(item: any, category: 'armado' | 'instalacion', laborTime: LaborTime): void {
+    item._activity = laborTime.activityName;
+    item._activitySearch = laborTime.activityName;
+    item._activityOpen = false;
+    this.applyLaborActivity(item, laborTime, category);
+  }
+
+  applyLaborActivity(item: any, laborTime: LaborTime, category: 'armado' | 'instalacion'): void {
+    item.description = laborTime.activityName;
+    item.unitOfMeasure = laborTime.unit || 'UNIDAD';
+    item.minutes = laborTime.minutes || 0;
+    item.valorMinuto = laborTime.valorMinuto || 0;
+    item.persons = category === 'instalacion' ? (laborTime.persons || 1) : 1;
+    if (item.totalQuantity == null || item.totalQuantity === 0) {
+      item.totalQuantity = laborTime.quantity || 1;
     }
     this.recalculate();
   }
