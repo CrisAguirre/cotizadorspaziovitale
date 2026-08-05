@@ -1032,7 +1032,9 @@ export class QuotationWizardComponent implements OnInit {
 
   openMOPicker(item: any): void {
     item._activityOpen = true;
-    if (item._activity) this.onMOTyping(item);
+    if (item._activitySearch) {
+      item._activitySearch = '';
+    }
   }
 
   onMOTyping(item: any): void {

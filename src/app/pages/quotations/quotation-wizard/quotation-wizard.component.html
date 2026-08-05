@@ -790,7 +790,7 @@
                   <td><input type="text" [(ngModel)]="sup.description" class="form-control-sm"></td>
                   <td>
                     <div class="sqm-input-wrapper">
-                      <input type="number" [(ngModel)]="sup.quantity" (change)="recalculate()"
+                      <input type="number" [(ngModel)]="sup.quantity" (ngModelChange)="recalculate()"
                         class="form-control-sm num-input" [attr.step]="sup.quantityMode === 'sqm' ? '0.01' : '1'"
                         [attr.placeholder]="sup.quantityMode === 'sqm' ? 'm²' : 'Cant.'">
                       <span class="sqm-label" *ngIf="sup.quantityMode === 'sqm'">m²</span>
