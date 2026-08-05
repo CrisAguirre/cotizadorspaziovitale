@@ -77,7 +77,13 @@ export interface SupplyItem {
   // Transitorios del dropdown de láminas (no se persisten en BD)
   _lamina?: string;
   _colorGroup?: string;
+  _brand?: string;
+  _laminaSearch?: string;
   _materialLabel?: string;
+  // Transitorios para cálculo de mano de obra por m² (regla de 3)
+  _sqmPerSheet?: number;
+  _laborMinutes?: number;
+  _laborPerSqm?: number;
 }
 
 export interface EdgeBandItem {

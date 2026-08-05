@@ -754,15 +754,22 @@
                 <tr *ngFor="let sup of furn.supplies; let i = index" [class.estimated-row]="sup.unitPrice == null || sup.unitPrice <= 0">
                   <td>
                     <div style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
+                      <input type="text" class="form-control-sm insumo-search"
+                        [(ngModel)]="sup._laminaSearch" placeholder="Buscar insumo por nombre...">
                       <select class="form-control-sm" [(ngModel)]="sup._lamina"
                         (ngModelChange)="onLaminaSelect(furn, sup)">
                         <option value="">-- Selecciona lámina --</option>
-                        <option *ngFor="let l of insumoLaminas" [ngValue]="l.description">{{ l.description }}</option>
+                        <option *ngFor="let l of filteredInsumoLaminas(sup)" [ngValue]="l.description">{{ l.description }}</option>
                       </select>
                       <select class="form-control-sm" *ngIf="hasColorGroups(sup)"
                         [(ngModel)]="sup._colorGroup" (ngModelChange)="onColorGroupSelect(furn, sup)">
                         <option value="">-- Grupo de color --</option>
                         <option *ngFor="let g of colorGroupsFor(sup)" [ngValue]="g">{{ g }}</option>
+                      </select>
+                      <select class="form-control-sm" *ngIf="hasBrands(sup)"
+                        [(ngModel)]="sup._brand" (ngModelChange)="onBrandSelect(furn, sup)">
+                        <option value="">-- Marca --</option>
+                        <option *ngFor="let b of brandsFor(sup)" [ngValue]="b">{{ b }}</option>
                       </select>
                       <span class="picker-meta" *ngIf="sup._materialLabel">{{ sup._materialLabel }}</span>
                     </div>
@@ -782,6 +789,7 @@
                         class="form-control-sm num-input" readonly inputmode="decimal">
                       <span class="sqm-label" *ngIf="sup.quantityMode === 'sqm'">/m²</span>
                     </div>
+                    <div class="picker-meta" *ngIf="sup._laborPerSqm">+ M.O ${{ sup._laborPerSqm | number:'1.0-2' }}/m²</div>
                   </td>
                   <td>$ {{ sup.totalPrice | number:'1.0-2' }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"

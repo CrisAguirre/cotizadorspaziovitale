@@ -785,6 +785,10 @@ export class QuotationWizardComponent implements OnInit {
     item.providerColor = material.provider;
     item.unitOfMeasure = material.unit || 'LAMINA';
 
+    // Datos del material para la mano de obra por m² (regla de 3)
+    item._sqmPerSheet = material.sqmPerSheet || 0;
+    item._laborMinutes = material.laborMinutes || 0;
+
     // Para tableros (uropack, alto brillo, mdf, melaminas): usar precio por m²
     if (material.unit === 'LAMINA' && material.pricePerSqm > 0) {
       item.quantityMode = 'sqm';
@@ -810,22 +814,24 @@ export class QuotationWizardComponent implements OnInit {
 
   // ===== Dropdown de láminas para la sección "1. Insumos" =====
   readonly insumoCategories = ['melamina', 'laminado', 'duraopak', 'tablero'];
-  insumoLaminas: { description: string; colorGroups: string[]; materials: Material[] }[] = [];
+  insumoLaminas: { description: string; colorGroups: string[]; brands: string[]; materials: Material[] }[] = [];
 
   buildInsumoLaminas(): void {
     const mats = this.materialService.preloadedMaterials
       .filter((m) => this.insumoCategories.includes(m.category) && m.active);
-    const map = new Map<string, { colorGroups: Set<string>; materials: Material[] }>();
+    const map = new Map<string, { colorGroups: Set<string>; brands: Set<string>; materials: Material[] }>();
     mats.forEach((m) => {
-      if (!map.has(m.description)) map.set(m.description, { colorGroups: new Set(), materials: [] });
+      if (!map.has(m.description)) map.set(m.description, { colorGroups: new Set(), brands: new Set(), materials: [] });
       const e = map.get(m.description)!;
       e.materials.push(m);
       if (m.color) e.colorGroups.add(m.color);
+      if (m.brand) e.brands.add(m.brand);
     });
     this.insumoLaminas = [...map.entries()]
       .map(([description, e]) => ({
         description,
         colorGroups: [...e.colorGroups].sort(),
+        brands: [...e.brands].sort(),
         materials: e.materials.sort((a, b) => a.pricePerSqm - b.pricePerSqm)
       }))
       .sort((a, b) => a.description.localeCompare(b.description));
@@ -844,6 +850,12 @@ export class QuotationWizardComponent implements OnInit {
     );
   }
 
+  filteredInsumoLaminas(sup: SupplyItem): { description: string; colorGroups: string[]; brands: string[]; materials: Material[] }[] {
+    const q = (sup?._laminaSearch || '').trim().toLowerCase();
+    if (!q) return this.insumoLaminas;
+    return this.insumoLaminas.filter((l) => l.description.toLowerCase().includes(q));
+  }
+
   colorGroupsFor(sup: SupplyItem): string[] {
     if (!sup || !sup._lamina) return [];
     const e = this.insumoLaminas.find((x) => x.description === sup._lamina);
@@ -854,8 +866,17 @@ export class QuotationWizardComponent implements OnInit {
     return this.colorGroupsFor(sup).length > 0;
   }
 
+  brandsFor(sup: SupplyItem): string[] {
+    return sup && sup._lamina ? this.insumoLaminas.find((x) => x.description === sup._lamina)?.brands || [] : [];
+  }
+
+  hasBrands(sup: SupplyItem): boolean {
+    return this.brandsFor(sup).length > 1;
+  }
+
   onLaminaSelect(furn: Furniture, sup: SupplyItem): void {
     sup._colorGroup = '';
+    sup._brand = '';
     sup._materialLabel = '';
     const e = this.insumoLaminas.find((x) => x.description === sup._lamina);
     if (!e || e.materials.length === 0) return;
@@ -863,16 +884,23 @@ export class QuotationWizardComponent implements OnInit {
     if (e.colorGroups.length === 1) {
       sup._colorGroup = e.colorGroups[0];
     }
-    if (e.colorGroups.length <= 1) {
+    const ready = e.colorGroups.length <= 1 && this.brandsFor(sup).length <= 1;
+    if (ready) {
       this.applyResolvedSupply(furn, sup);
     }
   }
 
   onColorGroupSelect(furn: Furniture, sup: SupplyItem): void {
+    // Si hay varias marcas para la lámina, se espera a que el operador elija la marca
+    if (this.brandsFor(sup).length > 1) return;
     this.applyResolvedSupply(furn, sup);
   }
 
-  /** Resuelve la variante concreta (proveedor/marca/precio) a partir de lámina + grupo de color */
+  onBrandSelect(furn: Furniture, sup: SupplyItem): void {
+    this.applyResolvedSupply(furn, sup);
+  }
+
+  /** Resuelve la variante concreta (proveedor/marca/precio) a partir de lámina + grupo de color + marca */
   resolveSupplyMaterial(sup: SupplyItem): Material | undefined {
     if (!sup || !sup._lamina) return undefined;
     const e = this.insumoLaminas.find((x) => x.description === sup._lamina);
@@ -880,7 +908,8 @@ export class QuotationWizardComponent implements OnInit {
     const candidates = sup._colorGroup
       ? e.materials.filter((m) => m.color === sup._colorGroup)
       : e.materials;
-    return candidates.length ? candidates[0] : undefined;
+    const filtered = sup._brand ? candidates.filter((m) => m.brand === sup._brand) : candidates;
+    return filtered.length ? filtered[0] : (candidates.length ? candidates[0] : undefined);
   }
 
   applyResolvedSupply(furn: Furniture, sup: SupplyItem): void {

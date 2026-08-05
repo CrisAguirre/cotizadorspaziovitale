@@ -127,12 +127,28 @@ export class QuotationCalculatorService {
     const designRate = config.designRatePerHour || 0;
 
     // 1. Insumos — I = cantidad × precio unitario
+    // Para láminas (quantityMode === 'sqm') se suma la mano de obra por m²:
+    //   minutos = (m² digitado × M.O POR M2) ÷ M2 de la lámina   (regla de 3)
+    //   costoMO = minutos × valor del minuto (laborRatePerHour / 60)
+    //   precioUnitarioEfectivo = unitPrice + (costoMO ÷ m² digitado)
     furniture.totalSupplies = 0;
     let totalMelaminaSqm = 0;
+    const valorMinuto = (config.laborRatePerHour || 0) / 60;
     if (furniture.supplies) {
       furniture.supplies.forEach((s) => {
         const qty = s.total > 0 ? s.total : (s.quantity || 0);
-        s.totalPrice = qty * (s.unitPrice || 0);
+        let effectiveUnitPrice = s.unitPrice || 0;
+        s._laborPerSqm = 0;
+
+        // Regla de 3: minutos = (m² × M.O) ÷ M2-lámina
+        if (s.quantityMode === 'sqm' && (s._sqmPerSheet || 0) > 0 && (s._laborMinutes || 0) > 0) {
+          const minutes = (qty * (s._laborMinutes || 0)) / (s._sqmPerSheet || 1);
+          const laborCost = minutes * valorMinuto;
+          s._laborPerSqm = qty > 0 ? laborCost / qty : 0;
+          effectiveUnitPrice = effectiveUnitPrice + s._laborPerSqm;
+        }
+
+        s.totalPrice = qty * effectiveUnitPrice;
         furniture.totalSupplies! += s.totalPrice;
 
         if (s.quantityMode === 'sqm') {
