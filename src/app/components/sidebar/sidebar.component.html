@@ -31,10 +31,10 @@
     </div>
     <a *ngFor="let t of temporals" (click)="resumeTemporal(t._id!)" class="nav-item temporal-item" style="cursor: pointer; position: relative; padding-right: 40px;">
       <div style="display: flex; flex-direction: column;">
-        <span style="font-size: 0.9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">? {{ t.clientName }}</span>
+        <span style="font-size: 0.9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">💾 {{ t.clientName }}</span>
         <span style="font-size: 0.7em; color: #a1a1aa; margin-left: 20px;">Paso: {{ t.currentStepName }}</span>
       </div>
-      <button class="btn-icon text-error" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.8em;" (click)="deleteTemporal(t._id!, $event)" title="Descartar borrador">?</button>
+      <button class="btn-icon text-error" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.8em;" (click)="deleteTemporal(t._id!, $event)" title="Descartar borrador">🗑️</button>
     </a>
 
   </nav>
