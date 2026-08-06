@@ -146,7 +146,7 @@ export class QuotationCalculatorService {
       });
     }
 
-    // 2. Cantos — G = ML + desperdicio; I = G × precio
+    // 2. Cantos — G = ML + desperdicio; costo material = G × precio; MO = G × 3 min/ML × valorMinuto
     furniture.totalEdgeBands = 0;
     if (furniture.edgeBands) {
       furniture.edgeBands.forEach((e) => {
@@ -154,7 +154,10 @@ export class QuotationCalculatorService {
         e.wasteFactor = factor;
         e.waste = (e.quantity || 0) * factor;
         e.total = (e.quantity || 0) + e.waste;
-        e.totalPrice = e.total * (e.unitPrice || 0);
+        const materialCost = e.total * (e.unitPrice || 0);
+        const moCosto = e.total * (e.moMinutesPerMl || 3) * valorMinuto;
+        e.moTotal = moCosto;
+        e.totalPrice = materialCost + moCosto;
         furniture.totalEdgeBands! += e.totalPrice;
       });
     }

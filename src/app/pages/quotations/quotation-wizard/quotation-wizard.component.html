@@ -827,6 +827,7 @@
                   <th>% Desperdicio</th>
                   <th>ML Totales</th>
                   <th>Precio Und</th>
+                  <th>M.O.</th>
                   <th>Total</th>
                   <th></th>
                 </tr>
@@ -834,16 +835,62 @@
               <tbody>
                 <tr *ngFor="let edge of furn.edgeBands; let i = index" [class.estimated-row]="edge.unitPrice == null || edge.unitPrice <= 0">
                   <td>
-                    <app-material-picker category="canto" placeholder="Canto..."
-                      (materialSelected)="applyEdgeMaterial(furn, edge, $event)"></app-material-picker>
+                    <div style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
+                      <div class="lamina-combobox">
+                        <input type="text" class="form-control-sm insumo-search"
+                          [(ngModel)]="edge._cantoSearch"
+                          (focus)="openCantoPicker(edge)"
+                          (input)="onCantoTyping(edge)"
+                          (blur)="closeCantoPicker(edge)"
+                          autocomplete="off"
+                          placeholder="Buscar calibre de tapacanto...">
+                        <div class="lamina-combobox-dropdown" *ngIf="edge._cantoOpen">
+                          <div class="picker-group-label" *ngIf="filteredCantoCalibres(edge).length">CALIBRES</div>
+                          <ng-container *ngIf="filteredCantoCalibres(edge).length">
+                            <button type="button" class="picker-item"
+                              *ngFor="let c of filteredCantoCalibres(edge)"
+                              (mousedown)="$event.preventDefault(); selectCantoCalibre(furn, edge, c.label)">
+                              <span class="picker-desc">{{ c.label }}</span>
+                            </button>
+                          </ng-container>
+                          <div class="picker-group-label" *ngIf="filteredCantoBrillantes(edge).length">BRILLANTES Y BICOLOR</div>
+                          <ng-container *ngIf="filteredCantoBrillantes(edge).length">
+                            <button type="button" class="picker-item"
+                              *ngFor="let m of filteredCantoBrillantes(edge)"
+                              (mousedown)="$event.preventDefault(); selectCantoBrillante(furn, edge, m)">
+                              <span class="picker-desc">{{ m.description }}</span>
+                              <span class="picker-meta">$ {{ m.unitPrice | number:'1.0-2' }}/ML</span>
+                            </button>
+                          </ng-container>
+                          <div *ngIf="!filteredCantoCalibres(edge).length && !filteredCantoBrillantes(edge).length" class="picker-item muted">Sin resultados</div>
+                        </div>
+                      </div>
+                      <select class="form-control-sm" *ngIf="edge._calibre && tiposForCalibre(edge).length"
+                        [(ngModel)]="edge._tipo" (ngModelChange)="onCantoTipoChange(furn, edge)">
+                        <option value="">-- Tipo de material --</option>
+                        <option *ngFor="let t of tiposForCalibre(edge)" [ngValue]="t">{{ t | uppercase }}</option>
+                      </select>
+                      <select class="form-control-sm" *ngIf="edge._calibre && edge._tipo && rigidecesForCalibre(edge).length"
+                        [(ngModel)]="edge._rigidez" (ngModelChange)="onCantoRigidezChange(furn, edge)">
+                        <option value="">-- Rigidez --</option>
+                        <option *ngFor="let r of rigidecesForCalibre(edge)" [ngValue]="r">{{ r | uppercase }}</option>
+                      </select>
+                    </div>
                   </td>
-                  <td><input type="text" [(ngModel)]="edge.description" class="form-control-sm"></td>
+                  <td>
+                    <input type="text" [(ngModel)]="edge.description" class="form-control-sm">
+                    <div class="picker-meta" *ngIf="edge.description">
+                      {{ edge.calibre }} {{ edge.tipo ? (edge.tipo | uppercase) : '' }}
+                      {{ edge.rigidez ? (edge.rigidez | uppercase) : '' }} · {{ edge.moMinutesPerMl || 3 }} min/ML
+                    </div>
+                  </td>
                   <td><input type="number" [(ngModel)]="edge.quantity" (change)="recalculate()"
                       class="form-control-sm num-input"></td>
                   <td>{{ (edge.wasteFactor || 0) * 100 }}%</td>
                   <td>{{ edge.total | number:'1.0-2' }}</td>
                   <td><input type="text" currencyInput [(ngModel)]="edge.unitPrice" (change)="recalculate()"
                       class="form-control-sm num-input" readonly inputmode="decimal"></td>
+                  <td>$ {{ edge.moTotal | number:'1.0-2' }}</td>
                   <td>$ {{ edge.totalPrice | number:'1.0-2' }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
                       (click)="removeItem(furn, 'edgeBands', i)">🗑️</button></td>

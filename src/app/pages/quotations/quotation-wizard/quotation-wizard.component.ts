@@ -283,7 +283,10 @@ export class QuotationWizardComponent implements OnInit {
     });
 
     // Precargar todos los materiales en segundo plano para que el buscador sea inmediato
-    this.materialService.preloadAllMaterials().subscribe(() => this.buildInsumoLaminas());
+    this.materialService.preloadAllMaterials().subscribe(() => {
+      this.buildInsumoLaminas();
+      this.buildCantoOptions();
+    });
   }
 
   loadQuotation(id: string) {
@@ -717,6 +720,7 @@ export class QuotationWizardComponent implements OnInit {
       item['unitOfMeasure'] = 'ML';
       item['quantity'] = 0;
       item['unitPrice'] = 0;
+      item['moMinutesPerMl'] = 3;
     }
     if (type === 'accessories') {
       item['unit'] = 'UNIDAD';
@@ -929,8 +933,138 @@ export class QuotationWizardComponent implements OnInit {
     item.unitPrice = material.unitPrice;
     item.color = material.color || material.provider;
     item.unitOfMeasure = material.unit || 'ML';
-
+    item.calibre = material.calibre || '';
+    item.tipo = material.tipo || '';
+    item.rigidez = material.rigidez || '';
+    item.moMinutesPerMl = material.moMinutesPerMl || 3;
+    item._calibre = item.calibre;
+    item._tipo = item.tipo;
+    item._rigidez = item.rigidez;
+    item._esBrillante = material.tipo === 'brillantesbicolor';
+    item._cantoSearch = item.description;
+    item._cantoOpen = false;
     this.recalculate();
+  }
+
+  // ===== Combobox de Cantos (tapacantos) — calibre + tipo + rigidez + brillantes =====
+  cantoCalibres: string[] = [];
+  cantoBrillantes: Material[] = [];
+
+  buildCantoOptions(): void {
+    const cantos = this.materialService.preloadedMaterials
+      .filter((m) => m.category === 'canto' && m.active)
+      .sort((a, b) => a.description.localeCompare(b.description));
+
+    const calibresSet = new Set<string>();
+    const brillantes: Material[] = [];
+    cantos.forEach((m) => {
+      if (m.tipo === 'brillantesbicolor') {
+        brillantes.push(m);
+      } else if (m.calibre) {
+        calibresSet.add(m.calibre);
+      }
+    });
+    this.cantoCalibres = [...calibresSet].sort();
+    this.cantoBrillantes = brillantes;
+
+    // Re-sincronizar filas ya cargadas con el combobox
+    this.activeQuotation.areas?.forEach((a) =>
+      a.furniture?.forEach((f) =>
+        f.edgeBands?.forEach((e) => {
+          if ((e.tipo || e.calibre) && !e._calibre) {
+            e._calibre = e.calibre || '';
+            e._tipo = e.tipo || '';
+            e._rigidez = e.rigidez || '';
+            e._cantoSearch = e.description;
+          }
+        })
+      )
+    );
+  }
+
+  filteredCantoCalibres(edge: EdgeBandItem): { type: 'calibre'; label: string }[] {
+    const q = (edge?._cantoSearch || '').trim().toLowerCase();
+    return this.cantoCalibres
+      .filter((c) => !q || c.toLowerCase().includes(q))
+      .map((c) => ({ type: 'calibre', label: c }));
+  }
+
+  filteredCantoBrillantes(edge: EdgeBandItem): Material[] {
+    const q = (edge?._cantoSearch || '').trim().toLowerCase();
+    const list = this.cantoBrillantes;
+    if (!q) return list;
+    return list.filter((m) => `${m.description} ${m.color}`.toLowerCase().includes(q));
+  }
+
+  openCantoPicker(edge: EdgeBandItem): void {
+    edge._cantoOpen = true;
+    if (edge._cantoSearch && edge._calibre) {
+      // Mantener la búsqueda para re-desplegar
+    }
+  }
+
+  onCantoTyping(edge: EdgeBandItem): void {
+    edge._cantoOpen = true;
+  }
+
+  closeCantoPicker(edge: EdgeBandItem): void {
+    setTimeout(() => (edge._cantoOpen = false), 150);
+  }
+
+  selectCantoCalibre(furn: Furniture, edge: EdgeBandItem, calibre: string): void {
+    edge._calibre = calibre;
+    edge._tipo = '';
+    edge._rigidez = '';
+    edge._cantoSearch = calibre;
+    edge._cantoOpen = false;
+    this.tryResolveCanto(furn, edge);
+  }
+
+  selectCantoBrillante(furn: Furniture, edge: EdgeBandItem, material: Material): void {
+    this.applyEdgeMaterial(furn, edge, material);
+  }
+
+  tiposForCalibre(edge: EdgeBandItem): string[] {
+    if (!edge?._calibre) return [];
+    return ['amaderado', 'unicolores'].filter((t) =>
+      this.materialService.preloadedMaterials.some(
+        (m) => m.category === 'canto' && m.active && m.calibre === edge._calibre && m.tipo === t
+      )
+    );
+  }
+
+  rigidecesForCalibre(edge: EdgeBandItem): string[] {
+    if (!edge?._calibre || !edge._tipo) return [];
+    return ['flexible', 'rigido'].filter((r) =>
+      this.materialService.preloadedMaterials.some(
+        (m) => m.category === 'canto' && m.active && m.calibre === edge._calibre && m.tipo === edge._tipo && m.rigidez === r
+      )
+    );
+  }
+
+  onCantoTipoChange(furn: Furniture, edge: EdgeBandItem): void {
+    edge._rigidez = '';
+    this.tryResolveCanto(furn, edge);
+  }
+
+  onCantoRigidezChange(furn: Furniture, edge: EdgeBandItem): void {
+    this.tryResolveCanto(furn, edge);
+  }
+
+  private resolveCantoMaterial(edge: EdgeBandItem): Material | undefined {
+    if (!edge._calibre || !edge._tipo || !edge._rigidez) return undefined;
+    return this.materialService.preloadedMaterials.find(
+      (m) =>
+        m.category === 'canto' && m.active &&
+        m.calibre === edge._calibre && m.tipo === edge._tipo && m.rigidez === edge._rigidez
+    );
+  }
+
+  private tryResolveCanto(furn: Furniture, edge: EdgeBandItem): void {
+    const material = this.resolveCantoMaterial(edge);
+    if (material) {
+      this.applyEdgeMaterial(furn, edge, material);
+    }
   }
 
   applyAccessoryMaterial(item: AccessoryItem, material: Material): void {

@@ -22,6 +22,11 @@ export interface Material {
   pricePerSqm: number;
   active: boolean;
   laborMinutes?: number;
+  // Campos específicos de CANTOS (tapacantos)
+  calibre?: string;
+  tipo?: string;
+  rigidez?: string;
+  moMinutesPerMl?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -102,6 +107,19 @@ export interface EdgeBandItem {
   total: number;
   unitPrice: number;
   totalPrice: number;
+  // Atributos del tapacanto (persistidos)
+  calibre?: string;
+  tipo?: string;
+  rigidez?: string;
+  moMinutesPerMl?: number;
+  moTotal?: number;
+  // Transitorios del combobox de cantos (no se persisten en BD)
+  _cantoSearch?: string;
+  _cantoOpen?: boolean;
+  _calibre?: string;
+  _tipo?: string;
+  _rigidez?: string;
+  _esBrillante?: boolean;
 }
 
 export interface AccessoryItem {

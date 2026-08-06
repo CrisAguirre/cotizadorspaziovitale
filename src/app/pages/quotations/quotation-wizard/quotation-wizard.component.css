@@ -407,6 +407,18 @@
   cursor: pointer;
   border-bottom: 1px solid var(--border-color, #334155);
 }
+.lamina-combobox-dropdown .picker-group-label {
+  padding: 6px 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary-color, #3b82f6);
+  background: rgba(59, 130, 246, 0.08);
+  border-bottom: 1px solid var(--border-color, #334155);
+  position: sticky;
+  top: 0;
+}
 .lamina-combobox-dropdown .picker-item:hover {
   background: rgba(59, 130, 246, 0.15);
 }
