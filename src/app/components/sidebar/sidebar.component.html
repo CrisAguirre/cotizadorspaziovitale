@@ -32,8 +32,7 @@
     <a *ngFor="let t of temporals" (click)="resumeTemporal(t._id!)" class="nav-item temporal-item" style="cursor: pointer; position: relative; padding-right: 40px; overflow: hidden;">
       <div style="display: flex; flex-direction: column; min-width: 0; overflow: hidden;">
         <div style="font-size: 0.9em; line-height: 1.2; min-width: 0; overflow: hidden;">
-          <span>💾 </span>
-          <span *ngFor="let w of t.clientName?.split(' ')" style="display: block; word-break: break-word;">{{ w }}</span>
+          <span>💾 </span><span style="word-break: break-word;">{{ t.clientName }}</span>
         </div>
         <span style="font-size: 0.7em; color: #a1a1aa; margin-left: 20px;">Paso: {{ t.currentStepName }}</span>
       </div>
