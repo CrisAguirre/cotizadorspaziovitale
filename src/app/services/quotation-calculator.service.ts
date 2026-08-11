@@ -102,6 +102,20 @@ export class QuotationCalculatorService {
     return quotation;
   }
 
+  private parseMeasurement(measurement: string | undefined): number {
+    if (!measurement) return 1;
+    const str = measurement.replace(/,/g, '.').toLowerCase();
+    if (str.includes('x') || str.includes('*')) {
+      const parts = str.split(/x|\*/);
+      const p1 = parseFloat(parts[0]);
+      const p2 = parseFloat(parts[1]);
+      if (!isNaN(p1) && !isNaN(p2)) return p1 * p2;
+      return parseFloat(parts[0]) || 1;
+    }
+    const val = parseFloat(str);
+    return isNaN(val) ? 1 : val;
+  }
+
   private calculateFurnitureTotals(furniture: Furniture, config: AppConfig): void {
     if (furniture.type === 'meson' && furniture.mesonDetails) {
       const md = furniture.mesonDetails;
@@ -189,18 +203,22 @@ export class QuotationCalculatorService {
       });
     }
 
-    // 5. M.O. Armado — total = minutos × cantidad × valor del minuto (× personas si aplica)
+    // 5. M.O. Armado — total = minutos calculados × valor del minuto (× personas si aplica)
     furniture.totalAssembly = 0;
     if (furniture.assembly) {
       furniture.assembly.forEach((a) => {
-        const qty = a.totalQuantity || 0;
-        if (a.minutes && a.minutes > 0 && a.valorMinuto) {
-          // Fórmula nueva: minutos del Excel × cantidad digitada × valorMinuto (× personas si hay)
+        const parsedMedida = this.parseMeasurement(a.measurement);
+        const baseQty = a.baseQuantity || 1;
+        const baseMin = a.minutes || 0;
+
+        if (baseMin > 0 && a.valorMinuto) {
+          const calcMin = (parsedMedida * baseMin) / baseQty;
+          a.calculatedMinutes = calcMin;
           const mult = (a.persons || 1);
-          a.totalPrice = (a.minutes || 0) * qty * (a.valorMinuto || 0) * mult;
+          a.totalPrice = calcMin * (a.valorMinuto || 0) * mult;
         } else {
-          // Fallback fórmula legado (horas × personas × tarifa hora)
-          const workUnits = qty * (a.assemblyHours || 0) * (a.persons || 1);
+          // Fallback fórmula legado
+          const workUnits = parsedMedida * (a.assemblyHours || 0) * (a.persons || 1);
           const rate = a.laborRate || laborRate;
           a.totalPrice = workUnits * rate;
         }
@@ -208,16 +226,21 @@ export class QuotationCalculatorService {
       });
     }
 
-    // 6. M.O. Instalación — misma lógica (minutos × cantidad × valor minuto × personas)
+    // 6. M.O. Instalación — misma lógica
     furniture.totalInstallation = 0;
     if (furniture.installation) {
       furniture.installation.forEach((i) => {
-        const qty = i.totalQuantity || 0;
-        if (i.minutes !== undefined && i.minutes > 0 && i.valorMinuto !== undefined) {
+        const parsedMedida = this.parseMeasurement(i.measurement);
+        const baseQty = i.baseQuantity || 1;
+        const baseMin = i.minutes || 0;
+
+        if (baseMin > 0 && i.valorMinuto !== undefined) {
+          const calcMin = (parsedMedida * baseMin) / baseQty;
+          i.calculatedMinutes = calcMin;
           const mult = (i.persons || 1);
-          i.totalPrice = (i.minutes || 0) * qty * (i.valorMinuto || 0) * mult;
+          i.totalPrice = calcMin * (i.valorMinuto || 0) * mult;
         } else {
-          const workUnits = qty * (i.installHours || 0) * (i.persons || 1);
+          const workUnits = parsedMedida * (i.installHours || 0) * (i.persons || 1);
           const rate = i.laborRate || laborRate;
           i.totalPrice = workUnits * rate;
         }

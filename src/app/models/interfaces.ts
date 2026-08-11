@@ -159,6 +159,8 @@ export interface AssemblyItem {
   _activityOpen?: boolean;
   minutes?: number;
   valorMinuto?: number;
+  baseQuantity?: number;
+  calculatedMinutes?: number;
 }
 
 export interface InstallationItem {
@@ -175,6 +177,8 @@ export interface InstallationItem {
   _activityOpen?: boolean;
   minutes?: number;
   valorMinuto?: number;
+  baseQuantity?: number;
+  calculatedMinutes?: number;
 }
 
 export interface MesonDetails {

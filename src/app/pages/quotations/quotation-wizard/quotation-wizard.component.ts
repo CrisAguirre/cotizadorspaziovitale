@@ -1139,7 +1139,7 @@ export class QuotationWizardComponent implements OnInit {
             it._activity = it.description;
             it._activitySearch = it.description;
             const lt = this.armadoActivities.find((x) => x.activityName === it.description);
-            if (lt) { it.minutes = lt.minutes; it.valorMinuto = lt.valorMinuto; it.persons = lt.persons; }
+            if (lt) { it.minutes = lt.minutes; it.valorMinuto = lt.valorMinuto; it.persons = lt.persons; it.baseQuantity = lt.quantity || 1; }
           }
         });
         f.installation?.forEach((it) => {
@@ -1147,7 +1147,7 @@ export class QuotationWizardComponent implements OnInit {
             it._activity = it.description;
             it._activitySearch = it.description;
             const lt = this.instalacionActivities.find((x) => x.activityName === it.description);
-            if (lt) { it.minutes = lt.minutes; it.valorMinuto = lt.valorMinuto; it.persons = lt.persons; }
+            if (lt) { it.minutes = lt.minutes; it.valorMinuto = lt.valorMinuto; it.persons = lt.persons; it.baseQuantity = lt.quantity || 1; }
           }
         });
       })
@@ -1200,9 +1200,10 @@ export class QuotationWizardComponent implements OnInit {
     item.unitOfMeasure = laborTime.unit || 'UNIDAD';
     item.minutes = laborTime.minutes || 0;
     item.valorMinuto = laborTime.valorMinuto || 0;
+    item.baseQuantity = laborTime.quantity || 1;
     item.persons = category === 'instalacion' ? (laborTime.persons || 1) : 1;
     if (item.totalQuantity == null || item.totalQuantity === 0) {
-      item.totalQuantity = laborTime.quantity || 1;
+      item.totalQuantity = 1;
     }
     this.recalculate();
   }
