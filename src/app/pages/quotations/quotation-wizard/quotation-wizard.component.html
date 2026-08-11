@@ -1043,8 +1043,12 @@
                       placeholder="ej. 1.72 × 0.36"></td>
                   <td><input type="text" [(ngModel)]="asm.unitOfMeasure" class="form-control-sm"
                       placeholder="ML, M2, ser"></td>
-                  <td><input type="number" [(ngModel)]="asm.minutes" (ngModelChange)="recalculate()"
-                      class="form-control-sm num-input" step="any"></td>
+                  <td>
+                    <input type="number" [(ngModel)]="asm.minutes" (ngModelChange)="recalculate()" class="form-control-sm num-input" step="any" title="Tiempo base (Excel)">
+                    <div style="font-size: 11px; text-align: center; color: var(--primary-color); margin-top: 3px;" *ngIf="asm.calculatedMinutes">
+                      {{ asm.calculatedMinutes | number:'1.0-1' }} min total
+                    </div>
+                  </td>
                   <td><input type="text" currencyInput [(ngModel)]="asm.valorMinuto" (ngModelChange)="recalculate()"
                       class="form-control-sm num-input" inputmode="decimal"></td>
                   <td>$ {{ asm.totalPrice | number:'1.0-2' }}</td>
@@ -1104,8 +1108,12 @@
                       placeholder="ej. 2.10 × 0.60"></td>
                   <td><input type="text" [(ngModel)]="inst.unitOfMeasure" class="form-control-sm"
                       placeholder="ML, M2, ser"></td>
-                  <td><input type="number" [(ngModel)]="inst.minutes" (ngModelChange)="recalculate()"
-                      class="form-control-sm num-input" step="any"></td>
+                  <td>
+                    <input type="number" [(ngModel)]="inst.minutes" (ngModelChange)="recalculate()" class="form-control-sm num-input" step="any" title="Tiempo base (Excel)">
+                    <div style="font-size: 11px; text-align: center; color: var(--primary-color); margin-top: 3px;" *ngIf="inst.calculatedMinutes">
+                      {{ inst.calculatedMinutes | number:'1.0-1' }} min total
+                    </div>
+                  </td>
                   <td><input type="number" [(ngModel)]="inst.persons" (ngModelChange)="recalculate()"
                       class="form-control-sm num-input" step="any"></td>
                   <td><input type="text" currencyInput [(ngModel)]="inst.valorMinuto" (ngModelChange)="recalculate()"
