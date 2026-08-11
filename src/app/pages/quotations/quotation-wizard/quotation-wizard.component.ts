@@ -1173,13 +1173,19 @@ export class QuotationWizardComponent implements OnInit {
 
   onMOTyping(item: any): void {
     item._activityOpen = true;
+    item.description = item._activitySearch;
     if (item._activity) {
       item._activity = '';
     }
   }
 
   closeMOPicker(item: any): void {
-    setTimeout(() => (item._activityOpen = false), 150);
+    setTimeout(() => {
+      item._activityOpen = false;
+      if (!item._activitySearch && item.description) {
+        item._activitySearch = item.description;
+      }
+    }, 150);
   }
 
   selectMOActivity(item: any, category: 'armado' | 'instalacion', laborTime: LaborTime): void {
