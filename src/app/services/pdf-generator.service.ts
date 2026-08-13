@@ -18,9 +18,17 @@ export class PdfGeneratorService {
 
 
   generateQuotationPdf(quotation: Quotation, appConfig: AppConfig | null) {
+    this.downloadPdf(quotation, appConfig, { includeBranding: true, showTax: true });
+  }
+
+  generateQuotationPdfWithoutBranding(quotation: Quotation, appConfig: AppConfig | null) {
+    this.downloadPdf(quotation, appConfig, { includeBranding: false, showTax: false });
+  }
+
+  private downloadPdf(quotation: Quotation, appConfig: AppConfig | null, opts: { includeBranding: boolean; showTax: boolean }) {
     try {
       const docDef: TDocumentDefinitions = {
-        content: this.buildContent(quotation, appConfig, LOGO_BASE64),
+        content: this.buildContent(quotation, appConfig, opts),
         styles: this.getStyles(),
         defaultStyle: {
           fontSize: 10,
@@ -44,29 +52,40 @@ export class PdfGeneratorService {
     }
   }
 
-  private buildContent(quotation: Quotation, appConfig: AppConfig | null, logoDataUrl: string): Content[] {
+  private buildContent(quotation: Quotation, appConfig: AppConfig | null, opts: { includeBranding: boolean; showTax: boolean }): Content[] {
     const content: Content[] = [];
 
-    // Header
-    content.push({
-      columns: [
-        {
-          image: logoDataUrl,
-          width: 120,
-          margin: [0, 0, 0, 0]
-        },
-        {
-          text: [
-            { text: `Cotización No. ${quotation.number}\n`, style: 'headerTitle' },
-            { text: `Fecha: ${quotation.date}\n` },
-            { text: `Ciudad: ${quotation.city}` }
-          ],
-          alignment: 'right',
-          width: '*'
-        }
+    // Header: logo y datos de Spazio Vitale solo en la versión con marca
+    const headerInfo: { text: Content; alignment: 'right'; width: '*' } = {
+      text: [
+        { text: `Cotización No. ${quotation.number}\n`, style: 'headerTitle' },
+        { text: `Fecha: ${quotation.date}\n` },
+        { text: `Ciudad: ${quotation.city}` }
       ],
-      margin: [0, 0, 0, 20]
-    });
+      alignment: 'right',
+      width: '*'
+    };
+    if (opts.includeBranding) {
+      content.push({
+        columns: [
+          {
+            image: LOGO_BASE64,
+            width: 120,
+            margin: [0, 0, 0, 0]
+          },
+          headerInfo
+        ],
+        margin: [0, 0, 0, 20]
+      });
+    } else {
+      content.push({
+        columns: [
+          { width: '*', text: '' },
+          headerInfo
+        ],
+        margin: [0, 0, 0, 20]
+      });
+    }
 
     // Client Info
     content.push({
@@ -119,6 +138,13 @@ export class PdfGeneratorService {
         margin: [0, 5, 0, 0]
       });
 
+      const prodTotalBody: any[][] = [
+        [{ text: opts.showTax ? 'SUBTOTAL (sin IVA):' : 'SUBTOTAL:', bold: true }, { text: this.formatCurrency(ptotals.subtotal), alignment: 'right' as 'right', bold: true }],
+        ...(opts.showTax ? [[`IVA (${ptotals.taxPercent}%):`, { text: this.formatCurrency(ptotals.taxAmount), alignment: 'right' as 'right' }]] : []),
+        ...((ptotals.viaticos || 0) > 0 ? [['Viáticos (sin %):', { text: this.formatCurrency(ptotals.viaticos), alignment: 'right' as 'right' }]] : []),
+        [{ text: 'VALOR TOTAL:', style: 'grandTotalLabel' }, { text: this.formatCurrency(ptotals.grandTotal), style: 'grandTotalValue', alignment: 'right' as 'right' }]
+      ];
+
       content.push({
         columns: [
           { width: '*', text: '' },
@@ -126,12 +152,7 @@ export class PdfGeneratorService {
             width: '40%',
             table: {
               widths: ['*', 'auto'],
-              body: [
-                [{ text: 'SUBTOTAL (sin IVA):', bold: true }, { text: this.formatCurrency(ptotals.subtotal), alignment: 'right' as 'right', bold: true }],
-                [`IVA (${ptotals.taxPercent}%):`, { text: this.formatCurrency(ptotals.taxAmount), alignment: 'right' as 'right' }],
-                ...((ptotals.viaticos || 0) > 0 ? [['Viáticos (sin %):', { text: this.formatCurrency(ptotals.viaticos), alignment: 'right' as 'right' }]] : []),
-                [{ text: 'VALOR TOTAL:', style: 'grandTotalLabel' }, { text: this.formatCurrency(ptotals.grandTotal), style: 'grandTotalValue', alignment: 'right' as 'right' }]
-              ]
+              body: prodTotalBody
             },
             layout: 'noBorders'
           }
@@ -371,8 +392,8 @@ export class PdfGeneratorService {
             body: [
               ['Costo Total Materiales/Operación:', { text: this.formatCurrency(totals.totalCost), alignment: 'right' as 'right' }],
               ['AIU (Imprevistos, Utilidad, Indirectos):', { text: this.formatCurrency(totals.subtotal - totals.totalCost), alignment: 'right' as 'right' }],
-              [{ text: 'SUBTOTAL ANTES DE IVA:', bold: true }, { text: this.formatCurrency(totals.subtotal), alignment: 'right' as 'right', bold: true }],
-              ['IVA:', { text: this.formatCurrency(totals.taxAmount), alignment: 'right' as 'right' }],
+              [{ text: opts.showTax ? 'SUBTOTAL ANTES DE IVA:' : 'SUBTOTAL:', bold: true }, { text: this.formatCurrency(totals.subtotal), alignment: 'right' as 'right', bold: true }],
+              ...(opts.showTax ? [['IVA:', { text: this.formatCurrency(totals.taxAmount), alignment: 'right' as 'right' }]] : []),
               ...(totals.discountAmount > 0 ? [['Recargo / Otros:', { text: this.formatCurrency(totals.discountAmount), alignment: 'right' as 'right' }]] : []),
               ...((totals.viaticos || 0) > 0 ? [['Viáticos (sin %):', { text: this.formatCurrency(totals.viaticos), alignment: 'right' as 'right' }]] : []),
               [{ text: 'VALOR TOTAL:', style: 'grandTotalLabel' }, { text: this.formatCurrency(totals.grandTotal), style: 'grandTotalValue', alignment: 'right' as 'right' }]

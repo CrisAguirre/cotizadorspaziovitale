@@ -519,11 +519,24 @@ export class QuotationWizardComponent implements OnInit {
   setDesignFilesMode(mode: 'attach' | 'none') {
     this.activeQuotation.wizardConfig.requiresDesignFiles = mode === 'attach';
     this.activeQuotation.wizardConfig.designFilesInternal = false;
+    if (mode === 'none') {
+      // Omitir "3. Asesoría y Diseño": limpiar los tiempos de diseño existentes
+      this.activeQuotation.areas?.forEach((a) =>
+        a.furniture?.forEach((f) => { f.designTime = []; })
+      );
+    }
+    this.recalculate();
   }
 
   getDesignFilesMode(): string {
-    if (this.activeQuotation.wizardConfig.requiresDesignFiles) return 'attach';
-    return 'none';
+    if (this.activeQuotation.wizardConfig.requiresDesignFiles === true) return 'attach';
+    if (this.activeQuotation.wizardConfig.requiresDesignFiles === false) return 'none';
+    return '';
+  }
+
+  /** Oculta la sección "3. Asesoría y Diseño" del presupuesto cuando se declinó subir archivos de diseño */
+  get hideDesignSection(): boolean {
+    return this.activeQuotation.wizardConfig.requiresDesignFiles === false;
   }
 
   addArea() {
@@ -1258,5 +1271,9 @@ export class QuotationWizardComponent implements OnInit {
 
   generatePdf() {
     this.pdfGenerator.generateQuotationPdf(this.activeQuotation, null);
+  }
+
+  generatePdfWithoutBranding() {
+    this.pdfGenerator.generateQuotationPdfWithoutBranding(this.activeQuotation, null);
   }
 }

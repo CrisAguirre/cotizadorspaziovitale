@@ -899,8 +899,8 @@
             </table>
           </div>
 
-          <!-- Diseño -->
-          <div class="budget-section">
+          <!-- Diseño (omitida si el operario declinó subir archivos de diseño) -->
+          <div class="budget-section" *ngIf="!hideDesignSection">
             <div class="flex-between">
               <h5>3. Asesoría y Diseño</h5>
               <button class="btn-secondary btn-sm" (click)="addItem(furn, 'designTime')">+ Añadir</button>
@@ -947,7 +947,7 @@
           <!-- Herrajes -->
           <div class="budget-section">
             <div class="flex-between">
-              <h5>4. Herrajes y Accesorios</h5>
+              <h5>{{ hideDesignSection ? '3' : '4' }}. Herrajes y Accesorios</h5>
               <button class="btn-secondary btn-sm" (click)="addItem(furn, 'accessories')">+ Añadir</button>
             </div>
             <table class="budget-table" *ngIf="furn.accessories?.length">
@@ -979,9 +979,16 @@
                   <td>
                     <span class="sqm-label">{{ acc.unit || 'UNIDAD' }}</span>
                   </td>
-                  <td>$ {{ getEffectiveUnitPrice(acc) | number:'1.0-2' }}</td>
+                  <td>
+                    <input type="text" currencyInput [(ngModel)]="acc.unitPrice" (change)="recalculate()"
+                      class="form-control-sm num-input" inputmode="decimal">
+                    <div class="picker-meta" *ngIf="acc.apply5Percent">c/ flete 5%: $ {{ getEffectiveUnitPrice(acc) | number:'1.0-2' }}</div>
+                  </td>
                   <td class="text-center" style="min-width: 60px;">
-                    <span class="sqm-label">{{ getTotalTimeMinutes(acc) }} min</span></td>
+                    <input type="number" [(ngModel)]="acc.timeHours" (change)="recalculate()"
+                      class="form-control-sm num-input" step="0.25" style="width: 60px;" title="Horas de mano de obra">
+                    <div style="font-size: 11px;">{{ getTotalTimeMinutes(acc) }} min</div>
+                  </td>
                   <td>$ {{ acc.totalPrice | number:'1.0-2' }}</td>
                   <td class="text-center">
                     <input type="checkbox" [ngModel]="acc.apply5Percent"
@@ -998,7 +1005,7 @@
           <!-- M.O. Armado -->
           <div class="budget-section">
             <div class="flex-between">
-              <h5>5. M.O. Armado</h5>
+              <h5>{{ hideDesignSection ? '4' : '5' }}. M.O. Armado</h5>
               <button class="btn-secondary btn-sm" (click)="addItem(furn, 'assembly')">+ Añadir</button>
             </div>
             <table class="budget-table" *ngIf="furn.assembly?.length">
@@ -1062,7 +1069,7 @@
           <!-- M.O. Instalación -->
           <div class="budget-section">
             <div class="flex-between">
-              <h5>6. M.O. Instalación</h5>
+              <h5>{{ hideDesignSection ? '5' : '6' }}. M.O. Instalación</h5>
               <button class="btn-secondary btn-sm" (click)="addItem(furn, 'installation')">+ Añadir</button>
             </div>
             <table class="budget-table" *ngIf="furn.installation?.length">
@@ -1277,6 +1284,8 @@
     <button type="button" class="btn-secondary" *ngIf="currentStep > 1" (click)="prevStep()">← Anterior</button>
     <button type="button" class="btn-primary" *ngIf="currentStep === maxSteps" (click)="generatePdf()"
       style="margin-left: 10px;">📄 Generar PDF</button>
+    <button type="button" class="btn-secondary" *ngIf="currentStep === maxSteps" (click)="generatePdfWithoutBranding()"
+      style="margin-left: 10px;" title="PDF sin logo ni datos de Spazio Vitale y sin IVA discriminado">📄 PDF sin marca</button>
     <button type="button" class="btn-primary ml-auto" *ngIf="currentStep < maxSteps" (click)="nextStep()"
       [disabled]="!isStepValid(currentStep)">Siguiente →</button>
     <div *ngIf="currentStep === 4 && !isProductsMode() && !isStepValid(4)" class="text-error" style="margin-left: 10px; align-self: center;">
