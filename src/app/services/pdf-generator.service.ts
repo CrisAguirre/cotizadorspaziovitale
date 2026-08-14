@@ -390,11 +390,9 @@ export class PdfGeneratorService {
           table: {
             widths: ['*', 'auto'],
             body: [
-              ['Costo Total Materiales/Operación:', { text: this.formatCurrency(totals.totalCost), alignment: 'right' as 'right' }],
-              ['AIU (Imprevistos, Utilidad, Indirectos):', { text: this.formatCurrency(totals.subtotal - totals.totalCost), alignment: 'right' as 'right' }],
               [{ text: opts.showTax ? 'SUBTOTAL ANTES DE IVA:' : 'SUBTOTAL:', bold: true }, { text: this.formatCurrency(totals.subtotal), alignment: 'right' as 'right', bold: true }],
               ...(opts.showTax ? [['IVA:', { text: this.formatCurrency(totals.taxAmount), alignment: 'right' as 'right' }]] : []),
-              ...(totals.discountAmount > 0 ? [['Recargo / Otros:', { text: this.formatCurrency(totals.discountAmount), alignment: 'right' as 'right' }]] : []),
+              ...(totals.discountAmount > 0 ? [['Descuentos:', { text: this.formatCurrency(totals.discountAmount), alignment: 'right' as 'right' }]] : []),
               ...((totals.viaticos || 0) > 0 ? [['Viáticos (sin %):', { text: this.formatCurrency(totals.viaticos), alignment: 'right' as 'right' }]] : []),
               [{ text: 'VALOR TOTAL:', style: 'grandTotalLabel' }, { text: this.formatCurrency(totals.grandTotal), style: 'grandTotalValue', alignment: 'right' as 'right' }]
             ]
