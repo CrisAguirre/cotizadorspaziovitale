@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, BehaviorSubject, of } from 'rxjs';
+import { tap, retry, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface TemporalData {
@@ -48,6 +48,11 @@ export class TemporalService {
 
   deleteTemporal(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`).pipe(
+      retry({ count: 3, delay: 1000 }),
+      catchError((err) => {
+        console.error('No se pudo eliminar el temporal', err);
+        return of(null);
+      }),
       tap(() => this.refreshTemporals())
     );
   }

@@ -118,7 +118,7 @@
           </span>
         </div>
         <div class="wizard-tip config-mode-banner" *ngIf="isProductsMode()"
-          style="text-align: center; margin: 0 auto 20px; max-width: 800px; color: var(--success-color, #27ae60);">
+          style="text-align: center; margin: 0 auto 20px; max-width: 800px; color: var(--success-color, #15803d);">
           ✅ <strong>Modo "Venta de productos y servicios":</strong> las preguntas de configuración (2-5) no aplican.
           Solo continúas a <strong>3. Productos y servicios</strong> y <strong>4. Resumen</strong>.
         </div>
@@ -643,12 +643,12 @@
                           [class.btn-primary]="mesonUIState.get(furn)?.transportType === 'piedra'"
                           [class.btn-secondary]="mesonUIState.get(furn)?.transportType !== 'piedra'"
                           (click)="setTransportType(furn, 'piedra')">Piedra
-                          <small style="display:block;font-size:9px;">$180,000</small></button>
+                          <small style="display:block;font-size:11px;">$180,000</small></button>
                         <button type="button" class="btn-sm"
                           [class.btn-primary]="mesonUIState.get(furn)?.transportType === 'compac'"
                           [class.btn-secondary]="mesonUIState.get(furn)?.transportType !== 'compac'"
                           (click)="setTransportType(furn, 'compac')">Compac
-                          <small style="display:block;font-size:9px;">$160,000</small></button>
+                          <small style="display:block;font-size:11px;">$160,000</small></button>
                       </div>
                     </td>
                     <td>
