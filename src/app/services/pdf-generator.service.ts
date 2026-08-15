@@ -390,7 +390,7 @@ export class PdfGeneratorService {
           table: {
             widths: ['*', 'auto'],
             body: [
-              [{ text: opts.showTax ? 'SUBTOTAL ANTES DE IVA:' : 'SUBTOTAL:', bold: true }, { text: this.formatCurrency(totals.subtotal), alignment: 'right' as 'right', bold: true }],
+              ...(opts.showTax ? [[{ text: 'SUBTOTAL ANTES DE IVA:', bold: true }, { text: this.formatCurrency(totals.subtotal), alignment: 'right' as 'right', bold: true }]] : []),
               ...(opts.showTax ? [['IVA:', { text: this.formatCurrency(totals.taxAmount), alignment: 'right' as 'right' }]] : []),
               ...(totals.discountAmount > 0 ? [['Descuentos:', { text: this.formatCurrency(totals.discountAmount), alignment: 'right' as 'right' }]] : []),
               ...((totals.viaticos || 0) > 0 ? [['Viáticos (sin %):', { text: this.formatCurrency(totals.viaticos), alignment: 'right' as 'right' }]] : []),
