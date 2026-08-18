@@ -1232,6 +1232,9 @@ export class QuotationWizardComponent implements OnInit {
         next: (res: any) => {
           this.isLoading = false;
           if (res.success) {
+            if (this.temporalId) {
+              this.temporalService.deleteTemporal(this.temporalId).subscribe();
+            }
             this.toastService.success('Cotización actualizada', `La cotización No. ${this.activeQuotation.number} se actualizó exitosamente.`);
             this.router.navigate(['/quotations']);
           } else {
