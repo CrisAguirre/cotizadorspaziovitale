@@ -307,6 +307,9 @@ export class QuotationWizardComponent implements OnInit {
             validityDays: this.activeQuotation.validityDays
           });
           this.initMesonUIStates();
+          if (this.availableLaborTimes && this.availableLaborTimes.length > 0) {
+            this.buildMOActivities();
+          }
           this.recalculate();
           this.isLoading = false;
         }
