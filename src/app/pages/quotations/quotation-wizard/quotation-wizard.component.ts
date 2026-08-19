@@ -369,6 +369,11 @@ export class QuotationWizardComponent implements OnInit {
   }
 
   autoSave() {
+    // No guardar temporal si la cotización ya fue guardada en BD (tiene _id)
+    if (this.activeQuotation._id) {
+      return;
+    }
+
     // Determine the current step name for UI display
     let stepName = 'Inicio';
     if (this.currentStep === 1) stepName = 'Cliente';
