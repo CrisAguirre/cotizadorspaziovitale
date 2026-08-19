@@ -1155,7 +1155,12 @@ export class QuotationWizardComponent implements OnInit {
             it._activity = it.description;
             it._activitySearch = it.description;
             const lt = this.armadoActivities.find((x) => x.activityName === it.description);
-            if (lt) { it.minutes = lt.minutes; it.valorMinuto = lt.valorMinuto; it.persons = lt.persons; it.baseQuantity = lt.quantity || 1; }
+            if (lt) { 
+              if (it.minutes === undefined) it.minutes = lt.minutes; 
+              if (it.valorMinuto === undefined) it.valorMinuto = lt.valorMinuto; 
+              if (it.persons === undefined) it.persons = lt.persons; 
+              if (it.baseQuantity === undefined) it.baseQuantity = lt.quantity || 1; 
+            }
           }
         });
         f.installation?.forEach((it) => {
@@ -1163,7 +1168,12 @@ export class QuotationWizardComponent implements OnInit {
             it._activity = it.description;
             it._activitySearch = it.description;
             const lt = this.instalacionActivities.find((x) => x.activityName === it.description);
-            if (lt) { it.minutes = lt.minutes; it.valorMinuto = lt.valorMinuto; it.persons = lt.persons; it.baseQuantity = lt.quantity || 1; }
+            if (lt) { 
+              if (it.minutes === undefined) it.minutes = lt.minutes; 
+              if (it.valorMinuto === undefined) it.valorMinuto = lt.valorMinuto; 
+              if (it.persons === undefined) it.persons = lt.persons; 
+              if (it.baseQuantity === undefined) it.baseQuantity = lt.quantity || 1; 
+            }
           }
         });
       })
