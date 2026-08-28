@@ -735,10 +735,12 @@
           <ng-container *ngIf="furn.type !== 'meson'">
             <!-- Insumos -->
             <div class="budget-section">
-            <div class="flex-between">
+            <div class="flex-between" style="align-items: flex-start;">
               <h5>1. Insumos (Láminas, etc.)</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'supplies')">+ Lista</button>
-              <button class="btn-secondary btn-sm btn-manual" (click)="addItem(furn, 'supplies', true)">+ Manual</button>
+              <div class="btn-group" style="display: flex; gap: 6px;">
+                <button class="btn-secondary btn-sm" (click)="addItem(furn, 'supplies')">+ Lista</button>
+                <button class="btn-secondary btn-sm btn-manual" (click)="addItem(furn, 'supplies', true)">+ Manual</button>
+              </div>
             </div>
             <table class="budget-table" *ngIf="furn.supplies?.length">
               <thead>
@@ -788,7 +790,7 @@
                       <span class="picker-meta" *ngIf="sup._materialLabel">{{ sup._materialLabel }}</span>
                     </div>
                     <div *ngIf="sup._isManual" style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
-                      <span class="picker-meta">Ingreso manual</span>
+                      <span class="picker-meta" style="color: #fbbf24; font-weight: 600;">Ingreso manual</span>
                       <select class="form-control-sm" [(ngModel)]="sup.quantityMode" (ngModelChange)="recalculate()">
                         <option value="unit">Venta por Unidad</option>
                         <option value="sqm">Venta por m²</option>
@@ -822,10 +824,12 @@
 
           <!-- Cantos -->
           <div class="budget-section">
-            <div class="flex-between">
+            <div class="flex-between" style="align-items: flex-start;">
               <h5>2. Cantos (Desperdicio Automático)</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'edgeBands')">+ Lista</button>
-              <button class="btn-secondary btn-sm btn-manual" (click)="addItem(furn, 'edgeBands', true)">+ Manual</button>
+              <div class="btn-group" style="display: flex; gap: 6px;">
+                <button class="btn-secondary btn-sm" (click)="addItem(furn, 'edgeBands')">+ Lista</button>
+                <button class="btn-secondary btn-sm btn-manual" (click)="addItem(furn, 'edgeBands', true)">+ Manual</button>
+              </div>
             </div>
             <table class="budget-table" *ngIf="furn.edgeBands?.length">
               <thead>
@@ -886,7 +890,7 @@
                       </select>
                     </div>
                     <div *ngIf="edge._isManual" style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
-                      <span class="picker-meta">Ingreso manual</span>
+                      <span class="picker-meta" style="color: #fbbf24; font-weight: 600;">Ingreso manual</span>
                     </div>
                   </td>
                   <td>
@@ -961,10 +965,12 @@
 
           <!-- Herrajes -->
           <div class="budget-section">
-            <div class="flex-between">
+            <div class="flex-between" style="align-items: flex-start;">
               <h5>{{ hideDesignSection ? '3' : '4' }}. Herrajes y Accesorios</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'accessories')">+ Lista</button>
-              <button class="btn-secondary btn-sm btn-manual" (click)="addItem(furn, 'accessories', true)">+ Manual</button>
+              <div class="btn-group" style="display: flex; gap: 6px;">
+                <button class="btn-secondary btn-sm" (click)="addItem(furn, 'accessories')">+ Lista</button>
+                <button class="btn-secondary btn-sm btn-manual" (click)="addItem(furn, 'accessories', true)">+ Manual</button>
+              </div>
             </div>
             <table class="budget-table" *ngIf="furn.accessories?.length">
               <thead>
@@ -986,7 +992,7 @@
                   <td>
                     <app-material-picker *ngIf="!acc._isManual" category="accesorio,herraje" placeholder="Herraje / accesorio..."
                       (materialSelected)="applyAccessoryMaterial(acc, $event)"></app-material-picker>
-                    <span class="picker-meta" *ngIf="acc._isManual">Ingreso manual</span>
+                    <span class="picker-meta" *ngIf="acc._isManual" style="color: #fbbf24; font-weight: 600;">Ingreso manual</span>
                   </td>
                   <td><input type="text" [(ngModel)]="acc.description" class="form-control-sm"></td>
                   <td>
@@ -1022,10 +1028,12 @@
 
           <!-- M.O. Armado -->
           <div class="budget-section">
-            <div class="flex-between">
+            <div class="flex-between" style="align-items: flex-start;">
               <h5>{{ hideDesignSection ? '4' : '5' }}. M.O. Armado</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'assembly')">+ Lista</button>
-              <button class="btn-secondary btn-sm btn-manual" (click)="addItem(furn, 'assembly', true)">+ Manual</button>
+              <div class="btn-group" style="display: flex; gap: 6px;">
+                <button class="btn-secondary btn-sm" (click)="addItem(furn, 'assembly')">+ Lista</button>
+                <button class="btn-secondary btn-sm btn-manual" (click)="addItem(furn, 'assembly', true)">+ Manual</button>
+              </div>
             </div>
             <table class="budget-table" *ngIf="furn.assembly?.length">
               <thead>
@@ -1090,10 +1098,12 @@
 
           <!-- M.O. Instalación -->
           <div class="budget-section">
-            <div class="flex-between">
+            <div class="flex-between" style="align-items: flex-start;">
               <h5>{{ hideDesignSection ? '5' : '6' }}. M.O. Instalación</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'installation')">+ Lista</button>
-              <button class="btn-secondary btn-sm btn-manual" (click)="addItem(furn, 'installation', true)">+ Manual</button>
+              <div class="btn-group" style="display: flex; gap: 6px;">
+                <button class="btn-secondary btn-sm" (click)="addItem(furn, 'installation')">+ Lista</button>
+                <button class="btn-secondary btn-sm btn-manual" (click)="addItem(furn, 'installation', true)">+ Manual</button>
+              </div>
             </div>
             <table class="budget-table" *ngIf="furn.installation?.length">
               <thead>
