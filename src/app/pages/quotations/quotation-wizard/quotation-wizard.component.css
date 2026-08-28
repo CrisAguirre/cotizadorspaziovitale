@@ -433,3 +433,13 @@
   font-size: 0.75rem;
   color: var(--primary-color, #3b82f6);
 }
+
+.btn-manual {
+  background: var(--surface-card);
+  border: 1px dashed var(--border-color);
+  color: var(--text-color);
+}
+.btn-manual:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}

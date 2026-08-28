@@ -728,10 +728,14 @@ export class QuotationWizardComponent implements OnInit {
 
   addItem(
     furniture: Furniture,
-    type: 'supplies' | 'edgeBands' | 'accessories' | 'designTime' | 'assembly' | 'installation'
+    type: 'supplies' | 'edgeBands' | 'accessories' | 'designTime' | 'assembly' | 'installation',
+    manual: boolean = false
   ) {
     if (!furniture[type]) furniture[type] = [];
     const item: Record<string, unknown> = { description: '' };
+    if (manual) {
+      item['_isManual'] = true;
+    }
     if (type === 'supplies') {
       item['unitOfMeasure'] = 'LAMINA';
       item['quantity'] = 0;

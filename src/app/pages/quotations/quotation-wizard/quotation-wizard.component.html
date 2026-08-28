@@ -737,7 +737,8 @@
             <div class="budget-section">
             <div class="flex-between">
               <h5>1. Insumos (Láminas, etc.)</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'supplies')">+ Añadir</button>
+              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'supplies')">+ Lista</button>
+              <button class="btn-secondary btn-sm btn-manual" (click)="addItem(furn, 'supplies', true)">+ Manual</button>
             </div>
             <table class="budget-table" *ngIf="furn.supplies?.length">
               <thead>
@@ -753,7 +754,7 @@
               <tbody>
                 <tr *ngFor="let sup of furn.supplies; let i = index" [class.estimated-row]="sup.unitPrice == null || sup.unitPrice <= 0">
                   <td>
-                    <div style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
+                    <div *ngIf="!sup._isManual" style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
                       <div class="lamina-combobox">
                         <input type="text" class="form-control-sm insumo-search"
                           [(ngModel)]="sup._laminaSearch"
@@ -786,6 +787,13 @@
                       </select>
                       <span class="picker-meta" *ngIf="sup._materialLabel">{{ sup._materialLabel }}</span>
                     </div>
+                    <div *ngIf="sup._isManual" style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
+                      <span class="picker-meta">Ingreso manual</span>
+                      <select class="form-control-sm" [(ngModel)]="sup.quantityMode" (ngModelChange)="recalculate()">
+                        <option value="unit">Venta por Unidad</option>
+                        <option value="sqm">Venta por m²</option>
+                      </select>
+                    </div>
                   </td>
                   <td><input type="text" [(ngModel)]="sup.description" class="form-control-sm"></td>
                   <td>
@@ -799,7 +807,7 @@
                   <td>
                     <div class="sqm-input-wrapper">
                       <input type="text" currencyInput [(ngModel)]="sup.unitPrice" (change)="recalculate()"
-                        class="form-control-sm num-input" readonly inputmode="decimal">
+                        class="form-control-sm num-input" [readonly]="!sup._isManual" inputmode="decimal">
                       <span class="sqm-label" *ngIf="sup.quantityMode === 'sqm'">/m²</span>
                     </div>
                     <div class="picker-meta" *ngIf="sup._laborPerSqm">+ M.O ${{ sup._laborPerSqm | number:'1.0-2' }}/m²</div>
@@ -816,7 +824,8 @@
           <div class="budget-section">
             <div class="flex-between">
               <h5>2. Cantos (Desperdicio Automático)</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'edgeBands')">+ Añadir</button>
+              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'edgeBands')">+ Lista</button>
+              <button class="btn-secondary btn-sm btn-manual" (click)="addItem(furn, 'edgeBands', true)">+ Manual</button>
             </div>
             <table class="budget-table" *ngIf="furn.edgeBands?.length">
               <thead>
@@ -835,7 +844,7 @@
               <tbody>
                 <tr *ngFor="let edge of furn.edgeBands; let i = index" [class.estimated-row]="edge.unitPrice == null || edge.unitPrice <= 0">
                   <td>
-                    <div style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
+                    <div *ngIf="!edge._isManual" style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
                       <div class="lamina-combobox">
                         <input type="text" class="form-control-sm insumo-search"
                           [(ngModel)]="edge._cantoSearch"
@@ -876,12 +885,18 @@
                         <option *ngFor="let r of rigidecesForCalibre(edge)" [ngValue]="r">{{ r | uppercase }}</option>
                       </select>
                     </div>
+                    <div *ngIf="edge._isManual" style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
+                      <span class="picker-meta">Ingreso manual</span>
+                    </div>
                   </td>
                   <td>
                     <input type="text" [(ngModel)]="edge.description" class="form-control-sm">
-                    <div class="picker-meta" *ngIf="edge.description">
+                    <div class="picker-meta" *ngIf="!edge._isManual && edge.description">
                       {{ edge.calibre }} {{ edge.tipo ? (edge.tipo | uppercase) : '' }}
                       {{ edge.rigidez ? (edge.rigidez | uppercase) : '' }} · {{ edge.moMinutesPerMl || 3 }} min/ML
+                    </div>
+                    <div class="picker-meta" *ngIf="edge._isManual" style="display: flex; gap: 5px; align-items: center; margin-top: 4px;">
+                      <input type="number" [(ngModel)]="edge.moMinutesPerMl" (change)="recalculate()" class="form-control-sm" style="width: 50px;" title="Minutos M.O. por ML"> min/ML
                     </div>
                   </td>
                   <td><input type="number" [(ngModel)]="edge.quantity" (change)="recalculate()"
@@ -889,7 +904,7 @@
                   <td>{{ (edge.wasteFactor || 0) * 100 }}%</td>
                   <td>{{ edge.total | number:'1.0-2' }}</td>
                   <td><input type="text" currencyInput [(ngModel)]="edge.unitPrice" (change)="recalculate()"
-                      class="form-control-sm num-input" readonly inputmode="decimal"></td>
+                      class="form-control-sm num-input" [readonly]="!edge._isManual" inputmode="decimal"></td>
                   <td>$ {{ edge.moTotal | number:'1.0-2' }}</td>
                   <td>$ {{ edge.totalPrice | number:'1.0-2' }}</td>
                   <td><button class="btn-icon text-error" title="Eliminar"
@@ -948,7 +963,8 @@
           <div class="budget-section">
             <div class="flex-between">
               <h5>{{ hideDesignSection ? '3' : '4' }}. Herrajes y Accesorios</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'accessories')">+ Añadir</button>
+              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'accessories')">+ Lista</button>
+              <button class="btn-secondary btn-sm btn-manual" (click)="addItem(furn, 'accessories', true)">+ Manual</button>
             </div>
             <table class="budget-table" *ngIf="furn.accessories?.length">
               <thead>
@@ -968,8 +984,9 @@
                 <tr *ngFor="let acc of furn.accessories; let i = index"
                   [class.estimated-row]="acc.description.includes('⧦Est.') || acc.unitPrice == null || acc.unitPrice <= 0">
                   <td>
-                    <app-material-picker category="accesorio,herraje" placeholder="Herraje / accesorio..."
+                    <app-material-picker *ngIf="!acc._isManual" category="accesorio,herraje" placeholder="Herraje / accesorio..."
                       (materialSelected)="applyAccessoryMaterial(acc, $event)"></app-material-picker>
+                    <span class="picker-meta" *ngIf="acc._isManual">Ingreso manual</span>
                   </td>
                   <td><input type="text" [(ngModel)]="acc.description" class="form-control-sm"></td>
                   <td>
@@ -977,7 +994,8 @@
                       class="form-control-sm num-input" style="width: 55px;">
                   </td>
                   <td>
-                    <span class="sqm-label">{{ acc.unit || 'UNIDAD' }}</span>
+                    <span class="sqm-label" *ngIf="!acc._isManual">{{ acc.unit || 'UNIDAD' }}</span>
+                    <input type="text" *ngIf="acc._isManual" [(ngModel)]="acc.unit" class="form-control-sm" style="width: 70px;" placeholder="UNIDAD">
                   </td>
                   <td>
                     <input type="text" currencyInput [(ngModel)]="acc.unitPrice" (change)="recalculate()"
@@ -1006,7 +1024,8 @@
           <div class="budget-section">
             <div class="flex-between">
               <h5>{{ hideDesignSection ? '4' : '5' }}. M.O. Armado</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'assembly')">+ Añadir</button>
+              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'assembly')">+ Lista</button>
+              <button class="btn-secondary btn-sm btn-manual" (click)="addItem(furn, 'assembly', true)">+ Manual</button>
             </div>
             <table class="budget-table" *ngIf="furn.assembly?.length">
               <thead>
@@ -1023,7 +1042,7 @@
               <tbody>
                 <tr *ngFor="let asm of furn.assembly; let i = index" [class.estimated-row]="asm.description.includes('⧦Est.')">
                   <td>
-                    <div style="display: flex; gap: 5px; flex-direction: column; min-width: 220px;">
+                    <div *ngIf="!asm._isManual" style="display: flex; gap: 5px; flex-direction: column; min-width: 220px;">
                       <div class="lamina-combobox">
                         <input type="text" class="form-control-sm insumo-search"
                           [(ngModel)]="asm._activitySearch"
@@ -1044,6 +1063,9 @@
                           <div *ngIf="!filteredMOActivities('armado', asm).length" class="picker-item muted">Sin resultados</div>
                         </div>
                       </div>
+                    </div>
+                    <div *ngIf="asm._isManual" style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
+                      <input type="text" [(ngModel)]="asm.description" class="form-control-sm" placeholder="Descripción de actividad manual...">
                     </div>
                   </td>
                   <td><input type="text" [(ngModel)]="asm.measurement" (ngModelChange)="recalculate()" class="form-control-sm"
@@ -1070,7 +1092,8 @@
           <div class="budget-section">
             <div class="flex-between">
               <h5>{{ hideDesignSection ? '5' : '6' }}. M.O. Instalación</h5>
-              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'installation')">+ Añadir</button>
+              <button class="btn-secondary btn-sm" (click)="addItem(furn, 'installation')">+ Lista</button>
+              <button class="btn-secondary btn-sm btn-manual" (click)="addItem(furn, 'installation', true)">+ Manual</button>
             </div>
             <table class="budget-table" *ngIf="furn.installation?.length">
               <thead>
@@ -1088,7 +1111,7 @@
               <tbody>
                 <tr *ngFor="let inst of furn.installation; let i = index" [class.estimated-row]="inst.description.includes('⧦Est.')">
                   <td>
-                    <div style="display: flex; gap: 5px; flex-direction: column; min-width: 220px;">
+                    <div *ngIf="!inst._isManual" style="display: flex; gap: 5px; flex-direction: column; min-width: 220px;">
                       <div class="lamina-combobox">
                         <input type="text" class="form-control-sm insumo-search"
                           [(ngModel)]="inst._activitySearch"
@@ -1109,6 +1132,9 @@
                           <div *ngIf="!filteredMOActivities('instalacion', inst).length" class="picker-item muted">Sin resultados</div>
                         </div>
                       </div>
+                    </div>
+                    <div *ngIf="inst._isManual" style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
+                      <input type="text" [(ngModel)]="inst.description" class="form-control-sm" placeholder="Descripción de actividad manual...">
                     </div>
                   </td>
                   <td><input type="text" [(ngModel)]="inst.measurement" (ngModelChange)="recalculate()" class="form-control-sm"

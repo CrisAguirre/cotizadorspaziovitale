@@ -95,6 +95,7 @@ export interface SupplyItem {
   _sqmPerSheet?: number;
   _laborMinutes?: number;
   _laborPerSqm?: number;
+  _isManual?: boolean;
 }
 
 export interface EdgeBandItem {
@@ -120,6 +121,7 @@ export interface EdgeBandItem {
   _tipo?: string;
   _rigidez?: string;
   _esBrillante?: boolean;
+  _isManual?: boolean;
 }
 
 export interface AccessoryItem {
@@ -135,6 +137,7 @@ export interface AccessoryItem {
   totalPrice: number;
   /** Si está activo agrega 5% adicional al precio unitario */
   apply5Percent?: boolean;
+  _isManual?: boolean;
 }
 
 export interface DesignTimeItem {
@@ -161,6 +164,7 @@ export interface AssemblyItem {
   valorMinuto?: number;
   baseQuantity?: number;
   calculatedMinutes?: number;
+  _isManual?: boolean;
 }
 
 export interface InstallationItem {
@@ -179,6 +183,7 @@ export interface InstallationItem {
   valorMinuto?: number;
   baseQuantity?: number;
   calculatedMinutes?: number;
+  _isManual?: boolean;
 }
 
 export interface MesonDetails {
