@@ -5,6 +5,21 @@
   </div>
 </div>
 
+<div class="tabs-container" style="margin-bottom: 20px; display: flex; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">
+  <button 
+    [class]="activeView === 'catalog' ? 'btn-primary' : 'btn-secondary'" 
+    (click)="setView('catalog')">
+    Base de datos de proveedores
+  </button>
+  <button 
+    [class]="activeView === 'manual' ? 'btn-primary' : 'btn-secondary'" 
+    (click)="setView('manual')">
+    Entradas Manuales Históricas
+  </button>
+</div>
+
+<!-- START CATALOG VIEW -->
+<ng-container *ngIf="activeView === 'catalog'">
 <div class="card glass-panel">
   <div class="filters-row">
     <select [(ngModel)]="filterCategory" (change)="onSearch()" class="form-control">
@@ -155,4 +170,88 @@
     </div>
   </div>
 </div>
+</div>
+</ng-container>
+<!-- END CATALOG VIEW -->
 
+<!-- START MANUAL ENTRIES VIEW -->
+<ng-container *ngIf="activeView === 'manual'">
+  <div class="card glass-panel">
+    <div class="filters-row">
+      <select [(ngModel)]="manualFilterCategory" (change)="onManualSearch()" class="form-control">
+        <option value="">Todas las categorías</option>
+        <option value="insumo">Insumos</option>
+        <option value="canto">Cantos</option>
+        <option value="accesorio">Herrajes/Accesorios</option>
+        <option value="armado">Armado</option>
+        <option value="instalacion">Instalación</option>
+      </select>
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Buscar descripción..."
+        [(ngModel)]="manualSearchTerm"
+        (keyup.enter)="onManualSearch()"
+      />
+      <button type="button" class="btn-secondary" (click)="onManualSearch()">Buscar</button>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loader"></div>
+      <p>Cargando registros manuales...</p>
+    </div>
+
+    <div *ngIf="!isLoading && manualTotalItems > 0" class="results-info">
+      <span>Mostrando {{ (manualCurrentPage - 1) * pageSize + 1 }}–{{ manualCurrentPage * pageSize > manualTotalItems ? manualTotalItems : manualCurrentPage * pageSize }} de <strong>{{ manualTotalItems }}</strong> registros</span>
+    </div>
+
+    <div class="table-responsive" *ngIf="!isLoading">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Cotización</th>
+            <th>Categoría</th>
+            <th>Descripción Ingresada</th>
+            <th>Monto ($)</th>
+            <th>Detalles (JSON)</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of manualEntries">
+            <td data-label="Fecha">{{ item.createdAt | date:'short' }}</td>
+            <td data-label="Cotización">
+              <span *ngIf="item.quotationId">
+                N°{{ item.quotationId.documentId || 'S/N' }} - {{ item.quotationId.clientName }}
+              </span>
+              <span class="text-muted" *ngIf="!item.quotationId">Borrado</span>
+            </td>
+            <td data-label="Categoría" style="text-transform: capitalize;">{{ item.category }}</td>
+            <td data-label="Descripción">{{ item.description }}</td>
+            <td data-label="Monto">
+              {{ item.details?.totalPrice || item.details?.total || item.details?.unitPrice || 0 | currency:'COP':'symbol':'1.0-2' }}
+            </td>
+            <td data-label="Detalles">
+              <button class="btn-icon" [title]="item.details | json" (click)="0" style="font-size: 12px; cursor: help;">📋 Ver JSON</button>
+            </td>
+            <td data-label="Acciones">
+              <button class="btn-icon text-error" title="Eliminar" (click)="deleteManualEntry(item._id)">🗑️</button>
+            </td>
+          </tr>
+          <tr *ngIf="manualEntries.length === 0">
+            <td colspan="7" class="text-center text-muted">No hay registros manuales almacenados.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación Manual -->
+    <div class="pagination-controls" *ngIf="manualTotalPages > 1 && !isLoading">
+      <button class="btn-secondary btn-sm" [disabled]="manualCurrentPage === 1" (click)="prevManualPage()">Anterior</button>
+      <span class="page-info">Página {{ manualCurrentPage }} de {{ manualTotalPages }}</span>
+      <button class="btn-secondary btn-sm" [disabled]="manualCurrentPage === manualTotalPages" (click)="nextManualPage()">Siguiente</button>
+    </div>
+  </div>
+</ng-container>
+<!-- END MANUAL ENTRIES VIEW -->

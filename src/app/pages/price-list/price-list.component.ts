@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { MaterialService } from '../../services/material.service';
 import { SupplierImportService, SupplierImportFormat, ImportPreview } from '../../services/supplier-import.service';
 import { Material } from '../../models/interfaces';
@@ -14,6 +16,17 @@ export class PriceListComponent implements OnInit {
   isImporting = false;
   importMessage = '';
   importError = '';
+
+  // View state: 'catalog' | 'manual'
+  activeView: 'catalog' | 'manual' = 'catalog';
+  
+  // Manual Entries state
+  manualEntries: any[] = [];
+  manualCurrentPage = 1;
+  manualTotalPages = 1;
+  manualTotalItems = 0;
+  manualFilterCategory = '';
+  manualSearchTerm = '';
 
   selectedFormat: SupplierImportFormat = 'hejercol';
   replaceProviderOnImport = false;
@@ -58,7 +71,8 @@ export class PriceListComponent implements OnInit {
 
   constructor(
     private materialService: MaterialService,
-    private supplierImport: SupplierImportService
+    private supplierImport: SupplierImportService,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -112,6 +126,79 @@ export class PriceListComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  // --- Manual Entries Logic ---
+
+  loadManualEntries(): void {
+    this.isLoading = true;
+    let url = `${environment.apiUrl}/manual-entries?page=${this.manualCurrentPage}&limit=${this.pageSize}`;
+    
+    if (this.manualFilterCategory) {
+      url += `&category=${this.manualFilterCategory}`;
+    }
+    if (this.manualSearchTerm.trim()) {
+      url += `&search=${encodeURIComponent(this.manualSearchTerm.trim())}`;
+    }
+
+    this.http.get<any>(url, { withCredentials: true }).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.manualEntries = res.data;
+          if (res.pagination) {
+            this.manualTotalPages = res.pagination.pages || 1;
+            this.manualTotalItems = res.pagination.total || 0;
+          }
+        }
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
+  }
+
+  onManualSearch(): void {
+    this.manualCurrentPage = 1;
+    this.loadManualEntries();
+  }
+
+  prevManualPage(): void {
+    if (this.manualCurrentPage > 1) {
+      this.manualCurrentPage--;
+      this.loadManualEntries();
+    }
+  }
+
+  nextManualPage(): void {
+    if (this.manualCurrentPage < this.manualTotalPages) {
+      this.manualCurrentPage++;
+      this.loadManualEntries();
+    }
+  }
+
+  goToManualPage(page: number): void {
+    if (page >= 1 && page <= this.manualTotalPages) {
+      this.manualCurrentPage = page;
+      this.loadManualEntries();
+    }
+  }
+
+  deleteManualEntry(id: string): void {
+    if (confirm('¿Estás seguro de eliminar este registro histórico?')) {
+      this.http.delete(`${environment.apiUrl}/manual-entries/${id}`, { withCredentials: true }).subscribe({
+        next: () => this.loadManualEntries()
+      });
+    }
+  }
+
+  setView(view: 'catalog' | 'manual'): void {
+    this.activeView = view;
+    if (view === 'catalog') {
+      this.loadMaterials();
+    } else {
+      this.loadManualEntries();
+    }
   }
 
   onSearch(): void {

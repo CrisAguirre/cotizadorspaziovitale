@@ -1009,9 +1009,9 @@
                     <div class="picker-meta" *ngIf="acc.apply5Percent">c/ flete 5%: $ {{ getEffectiveUnitPrice(acc) | number:'1.0-2' }}</div>
                   </td>
                   <td class="text-center" style="min-width: 60px;">
-                    <input type="number" [(ngModel)]="acc.timeHours" (change)="recalculate()"
-                      class="form-control-sm num-input" step="0.25" style="width: 60px;" title="Horas de mano de obra">
-                    <div style="font-size: 11px;">{{ getTotalTimeMinutes(acc) }} min</div>
+                    <input type="number" [ngModel]="(acc.timeHours || 0) * 60" (ngModelChange)="acc.timeHours = $event / 60; recalculate()"
+                      class="form-control-sm num-input" step="1" style="width: 60px;" title="Minutos de mano de obra">
+                    <div style="font-size: 11px;">{{ getTotalTimeMinutes(acc) }} min total</div>
                   </td>
                   <td>$ {{ acc.totalPrice | number:'1.0-2' }}</td>
                   <td class="text-center">
