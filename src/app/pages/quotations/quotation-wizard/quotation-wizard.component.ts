@@ -913,6 +913,9 @@ export class QuotationWizardComponent implements OnInit {
   // ===== Combobox de láminas (escribir para buscar y desplegar) =====
   openLaminaPicker(sup: SupplyItem): void {
     sup._laminaOpen = true;
+    if (sup._laminaSearch) {
+      sup._laminaSearch = '';
+    }
   }
 
   onLaminaTyping(furn: Furniture, sup: SupplyItem): void {
@@ -1023,8 +1026,8 @@ export class QuotationWizardComponent implements OnInit {
 
   openCantoPicker(edge: EdgeBandItem): void {
     edge._cantoOpen = true;
-    if (edge._cantoSearch && edge._calibre) {
-      // Mantener la búsqueda para re-desplegar
+    if (edge._cantoSearch) {
+      edge._cantoSearch = '';
     }
   }
 

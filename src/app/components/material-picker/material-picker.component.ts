@@ -28,15 +28,15 @@ export class MaterialPickerComponent {
         distinctUntilChanged(),
         switchMap((q) => {
           // Si no hay query pero hay categoría, mostrar todos los items de la categoría
-          if ((!q || q.length < 2) && this.category) {
+          if (!q && this.category) {
             this.isLoading = true;
-            return this.materialService.searchLocalMaterials('', 50, this.category);
+            return this.materialService.searchLocalMaterials('', 9999, this.category);
           }
-          if (!q || q.length < 2) {
-            return of({ success: true, data: [], pagination: { total: 0, page: 1, limit: 50, pages: 0 } });
+          if (!q) {
+            return of({ success: true, data: [], pagination: { total: 0, page: 1, limit: 9999, pages: 0 } });
           }
           this.isLoading = true;
-          return this.materialService.searchLocalMaterials(q, 50, this.category);
+          return this.materialService.searchLocalMaterials(q, 9999, this.category);
         })
       )
       .subscribe({

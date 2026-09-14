@@ -60,7 +60,7 @@ export class MaterialService {
       filtered = filtered.filter(m => cats.includes(m.category));
     }
 
-    if (query && query.length >= 2) {
+    if (query && query.length >= 1) {
       const lowerQuery = query.toLowerCase();
       filtered = filtered.filter(m => 
         m.description.toLowerCase().includes(lowerQuery) ||
