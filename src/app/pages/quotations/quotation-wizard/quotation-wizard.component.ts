@@ -1246,55 +1246,106 @@ export class QuotationWizardComponent implements OnInit {
     this.recalculate();
   }
 
+  /** Limpia campos transitorios del wizard (prefijo _) antes de enviar al backend. */
+  private sanitizeQuotation(q: Quotation): any {
+    const clone = JSON.parse(JSON.stringify(q));
+    const strip = (obj: any): void => {
+      if (Array.isArray(obj)) {
+        obj.forEach(strip);
+        return;
+      }
+      if (obj && typeof obj === 'object') {
+        for (const key of Object.keys(obj)) {
+          if (key.startsWith('_')) {
+            delete obj[key];
+          } else {
+            strip(obj[key]);
+          }
+        }
+      }
+    };
+    strip(clone);
+    delete clone._id;
+    delete clone.createdAt;
+    delete clone.updatedAt;
+    delete clone.__v;
+    return clone;
+  }
+
+  private handleSaveSuccess(res: any, wasUpdate: boolean): void {
+    this.isLoading = false;
+    if (res && res.success) {
+      const num = res.data?.number ?? this.activeQuotation.number;
+      if (this.temporalId) {
+        this.temporalService.deleteTemporal(this.temporalId).subscribe({
+          next: () => this.temporalService.refreshTemporals(),
+          error: () => this.temporalService.refreshTemporals()
+        });
+        this.temporalId = undefined;
+      }
+      this.toastService.success(
+        wasUpdate ? 'Cotizacion actualizada' : 'Cotizacion guardada',
+        `La cotizacion No. ${num} se guardo exitosamente.`
+      );
+      this.router.navigate(['/quotations']);
+    } else {
+      this.toastService.error('Error al guardar', res?.message || 'No se pudo guardar la cotizacion. Intente de nuevo.');
+    }
+  }
+
+  private handleSaveError(err: any, ctx: string): void {
+    this.isLoading = false;
+    console.error(`[saveQuotation:${ctx}]`, err);
+    const serverMsg = err?.error?.message || err?.message || '';
+    const details = err?.error?.errors ? ` Detalle: ${JSON.stringify(err.error.errors).slice(0, 400)}` : '';
+    this.toastService.error('Error al guardar', (serverMsg ? serverMsg + '.' : 'Error del servidor.') + details);
+  }
+
   saveQuotation() {
     this.isLoading = true;
-    this.activeQuotation.status = 'nuevo'; // Forzar estado válido para Mongoose
+    this.activeQuotation.status = 'nuevo';
     this.recalculate();
+    const payload = this.sanitizeQuotation(this.activeQuotation);
 
     if (this.activeQuotation._id) {
-      // Actualizar cotización existente
-      this.quotationService.updateQuotation(this.activeQuotation._id, this.activeQuotation).subscribe({
-        next: (res: any) => {
-          this.isLoading = false;
-          if (res.success) {
-            if (this.temporalId) {
-              this.temporalService.deleteTemporal(this.temporalId).subscribe();
-            }
-            this.toastService.success('Cotización actualizada', `La cotización No. ${this.activeQuotation.number} se actualizó exitosamente.`);
-            this.router.navigate(['/quotations']);
-          } else {
-            this.toastService.error('Error al actualizar', 'No se pudo actualizar la cotización. Intente de nuevo.');
-          }
-        },
-        error: (err: unknown) => {
-          this.isLoading = false;
-          console.error(err);
-          this.toastService.error('Error', 'Error del servidor al actualizar');
-        }
+      this.quotationService.updateQuotation(this.activeQuotation._id, payload).subscribe({
+        next: (res: any) => this.handleSaveSuccess(res, true),
+        error: (err: unknown) => this.handleSaveError(err, 'update-by-id')
       });
-    } else {
-      // Crear nueva cotización
-      this.quotationService.createQuotation(this.activeQuotation).subscribe({
-        next: (res: any) => {
-          this.isLoading = false;
-          if (res.success) {
-            // Si todo salió bien y veníamos de un temporal, borrar el temporal
-            if (this.temporalId) {
-              this.temporalService.deleteTemporal(this.temporalId).subscribe();
-            }
-            this.toastService.success('Cotización guardada', `La cotización No. ${this.activeQuotation.number} se guardó exitosamente.`);
-            this.router.navigate(['/quotations']);
-          } else {
-            this.toastService.error('Error al guardar', 'No se pudo guardar la cotización. Intente de nuevo.');
-          }
-        },
-        error: (err: unknown) => {
-          this.isLoading = false;
-          console.error(err);
-          this.toastService.error('Error', 'Error del servidor al crear');
-        }
-      });
+      return;
     }
+
+    const num = Number(payload.number) || 0;
+    if (num > 0) {
+      this.quotationService.getQuotations({ search: String(num), limit: 5 }).subscribe({
+        next: (listRes: any) => {
+          const existing = (listRes?.data || []).find((q: any) => Number(q.number) === num);
+          if (existing?._id) {
+            this.quotationService.updateQuotation(existing._id, payload).subscribe({
+              next: (res: any) => this.handleSaveSuccess(res, true),
+              error: (err: unknown) => this.handleSaveError(err, 'update-by-number')
+            });
+          } else {
+            this.quotationService.createQuotation(payload).subscribe({
+              next: (res: any) => this.handleSaveSuccess(res, false),
+              error: (err: unknown) => this.handleSaveError(err, 'create')
+            });
+          }
+        },
+        error: (_e: unknown) => {
+          this.quotationService.createQuotation(payload).subscribe({
+            next: (res: any) => this.handleSaveSuccess(res, false),
+            error: (err: unknown) => this.handleSaveError(err, 'create-fallback')
+          });
+        }
+      });
+      return;
+    }
+
+    this.quotationService.createQuotation(payload).subscribe({
+      next: (res: any) => this.handleSaveSuccess(res, false),
+      error: (err: unknown) => this.handleSaveError(err, 'create-no-number')
+    });
   }
 
   generatePdf() {
