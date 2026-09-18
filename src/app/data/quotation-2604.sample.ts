@@ -10,12 +10,15 @@ export function buildQuotation2604Sample(): Quotation {
     number: 2604,
     date: new Date().toISOString().substring(0, 10),
     city: 'San Juan de Pasto',
+    installationAddress: '',
+    sameAddress: true,
     title: 'VENTA, ELABORACIÓN E INSTALACIÓN DE MOBILIARIO',
     client: {
       name: 'Cliente ejemplo 2604',
       city: 'Pasto',
       phone: '',
-      email: ''
+      email: '',
+      address: ''
     },
     areas: [
       {
@@ -92,7 +95,8 @@ export function buildQuotation2604Sample(): Quotation {
       discountAmount: 0,
       grandTotal: 0,
       totalSqm: 0,
-      pricePerSqm: 0
+      pricePerSqm: 0,
+      viaticos: 0
     },
     wizardConfig: {
       clientPriceMode: 'unit_sqm',

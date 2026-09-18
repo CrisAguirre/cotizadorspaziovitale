@@ -126,15 +126,17 @@ describe('QuotationCalculatorService', () => {
       number: 9999,
       date: '2026-07-05',
       city: 'Pasto',
+      installationAddress: '',
+      sameAddress: true,
       title: 'TEST MESONES',
-      client: { name: 'Test', city: 'Pasto', phone: '', email: '' },
+      client: { name: 'Test', city: 'Pasto', phone: '', email: '', address: '' },
       areas: [area],
       totals: {
         totalCost: 0, unforeseenPercent: 10, unforeseenAmount: 0,
         profitPercent: 35, profitAmount: 0, indirectPercent: 32,
         indirectAmount: 0, subtotal: 0, taxPercent: 19, taxAmount: 0,
         totalWithTax: 0, discountPercent: 10, discountAmount: 0,
-        grandTotal: 0, totalSqm: 0, pricePerSqm: 0
+        grandTotal: 0, totalSqm: 0, pricePerSqm: 0, viaticos: 0
       },
       wizardConfig: {
         clientPriceMode: 'manual', hardwareDisplayMode: 'table',
