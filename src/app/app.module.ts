@@ -31,7 +31,7 @@ const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'dashboard', component: DashboardComponent },
-      { path: 'price-list', component: PriceListComponent },
+      { path: 'price-list', component: PriceListComponent, canActivate: [roleGuard], data: { expectedRole: 'admin' } },
       { path: 'settings', component: SettingsComponent, canActivate: [roleGuard], data: { expectedRole: 'admin' } },
       { path: 'quotations', component: QuotationListComponent },
       { path: 'quotations/new', component: QuotationWizardComponent },

@@ -14,7 +14,7 @@
     <a routerLink="/quotations" routerLinkActive="active" class="nav-item">
       <span>📄 Cotizaciones</span>
     </a>
-    <a routerLink="/price-list" routerLinkActive="active" class="nav-item">
+    <a *ngIf="authService.getUser()?.role === 'admin'" routerLink="/price-list" routerLinkActive="active" class="nav-item">
       <span>💰 Lista de Precios</span>
     </a>
     <a *ngIf="authService.getUser()?.role === 'admin'" routerLink="/activity" routerLinkActive="active" class="nav-item">
