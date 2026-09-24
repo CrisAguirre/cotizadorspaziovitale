@@ -30,4 +30,24 @@ export class ActivityComponent implements OnInit {
       }
     });
   }
+
+  roleLabel(role: string): string {
+    const labels: Record<string, string> = {
+      admin: 'ADMIN',
+      comercial: 'ASESOR COMERCIAL',
+      contabilidad: 'CONTABILIDAD',
+      diseno: 'DISEÑO'
+    };
+    return labels[role] || (role ? String(role).toUpperCase() : '');
+  }
+
+  roleBadgeClass(role: string): string {
+    const classes: Record<string, string> = {
+      admin: 'badge-admin',
+      comercial: 'badge-comercial',
+      contabilidad: 'badge-contabilidad',
+      diseno: 'badge-diseno'
+    };
+    return classes[role] || 'badge-designer';
+  }
 }

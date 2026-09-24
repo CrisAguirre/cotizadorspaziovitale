@@ -30,8 +30,8 @@
         <tr *ngFor="let act of activities">
           <td data-label="Usuario">{{ act.userEmail }}</td>
           <td data-label="Rol">
-            <span class="badge" [class.badge-designer]="act.role === 'designer'" [class.badge-admin]="act.role === 'admin'">
-              {{ act.role === 'designer' ? 'Diseñador' : act.role | uppercase }}
+            <span class="badge" [ngClass]="roleBadgeClass(act.role)">
+              {{ roleLabel(act.role) }}
             </span>
           </td>
           <td data-label="Acción">

@@ -17,4 +17,15 @@ export class HeaderComponent {
   onToggleSidebar() {
     this.toggleSidebar.emit();
   }
+
+  getRoleLabel(): string {
+    const role = this.authService.getUser()?.role;
+    const labels: Record<string, string> = {
+      admin: 'Administrador',
+      comercial: 'Asesor Comercial',
+      contabilidad: 'Contabilidad',
+      diseno: 'Diseño'
+    };
+    return labels[role] || (role ? String(role).toUpperCase() : 'Usuario');
+  }
 }

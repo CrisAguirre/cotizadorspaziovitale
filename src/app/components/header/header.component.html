@@ -9,7 +9,7 @@
     </div>
     <div class="user-details">
       <span class="user-email">{{ authService.getUser()?.email || 'Usuario' }}</span>
-      <span class="user-role">{{ authService.getUser()?.role === 'admin' ? 'Administrador' : 'Diseñador' }}</span>
+      <span class="user-role">{{ getRoleLabel() }}</span>
     </div>
     </div>
   </div>
