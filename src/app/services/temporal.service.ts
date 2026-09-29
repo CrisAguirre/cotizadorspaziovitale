@@ -10,6 +10,8 @@ export interface TemporalData {
   currentStepName: string;
   currentStepNumber: number;
   data: any;
+  createdBy?: any;
+  createdByEmail?: string;
   updatedAt?: string;
 }
 

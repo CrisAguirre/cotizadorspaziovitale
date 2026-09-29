@@ -30,15 +30,21 @@ export class SidebarComponent implements OnInit {
     event.stopPropagation();
     this.toastService.confirm({
       title: 'Eliminar borrador',
-      message: '¿Deseas eliminar esta cotización temporal?',
+      message: '¿Deseas eliminar esta cotización temporal? Solo el creador o admin puede borrarla.',
       confirmText: 'Sí, eliminar',
       cancelText: 'Cancelar',
       type: 'danger'
     }).then(confirmed => {
       if (confirmed) {
         this.temporalService.deleteTemporal(id).subscribe({
-          next: () => this.toastService.success('Borrador eliminado', 'La cotización temporal ha sido descartada.'),
-          error: () => this.toastService.error('Error', 'No se pudo eliminar el borrador.')
+          next: (res: any) => {
+            if (res === null) {
+              this.toastService.error('Error', 'No se pudo eliminar el borrador. Puede ser de otro usuario.');
+              return;
+            }
+            this.toastService.success('Borrador eliminado', 'La cotización temporal ha sido descartada.');
+          },
+          error: (err: any) => this.toastService.error('Error', err?.error?.message || 'No se pudo eliminar el borrador.')
         });
       }
     });

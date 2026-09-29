@@ -35,6 +35,7 @@
           <span>💾 </span><span style="word-break: break-word;">{{ t.clientName }}</span>
         </div>
         <span style="font-size: 0.7em; color: #a1a1aa; margin-left: 20px;">Paso: {{ t.currentStepName }}</span>
+        <span style="font-size: 0.7em; color: #a1a1aa; margin-left: 20px;">👤 {{ t.createdByEmail || t.createdBy?.email || 'Sin registro' }}</span>
       </div>
       <button class="btn-icon text-error" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.8em;" (click)="deleteTemporal(t._id!, $event)" title="Descartar borrador">🗑️</button>
     </a>

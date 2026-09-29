@@ -1317,6 +1317,9 @@
 
   <!-- BOTONERA -->
   <div class="wizard-footer mt-4">
+    <div *ngIf="isReadOnly" class="text-error" style="margin-bottom: 10px;">
+      ⚠️ Solo lectura: esta cotización es de otro usuario. Duplícala desde el listado para crear tu copia.
+    </div>
     <button type="button" class="btn-secondary" *ngIf="currentStep > 1" (click)="prevStep()">← Anterior</button>
     <button type="button" class="btn-primary" *ngIf="currentStep === maxSteps" (click)="generatePdf()"
       style="margin-left: 10px;">📄 Generar PDF</button>
@@ -1328,6 +1331,6 @@
       ⚠️ Por favor, revisa los ítems marcados en rojo. Todos los insumos y herrajes deben tener un precio asignado.
     </div>
     <button type="button" class="btn-success ml-auto" *ngIf="currentStep === maxSteps" (click)="saveQuotation()"
-      [disabled]="isLoading || !isStepValid(currentStep)">Guardar Cotización</button>
+      [disabled]="isLoading || isReadOnly || !isStepValid(currentStep)">Guardar Cotización</button>
   </div>
 </div>

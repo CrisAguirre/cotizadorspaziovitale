@@ -64,6 +64,10 @@
             Estado
             <span *ngIf="sortColumn === 'status'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
           </th>
+          <th (click)="sortBy('createdBy')" class="sortable">
+            Creada por
+            <span *ngIf="sortColumn === 'createdBy'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+          </th>
           <th>Ciclo de Vida</th>
           <th>Acciones</th>
         </tr>
@@ -78,17 +82,18 @@
           <td data-label="Estado">
             <span class="badge" [ngClass]="getStatusClass(q.status)">{{ getStatusLabel(q.status) }}</span>
           </td>
+          <td data-label="Creada por" style="font-size: 0.85em; word-break: break-word;">{{ getCreatorEmail(q) }}</td>
           <td data-label="Ciclo de Vida" class="lifecycle-actions">
-            <!-- Estado: Nuevo → Enviar a revisión -->
-            <button *ngIf="q.status === 'nuevo' || q.status === 'borrador'"
+            <!-- Estado: Nuevo → Enviar a revisión (solo dueño/admin) -->
+            <button *ngIf="(q.status === 'nuevo' || q.status === 'borrador') && canEdit(q)"
                     class="btn-primary btn-sm"
                     title="Marcar como enviada al cliente"
                     (click)="changeStatus(q, 'en_revision')">
               📤 Enviar
             </button>
   
-            <!-- Estado: En Revisión → Aceptar / Rechazar / Devolver -->
-            <ng-container *ngIf="q.status === 'en_revision' || q.status === 'auditada' || q.status === 'enviada'">
+            <!-- Estado: En Revisión → Aceptar / Rechazar / Devolver (solo dueño/admin) -->
+            <ng-container *ngIf="(q.status === 'en_revision' || q.status === 'auditada' || q.status === 'enviada') && canEdit(q)">
               <button class="btn-success btn-sm"
                       title="Aceptar" 
                       (click)="changeStatus(q, 'aceptada')">
@@ -106,29 +111,31 @@
               </button>
             </ng-container>
   
-            <!-- Estado: Aceptada o Rechazada → Archivar -->
-            <button *ngIf="q.status === 'aceptada' || q.status === 'aprobada'"
+            <!-- Estado: Aceptada o Rechazada → Archivar (solo dueño/admin) -->
+            <button *ngIf="(q.status === 'aceptada' || q.status === 'aprobada') && canEdit(q)"
                     class="btn-secondary btn-sm"
                     title="Archivar" 
                     (click)="changeStatus(q, 'archivada_aceptada')">
               📁 Archivar
             </button>
-            <button *ngIf="q.status === 'rechazada'"
+            <button *ngIf="q.status === 'rechazada' && canEdit(q)"
                     class="btn-secondary btn-sm"
                     title="Archivar" 
                     (click)="changeStatus(q, 'archivada_rechazada')">
               📁 Archivar
             </button>
+            <span *ngIf="!canEdit(q)" style="font-size: 0.8em; color: #888;">Solo lectura</span>
           </td>
           <td data-label="Acciones" class="actions-cell">
             <button class="btn-icon" title="Ver Resumen" (click)="viewQuotation(q._id)">👁️</button>
-            <button class="btn-icon" title="Editar" (click)="editQuotation(q._id)">✏️</button>
+            <button *ngIf="canEdit(q)" class="btn-icon" title="Editar" (click)="editQuotation(q._id)">✏️</button>
+            <button class="btn-icon" title="Duplicar como mía" (click)="duplicateQuotation(q._id)">📋</button>
             <button class="btn-icon" title="Descargar PDF" (click)="downloadPdf(q)">📄</button>
-            <button class="btn-icon" title="Eliminar" (click)="deleteQuotation(q._id, q.number)" style="color: #ff6b6b;">🗑️</button>
+            <button *ngIf="isAdmin()" class="btn-icon" title="Eliminar" (click)="deleteQuotation(q._id, q.number)" style="color: #ff6b6b;">🗑️</button>
           </td>
         </tr>
         <tr *ngIf="getDisplayList().length === 0">
-          <td colspan="8" class="text-center">
+          <td colspan="9" class="text-center">
             {{ activeTab === 'activas' ? 'No hay cotizaciones activas.' : 'No hay cotizaciones archivadas.' }}
           </td>
         </tr>

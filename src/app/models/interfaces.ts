@@ -341,6 +341,7 @@ export interface Quotation {
   validityDays: number;
   notes: string;
   createdBy?: any;
+  createdByEmail?: string;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { QuotationService } from '../../../services/quotation.service';
+import { AuthService } from '../../../services/auth.service';
 import { Quotation } from '../../../models/interfaces';
 import { Router, ActivatedRoute } from '@angular/router';
 import { PdfGeneratorService } from '../../../services/pdf-generator.service';
@@ -37,6 +38,7 @@ export class QuotationListComponent implements OnInit {
 
   constructor(
     private quotationService: QuotationService,
+    public authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
     private pdfGenerator: PdfGeneratorService,
@@ -104,6 +106,9 @@ export class QuotationListComponent implements OnInit {
         } else if (this.sortColumn === 'totals.grandTotal') {
           valA = a.totals?.grandTotal;
           valB = b.totals?.grandTotal;
+        } else if (this.sortColumn === 'createdBy') {
+          valA = this.getCreatorEmail(a);
+          valB = this.getCreatorEmail(b);
         }
 
         if (typeof valA === 'string') valA = valA.toLowerCase();
@@ -158,6 +163,43 @@ export class QuotationListComponent implements OnInit {
     if (id) {
       this.router.navigate(['/quotations/view', id]);
     }
+  }
+
+  getCreatorEmail(q: any): string {
+    if (!q) return 'Sin registro';
+    if (q.createdByEmail) return q.createdByEmail;
+    if (q.createdBy?.email) return q.createdBy.email;
+    if (typeof q.createdBy === 'string') return q.createdBy;
+    return 'Sin registro';
+  }
+
+  isAdmin(): boolean {
+    return this.authService.getUser()?.role === 'admin';
+  }
+
+  canEdit(q: any): boolean {
+    if (this.isAdmin()) return true;
+    const me = this.authService.getUser()?.email?.toLowerCase?.();
+    if (!me) return false;
+    const owner = this.getCreatorEmail(q)?.toLowerCase?.();
+    // Legacy sin autor: permitir intentar (el backend decide por _id)
+    if (!owner || owner === 'sin registro') return true;
+    return owner === me;
+  }
+
+  duplicateQuotation(id?: string) {
+    if (!id) return;
+    this.quotationService.duplicateQuotation(id).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.toastService.success('Duplicada', `Cotización duplicada como No. ${res.data?.number}. Quedó a tu nombre.`);
+          this.loadQuotations();
+        }
+      },
+      error: (err: any) => {
+        this.toastService.error('Error al duplicar', err.error?.message || err.message);
+      }
+    });
   }
 
   editQuotation(id?: string) {

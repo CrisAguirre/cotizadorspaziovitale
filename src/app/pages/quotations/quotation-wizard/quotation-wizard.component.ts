@@ -10,6 +10,7 @@ import { LaborTimeService } from '../../../services/labor-time.service';
 import { TemporalService, TemporalData } from '../../../services/temporal.service';
 import { MaterialService } from '../../../services/material.service';
 import { ToastService } from '../../../services/toast.service';
+import { AuthService } from '../../../services/auth.service';
 
 import { FURNITURE_HIERARCHY, FurnitureType } from '../../../config/furniture-hierarchy.config';
 import { QuotationLogicService } from '../../../services/quotation-logic.service';
@@ -30,6 +31,7 @@ export class QuotationWizardComponent implements OnInit {
   showTipConfig: { [key: number]: boolean } = { 1: false, 2: false, 3: false, 4: false, 5: false };
 
   temporalId?: string;
+  isReadOnly = false;
 
   availableLaborTimes: LaborTime[] = [];
   
@@ -235,6 +237,7 @@ export class QuotationWizardComponent implements OnInit {
     private materialService: MaterialService,
     private logicService: QuotationLogicService,
     private toastService: ToastService,
+    private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -295,6 +298,7 @@ export class QuotationWizardComponent implements OnInit {
       next: (res: any) => {
         if (res.success && res.data) {
           this.activeQuotation = res.data;
+          this.checkReadOnly();
           this.quotationForm.patchValue({
             number: this.activeQuotation.number,
             date: this.activeQuotation.date,
@@ -341,11 +345,40 @@ export class QuotationWizardComponent implements OnInit {
     }
   }
 
+  private getOwnerEmail(q: any): string {
+    if (!q) return '';
+    if (q.createdByEmail) return String(q.createdByEmail).toLowerCase();
+    if (q.createdBy?.email) return String(q.createdBy.email).toLowerCase();
+    return '';
+  }
+
+  private checkReadOnly(): void {
+    const me = this.authService.getUser()?.email?.toLowerCase?.() || '';
+    const role = this.authService.getUser()?.role;
+    if (role === 'admin' || !me) { this.isReadOnly = false; return; }
+    const owner = this.getOwnerEmail(this.activeQuotation);
+    // Legacy sin autor: se permite editar (el backend valida por _id)
+    if (!owner) { this.isReadOnly = false; return; }
+    this.isReadOnly = owner !== me;
+    if (this.isReadOnly) {
+      this.toastService.error('Solo lectura', 'Esta cotización es de otro usuario. Duplícala desde el listado para crear tu copia.');
+    }
+  }
+
   loadTemporal(id: string) {
     this.temporalService.getTemporal(id).subscribe({
       next: (res) => {
         if (res.success && res.data) {
-          this.temporalId = res.data._id;
+          const owner = String((res.data as any).createdByEmail || (res.data as any).createdBy?.email || '').toLowerCase();
+          const me = String(this.authService.getUser()?.email || '').toLowerCase();
+          const role = this.authService.getUser()?.role;
+          if (owner && me && owner !== me && role !== 'admin') {
+            // Temporal ajeno: no tomar su _id para no sobrescribirlo; se creará copia propia al avanzar
+            this.temporalId = undefined;
+            this.toastService.error('Temporal de otro usuario', `Creado por ${owner}. Se guardará como copia tuya al avanzar.`);
+          } else {
+            this.temporalId = res.data._id;
+          }
           this.activeQuotation = res.data.data;
           this.currentStep = res.data.currentStepNumber || 1;
           
@@ -393,9 +426,18 @@ export class QuotationWizardComponent implements OnInit {
         currentStepNumber: this.currentStep,
         data: this.activeQuotation
       };
-      this.temporalService.saveTemporal(temporalData).subscribe(res => {
-        if (res.success && res.data._id) {
-          this.temporalId = res.data._id;
+      this.temporalService.saveTemporal(temporalData).subscribe({
+        next: (res) => {
+          if (res.success && res.data._id) {
+            this.temporalId = res.data._id;
+          }
+        },
+        error: (err: any) => {
+          // 403 = temporal ajeno: soltar el _id para crear copia propia en el próximo paso
+          if (err?.status === 403) {
+            this.temporalId = undefined;
+            this.toastService.error('Temporal ajeno', 'Se creará una copia a tu nombre.');
+          }
         }
       });
     }
@@ -1302,6 +1344,10 @@ export class QuotationWizardComponent implements OnInit {
   }
 
   saveQuotation() {
+    if (this.isReadOnly) {
+      this.toastService.error('Solo lectura', 'No puedes guardar cambios en una cotización de otro usuario. Duplícala desde el listado.');
+      return;
+    }
     this.isLoading = true;
     this.activeQuotation.status = 'nuevo';
     this.recalculate();

@@ -19,6 +19,7 @@
       <div>
         <h2>Cotización No. {{ quotation.number }}</h2>
         <p class="text-muted">{{ quotation.title }}</p>
+        <p class="text-muted" style="font-size: 0.85em;">👤 Creada por: {{ quotation.createdByEmail || quotation.createdBy?.email || 'Sin registro' }}</p>
       </div>
       <div class="status-badge" [ngClass]="quotation.status || 'nuevo'">
         {{ (quotation.status || 'nuevo') | uppercase }}

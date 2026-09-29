@@ -22,6 +22,7 @@ function makeComponent(overrides: any = {}) {
   };
   const router: any = { navigate: jasmine.createSpy('navigate') };
   const route: any = { params: of({}), queryParams: of({}) };
+  const authService: any = { getUser: () => ({ email: 'test@sv.com', role: 'admin' }) };
   const calcService: any = { recalculateAll: (_q: any, _c: any) => {} };
   const configService: any = { getConfig: () => of({}) };
   const cmp = new QuotationWizardComponent(
@@ -35,6 +36,7 @@ function makeComponent(overrides: any = {}) {
     {} as any,
     {} as any,
     toastService,
+    authService,
     router,
     route
   );
