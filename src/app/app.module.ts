@@ -21,6 +21,7 @@ import { HeaderComponent } from './components/header/header.component';
 import { MaterialPickerComponent } from './components/material-picker/material-picker.component';
 import { ToastComponent } from './components/toast/toast.component';
 import { ActivityComponent } from './pages/activity/activity.component';
+import { ProyectosComponent } from './pages/proyectos/proyectos.component';
 import { CurrencyInputDirective } from './directives/currency-input.directive';
 
 const routes: Routes = [
@@ -37,6 +38,7 @@ const routes: Routes = [
       { path: 'quotations/new', component: QuotationWizardComponent },
       { path: 'quotations/view/:id', component: QuotationViewComponent },
       { path: 'quotations/:id', component: QuotationWizardComponent },
+      { path: 'proyectos', component: ProyectosComponent },
       { path: 'activity', component: ActivityComponent, canActivate: [roleGuard], data: { expectedRole: 'admin' } },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
@@ -60,6 +62,7 @@ const routes: Routes = [
     MaterialPickerComponent,
     ToastComponent,
     ActivityComponent,
+    ProyectosComponent,
     CurrencyInputDirective
   ],
   imports: [

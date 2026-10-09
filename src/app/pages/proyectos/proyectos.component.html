@@ -1,0 +1,232 @@
+<div class="page-header mb-4">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+    <div>
+      <h1>📁 Proyectos</h1>
+      <p class="text-muted">Monitor secuencial en tiempo real — todos los actores ven el estado actual de cada proceso</p>
+      <p class="muted" *ngIf="lastRefresh">🔄 Actualizado: {{ lastRefresh | date:'mediumTime' }}
+        <label class="check inline"><input type="checkbox" [(ngModel)]="autoRefresh" /> auto (15s)</label>
+        <button class="btn-icon" (click)="refreshNow()" title="Actualizar ahora">↻</button>
+      </p>
+    </div>
+    <button class="btn-primary" (click)="showForm = !showForm">{{ showForm ? '✖ Cerrar' : '＋ Nuevo proyecto' }}</button>
+  </div>
+</div>
+
+<div class="card glass-panel mb-4" *ngIf="showForm">
+  <h3 style="margin-bottom:12px;">Nuevo proyecto</h3>
+  <div class="form-grid">
+    <input class="form-control" placeholder="Título del trabajo *" [(ngModel)]="form.title" />
+    <input class="form-control" placeholder="Cliente *" [(ngModel)]="form.clientName" />
+    <input class="form-control" placeholder="Teléfono" [(ngModel)]="form.clientPhone" />
+    <input class="form-control" placeholder="Email cliente" [(ngModel)]="form.clientEmail" />
+    <select class="form-control" [(ngModel)]="form.contactSource">
+      <option value="redes">Redes</option>
+      <option value="almacen">Contacto en almacén</option>
+      <option value="recomendacion">Recomendación</option>
+      <option value="recurrente">Cliente antiguo</option>
+      <option value="otro">Otro</option>
+    </select>
+    <select class="form-control" [(ngModel)]="form.priority">
+      <option value="baja">Prioridad baja</option>
+      <option value="media">Prioridad media</option>
+      <option value="alta">Prioridad alta</option>
+      <option value="urgente">Urgente</option>
+    </select>
+    <input class="form-control" placeholder="Asesor comercial" [(ngModel)]="form.actors!.asesorComercial" />
+    <input class="form-control" placeholder="Diseñador / Asesor diseño" [(ngModel)]="form.actors!.disenador" />
+    <input class="form-control" placeholder="Operarios" [(ngModel)]="form.actors!.operarios" />
+    <input class="form-control" placeholder="Contadora" [(ngModel)]="form.actors!.contadora" />
+  </div>
+  <textarea class="form-control mt-2" rows="2" placeholder="Notas iniciales" [(ngModel)]="form.notes"></textarea>
+  <div class="mt-2">
+    <button class="btn-success" (click)="saveNew()" [disabled]="saving">{{ saving ? 'Guardando...' : '💾 Guardar proyecto' }}</button>
+  </div>
+</div>
+
+<div class="card glass-panel mb-4">
+  <div class="filters">
+    <input class="form-control" placeholder="🔍 Buscar por título o cliente" [(ngModel)]="search" (change)="onSearch()" />
+    <select class="form-control" [(ngModel)]="filterStage" (change)="onSearch()">
+      <option value="">Todas las etapas</option>
+      <option *ngFor="let s of stages" [value]="s.key">{{ s.label }}</option>
+    </select>
+    <select class="form-control" [(ngModel)]="filterSource" (change)="onSearch()">
+      <option value="">Todas las fuentes</option>
+      <option value="redes">Redes</option>
+      <option value="almacen">Almacén</option>
+      <option value="recomendacion">Recomendación</option>
+      <option value="recurrente">Cliente antiguo</option>
+      <option value="otro">Otro</option>
+    </select>
+    <select class="form-control" [(ngModel)]="filterState" (change)="onSearch()">
+      <option value="">Todos los estados</option>
+      <option value="pendiente">Pendiente</option>
+      <option value="en_curso">En curso</option>
+      <option value="completado">Completado</option>
+      <option value="devuelto">Devuelto</option>
+      <option value="bloqueado">Bloqueado</option>
+    </select>
+  </div>
+</div>
+
+<div class="card glass-panel">
+  <div *ngIf="isLoading" class="text-center p-4">Cargando proyectos...</div>
+  <div *ngIf="!isLoading && projects.length === 0" class="text-center p-4 text-muted">
+    No hay proyectos aún. Crea el primero con “Nuevo proyecto”.
+  </div>
+  <div class="table-responsive" *ngIf="!isLoading && projects.length > 0">
+    <table class="data-table w-100">
+      <thead>
+        <tr>
+          <th>Trabajo</th>
+          <th>Cliente / Fuente</th>
+          <th>Etapa actual</th>
+          <th>Estado del paso</th>
+          <th>Progreso</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of projects" [class.selected]="selected?._id === p._id">
+          <td data-label="Trabajo">
+            <strong>{{ p.title }}</strong>
+            <div class="muted">👤 {{ p.createdByEmail || p.createdBy?.email || 'Sin registro' }}</div>
+          </td>
+          <td data-label="Cliente">{{ p.clientName }}<div class="muted">{{ sourceLabel(p.contactSource) }}</div></td>
+          <td data-label="Etapa"><span class="badge stage-{{ p.currentStage }}">{{ stageLabel(p.currentStage) }}</span></td>
+          <td data-label="Estado"><span class="badge st-{{ getStageStatus(p, p.currentStage!) }}">{{ stateLabel(getStageStatus(p, p.currentStage!)) }}</span>
+            <div class="muted">{{ p.stageStates?.[p.currentStage!]?.updatedByEmail || '' }}</div>
+          </td>
+          <td data-label="Progreso">
+            <div class="progress"><div class="bar" [style.width.%]="progress(p)"></div></div>
+            <div class="muted">{{ progress(p) }}%</div>
+          </td>
+          <td data-label="Acciones">
+            <button class="btn-icon" (click)="selectProject(p)" title="Ver monitor">👁️</button>
+            <button class="btn-icon text-error" *ngIf="isAdmin()" (click)="deleteProject(p)" title="Eliminar (admin)">🗑️</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card glass-panel mt-4" *ngIf="selected">
+  <h2>🧭 {{ selected.title }} — {{ selected.clientName }}</h2>
+  <p class="text-muted">Fuente: {{ sourceLabel(selected.contactSource) }} · Prioridad: {{ selected.priority }} · {{ selected.notes }}</p>
+
+  <div class="stepper">
+    <div *ngFor="let s of stages; let i = index"
+         class="step st-{{ getStageStatus(selected, s.key) }}"
+         [class.done]="getStageStatus(selected, s.key) === 'completado'"
+         [class.current]="selected.currentStage === s.key"
+         (click)="moveStage(selected, s.key)"
+         [title]="s.actors + ' · Estado: ' + stateLabel(getStageStatus(selected, s.key)) + (canMove(selected, s.key) ? ' — clic para mover' : ' (secuencial)')">
+      <div class="dot">{{ s.icon }}</div>
+      <div class="lbl">{{ s.label }}</div>
+      <div class="actor">{{ s.actors }}</div>
+      <div><span class="badge st-{{ getStageStatus(selected, s.key) }}">{{ stateLabel(getStageStatus(selected, s.key)) }}</span></div>
+      <button class="btn-icon small" (click)="toggleBlock(selected, s.key); $event.stopPropagation()" [title]="getStageStatus(selected, s.key) === 'bloqueado' ? 'Desbloquear' : 'Bloquear (admin)'">⛔</button>
+    </div>
+  </div>
+
+  <div class="stage-detail" *ngIf="getStageDetail(selected.currentStage) as detail">
+    <h3>{{ detail.icon }} {{ detail.label }} — {{ detail.actors }}</h3>
+    <p>{{ detail.description }}</p>
+    <ul class="checklist">
+      <li *ngFor="let c of detail.checklist">✅ {{ c }}</li>
+    </ul>
+
+    <!-- 1 INICIO -->
+    <div *ngIf="selected.currentStage === 'inicio'" class="stage-form">
+      <label>Requerimiento o necesidad del cliente *</label>
+      <textarea class="form-control" rows="3" placeholder="Ej. Cocina integral en melamina con mesón en quarztone..." [(ngModel)]="selected.requirement"></textarea>
+    </div>
+
+    <!-- 2 ANALISIS -->
+    <div *ngIf="selected.currentStage === 'analisis'" class="stage-form">
+      <label>Cotización vinculada * (ID o N°/ref)</label>
+      <div class="form-grid">
+        <input class="form-control" placeholder="ID cotización (ObjectId)" [(ngModel)]="selected.quotationId" />
+        <input class="form-control" placeholder="Ref / N° cotización" [(ngModel)]="selected.quotationRef" />
+      </div>
+      <p class="muted">Genera la cotización en 📄 Cotizaciones y pega aquí el ID o número.</p>
+    </div>
+
+    <!-- 3 PRESENTACION -->
+    <div *ngIf="selected.currentStage === 'presentacion'" class="stage-form">
+      <label>Retroalimentación del cliente * (para avanzar o devolver)</label>
+      <textarea class="form-control" rows="3" placeholder="Ej. Cliente aprueba propuesta / pide ajustar mesón..." [(ngModel)]="stageNotes"></textarea>
+      <p class="muted" *ngIf="selected.feedback">Último feedback guardado: {{ selected.feedback }}</p>
+      <div class="btn-row">
+        <button class="btn-success" (click)="moveStage(selected, 'contratacion')">✓ Aprobar → Contratación</button>
+        <button class="btn-secondary" (click)="sendBackToAnalisis()">↩ Devolver a Análisis (re-cotizar)</button>
+      </div>
+    </div>
+
+    <!-- 4 CONTRATACION -->
+    <div *ngIf="selected.currentStage === 'contratacion'" class="stage-form">
+      <div class="form-grid">
+        <div><label>N° Contrato *</label><input class="form-control" [(ngModel)]="selected.contractNumber" placeholder="CNT-..." /></div>
+        <div><label>Planos / Diseños *</label>
+          <select class="form-control" [(ngModel)]="selected.designStatus">
+            <option value="pendiente">Pendiente</option>
+            <option value="en_proceso">En proceso</option>
+            <option value="aprobado">Aprobado</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 PREPARACION -->
+    <div *ngIf="selected.currentStage === 'preparacion'" class="stage-form">
+      <label class="check"><input type="checkbox" [(ngModel)]="selected.insumosRequested" /> Insumos solicitados *</label>
+      <label>Preparaciones varias</label>
+      <textarea class="form-control" rows="2" placeholder="Medidas verificadas, herrajes apartados..." [(ngModel)]="selected.insumosNotes"></textarea>
+    </div>
+
+    <!-- 6 PRODUCCION -->
+    <div *ngIf="selected.currentStage === 'produccion'" class="stage-form">
+      <label>Notas de fabricación *</label>
+      <textarea class="form-control" rows="3" placeholder="Corte, enchape, armado, calidad..." [(ngModel)]="selected.productionNotes"></textarea>
+    </div>
+
+    <!-- 7 INSTALACION -->
+    <div *ngIf="selected.currentStage === 'instalacion'" class="stage-form">
+      <div class="form-grid">
+        <div><label>Fecha entrega</label><input type="date" class="form-control" [(ngModel)]="selected.deliveryDate" /></div>
+        <div><label>Valor pago final</label><input type="number" class="form-control" [(ngModel)]="selected.finalAmount" /></div>
+      </div>
+      <label class="check"><input type="checkbox" [(ngModel)]="selected.finalPaymentReceived" /> Pago final recibido</label>
+      <label>Acta / notas de entrega</label>
+      <textarea class="form-control" rows="2" placeholder="Obra entregada a satisfacción..." [(ngModel)]="selected.deliveryNotes"></textarea>
+    </div>
+
+    <div class="btn-row mt-2" *ngIf="selected.currentStage !== 'presentacion'">
+      <button class="btn-secondary" (click)="saveStageData(selected)">💾 Guardar datos etapa</button>
+      <button class="btn-primary" *ngIf="nextStage(selected)" (click)="advanceSelected()">Siguiente → {{ stageLabel(nextStage(selected)!) }}</button>
+    </div>
+    <div class="btn-row mt-2" *ngIf="selected.currentStage === 'presentacion'">
+      <button class="btn-secondary" (click)="saveStageData(selected)">💾 Guardar datos</button>
+    </div>
+    <p class="warn" *ngIf="missingFor(selected).length">⚠️ {{ missingFor(selected).join(' ') }}</p>
+    <label class="mt-2">Nota del movimiento (se guarda en historial)</label>
+    <input class="form-control" placeholder="Opcional si ya registraste arriba" [(ngModel)]="stageNotes" *ngIf="selected.currentStage !== 'presentacion'" />
+  </div>
+
+  <h3 class="mt-4">🕘 Historial de etapas</h3>
+  <div class="table-responsive" *ngIf="selected.stageHistory?.length; else noHist">
+    <table class="data-table w-100">
+      <thead><tr><th>Etapa</th><th>Por</th><th>Fecha</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let h of selected.stageHistory">
+          <td data-label="Etapa">{{ stageLabel(h.stage) }}</td>
+          <td data-label="Por">{{ h.changedByEmail || '—' }}</td>
+          <td data-label="Fecha">{{ h.changedAt | date:'short' }}</td>
+          <td data-label="Notas">{{ h.notes || '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <ng-template #noHist><p class="text-muted">Sin historial todavía.</p></ng-template>
+</div>

@@ -346,6 +346,69 @@ export interface Quotation {
   updatedAt?: string;
 }
 
+// ===== PROYECTOS (monitor secuencial local comercial) =====
+export type ProjectStage = 'inicio' | 'analisis' | 'presentacion' | 'contratacion' | 'preparacion' | 'produccion' | 'instalacion';
+export type ContactSource = 'redes' | 'almacen' | 'recomendacion' | 'recurrente' | 'otro';
+
+export interface ProjectActors {
+  asesorComercial?: string;
+  contadora?: string;
+  operarios?: string;
+  disenador?: string;
+  asesorDiseno?: string;
+}
+
+export interface StageHistoryEntry {
+  stage: ProjectStage;
+  changedBy?: any;
+  changedByEmail?: string;
+  changedAt?: string;
+  notes?: string;
+}
+
+export type StageStateStatus = 'pendiente' | 'en_curso' | 'completado' | 'devuelto' | 'bloqueado';
+
+export interface StageStateInfo {
+  status?: StageStateStatus;
+  updatedAt?: string;
+  updatedByEmail?: string;
+  notes?: string;
+}
+
+export interface Project {
+  _id?: string;
+  title: string;
+  clientName: string;
+  clientPhone?: string;
+  clientEmail?: string;
+  clientAddress?: string;
+  contactSource?: ContactSource;
+  currentStage?: ProjectStage;
+  stageHistory?: StageHistoryEntry[];
+  stageStates?: Partial<Record<ProjectStage, StageStateInfo>>;
+  actors?: ProjectActors;
+  quotationId?: any;
+  requirement?: string;
+  quotationRef?: string;
+  feedback?: string;
+  contractNumber?: string;
+  designStatus?: 'pendiente' | 'en_proceso' | 'aprobado';
+  insumosRequested?: boolean;
+  insumosNotes?: string;
+  productionNotes?: string;
+  deliveryDate?: string;
+  finalAmount?: number;
+  finalPaymentReceived?: boolean;
+  deliveryNotes?: string;
+  priority?: 'baja' | 'media' | 'alta' | 'urgente';
+  notes?: string;
+  active?: boolean;
+  createdBy?: any;
+  createdByEmail?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // ===== API RESPONSES =====
 export interface ApiResponse<T> {
   success: boolean;
