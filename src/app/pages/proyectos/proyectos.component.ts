@@ -11,6 +11,7 @@ interface SubstepMeta {
   key: string;
   label: string;
   responsible: string;
+  hint?: string;
 }
 
 interface StageMeta {
@@ -121,6 +122,28 @@ export class ProyectosComponent implements OnInit, OnDestroy {
 
   stageNotes = '';
   viewStage: ProjectStage | null = null;
+  substepHints: Record<string, string> = {
+    '1.1': 'Registrar medio de contacto y datos iniciales del cliente.',
+    '1.2': 'Identificar si es compra, fabricación u otro. Definir requerimiento.',
+    '1.3': 'Recopilar medidas, referencias y presupuesto preliminar de diseño.',
+    '1.4': 'Elaborar y aprobar el presupuesto de diseño.',
+    '1.5': 'Registrar pago del diseño tras aprobación.',
+    '2.1': 'Elaborar el diseño técnico del proyecto.',
+    '2.2': 'Presentar el diseño al cliente y registrar observaciones.',
+    '2.3': 'Confirmar existencia de materiales y productos.',
+    '2.4': 'Generar y vincular la cotización guardada (no temporal).',
+    '3.1': 'Socializar la cotización con el cliente.',
+    '3.2': 'Socializar electrodomésticos incluidos.',
+    '4.1': 'Elaborar contrato jalonando la cotización guardada.',
+    '4.2': 'Elaborar planos y diseños.',
+    '4.3': 'Firmar documentos (cliente y administración).',
+    '4.4': 'Confirmar abono del 60%.',
+    '5.1': 'Enviar documento al diseñador.',
+    '5.2': 'Cargar pedido de materiales desde la cotización guardada.',
+    '5.3': 'Revisar y completar checklist de materiales.',
+    '6.1': 'Pendiente de definición por Spazio Vitale.',
+    '7.1': 'Pendiente de definición por Spazio Vitale.'
+  };
   adjustmentReason = '';
   stepSubstep = '';
   stepStatus: 'pendiente' | 'en_curso' | 'completado' | 'bloqueado' = 'en_curso';
@@ -493,6 +516,79 @@ export class ProyectosComponent implements OnInit, OnDestroy {
 
   stageDetailInfo(p: Project, stage: ProjectStage, substep: string): any {
     return p.stageDetails?.[stage]?.[substep || '_general'];
+  }
+
+  isSubstepCompleted(p: Project, substepKey: string): boolean {
+    const stage = (p.currentStage || 'inicio') as ProjectStage;
+    const info = p.stageDetails?.[stage]?.[substepKey];
+    return info?.status === 'completado';
+  }
+
+  saveSubstep(p: Project, substepKey: string): void {
+    const stage = (p.currentStage || 'inicio') as ProjectStage;
+    const payload: Partial<Project> = {
+      title: p.title,
+      clientName: p.clientName,
+      requirement: p.requirement,
+      quotationRef: p.quotationRef,
+      feedback: p.feedback,
+      contractNumber: p.contractNumber,
+      designStatus: p.designStatus,
+      insumosRequested: p.insumosRequested,
+      insumosNotes: p.insumosNotes,
+      productionNotes: p.productionNotes,
+      deliveryDate: p.deliveryDate,
+      finalAmount: p.finalAmount,
+      finalPaymentReceived: p.finalPaymentReceived,
+      deliveryNotes: p.deliveryNotes,
+      notes: p.notes,
+      needType: p.needType,
+      designBudget: p.designBudget,
+      designPaymentReceived: p.designPaymentReceived,
+      receptionNotes: p.receptionNotes,
+      designElaborationNotes: p.designElaborationNotes,
+      designPresentationNotes: p.designPresentationNotes,
+      materialsConfirmed: p.materialsConfirmed,
+      quotationSocializationNotes: p.quotationSocializationNotes,
+      appliancesSocializationNotes: p.appliancesSocializationNotes,
+      contractElaborated: p.contractElaborated,
+      plansElaborated: p.plansElaborated,
+      documentsSignedClient: p.documentsSignedClient,
+      documentsSignedAdmin: p.documentsSignedAdmin,
+      payment60Received: p.payment60Received,
+      designerDocumentSent: p.designerDocumentSent,
+      materialsOrderReady: p.materialsOrderReady,
+      materialsChecklistDone: p.materialsChecklistDone
+    };
+    if (typeof p.quotationId === 'string' && (p.quotationId as string).trim()) {
+      (payload as any).quotationId = (p.quotationId as string).trim();
+    }
+    this.projectService.updateProject(p._id!, payload).subscribe({
+      next: (res) => {
+        if (res.success) {
+          // actualizar estado del subpaso
+          this.projectService.updateStep(p._id!, {
+            stage,
+            substep: substepKey,
+            status: this.stepStatus,
+            responsible: this.stepResponsible,
+            notes: this.stepNotes,
+            kind: 'normal'
+          }).subscribe({
+            next: (r2) => {
+              if (r2.success) {
+                this.toast.success('Subpaso guardado', `${substepKey} → ${this.stepStatus}`);
+                this.stepNotes = '';
+                this.selected = r2.data;
+                this.loadProjects(true);
+              }
+            },
+            error: (err) => this.toast.error('Error', err?.error?.message || 'No se pudo actualizar el paso.')
+          });
+        }
+      },
+      error: (err) => this.toast.error('Error', err?.error?.message || 'No se pudo guardar.')
+    });
   }
 
   saveStageData(p: Project): void {
