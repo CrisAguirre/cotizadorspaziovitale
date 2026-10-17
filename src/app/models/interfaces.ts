@@ -375,6 +375,27 @@ export interface StageStateInfo {
   notes?: string;
 }
 
+export interface StepUpdateEntry {
+  stage?: ProjectStage;
+  substep?: string;
+  status?: 'pendiente' | 'en_curso' | 'completado' | 'bloqueado';
+  responsible?: string;
+  notes?: string;
+  byEmail?: string;
+  byRole?: string;
+  at?: string;
+}
+
+export interface StageDetailInfo {
+  substep?: string;
+  status?: 'pendiente' | 'en_curso' | 'completado' | 'bloqueado';
+  responsible?: string;
+  notes?: string;
+  byEmail?: string;
+  byRole?: string;
+  updatedAt?: string;
+}
+
 export interface Project {
   _id?: string;
   title: string;
@@ -386,6 +407,8 @@ export interface Project {
   currentStage?: ProjectStage;
   stageHistory?: StageHistoryEntry[];
   stageStates?: Partial<Record<ProjectStage, StageStateInfo>>;
+  stageDetails?: Record<string, Record<string, StageDetailInfo>>;
+  stepUpdates?: StepUpdateEntry[];
   actors?: ProjectActors;
   quotationId?: any;
   requirement?: string;
@@ -396,6 +419,23 @@ export interface Project {
   insumosRequested?: boolean;
   insumosNotes?: string;
   productionNotes?: string;
+  needType?: string;
+  designBudget?: number;
+  designPaymentReceived?: boolean;
+  receptionNotes?: string;
+  designElaborationNotes?: string;
+  designPresentationNotes?: string;
+  materialsConfirmed?: boolean;
+  quotationSocializationNotes?: string;
+  appliancesSocializationNotes?: string;
+  contractElaborated?: boolean;
+  plansElaborated?: boolean;
+  documentsSignedClient?: boolean;
+  documentsSignedAdmin?: boolean;
+  payment60Received?: boolean;
+  designerDocumentSent?: boolean;
+  materialsOrderReady?: boolean;
+  materialsChecklistDone?: boolean;
   deliveryDate?: string;
   finalAmount?: number;
   finalPaymentReceived?: boolean;

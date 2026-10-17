@@ -1,0 +1,111 @@
+<div class="control-wrapper">
+  <div class="header-section">
+    <h1>📊 Panel de Control — Proyectos</h1>
+    <p class="text-muted">Indicadores, alertas y estado en tiempo real de los proyectos en ejecución</p>
+    <p class="muted" *ngIf="lastRefresh">🔄 Actualizado: {{ lastRefresh | date:'mediumTime' }}
+      <label class="check inline"><input type="checkbox" [(ngModel)]="autoRefresh" /> auto (15s)</label>
+      <button class="btn-icon" (click)="refreshNow()" title="Actualizar ahora">↻</button>
+    </p>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loader"></div>
+    <p>Cargando panel...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="kpi-grid">
+    <div class="kpi-card glass-panel anim-pop" style="--delay:0">
+      <div class="kpi-icon">📁</div>
+      <div class="kpi-body">
+        <span class="kpi-value">{{ total }}</span>
+        <span class="kpi-label">Proyectos totales</span>
+      </div>
+    </div>
+    <div class="kpi-card glass-panel anim-pop" style="--delay:1">
+      <div class="kpi-icon">⚙️</div>
+      <div class="kpi-body">
+        <span class="kpi-value">{{ active }}</span>
+        <span class="kpi-label">Activos</span>
+      </div>
+    </div>
+    <div class="kpi-card glass-panel anim-pop" style="--delay:2">
+      <div class="kpi-icon">✅</div>
+      <div class="kpi-body">
+        <span class="kpi-value">{{ completed }}</span>
+        <span class="kpi-label">Completados</span>
+      </div>
+    </div>
+    <div class="kpi-card glass-panel anim-pop alert-card" style="--delay:3">
+      <div class="kpi-icon">⛔</div>
+      <div class="kpi-body">
+        <span class="kpi-value">{{ blocked }}</span>
+        <span class="kpi-label">Bloqueados</span>
+      </div>
+    </div>
+    <div class="kpi-card glass-panel anim-pop alert-card" style="--delay:4">
+      <div class="kpi-icon">⏸️</div>
+      <div class="kpi-body">
+        <span class="kpi-value">{{ stalled.length }}</span>
+        <span class="kpi-label">Estancados (&gt;{{ stalledDays }}d)</span>
+      </div>
+    </div>
+    <div class="kpi-card glass-panel anim-pop" style="--delay:5">
+      <div class="kpi-icon">↩️</div>
+      <div class="kpi-body">
+        <span class="kpi-value">{{ returned.length }}</span>
+        <span class="kpi-label">Devueltos a reproceso</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-grid" *ngIf="!isLoading">
+    <div class="card glass-panel anim-slide">
+      <h3>📈 Distribución por etapa</h3>
+      <div class="stage-bar" *ngFor="let sc of stageCounts()">
+        <div class="stage-bar-label">{{ stageLabel(sc.key) }}</div>
+        <div class="stage-bar-track">
+          <div class="stage-bar-fill" [style.width.%]="(sc.count / maxStageCount()) * 100"></div>
+        </div>
+        <div class="stage-bar-count">{{ sc.count }}</div>
+      </div>
+    </div>
+
+    <div class="card glass-panel anim-slide">
+      <h3>🚨 Alertas</h3>
+      <div *ngIf="blocked === 0 && stalled.length === 0 && returned.length === 0" class="text-muted">
+        Sin alertas activas. ✅
+      </div>
+      <ul class="alert-list" *ngIf="blocked > 0 || stalled.length > 0 || returned.length > 0">
+        <li *ngFor="let p of projects" [hidden]="!hasAlert(p)">
+          <strong>{{ p.title }}</strong> — {{ p.clientName }}
+          <span class="badge st-bloqueado" *ngIf="hasBlocked(p)">Bloqueado</span>
+          <span class="badge st-devuelto" *ngIf="isReturned(p)">Devuelto</span>
+          <span class="badge st-pendiente" *ngIf="isStalled(p)">Estancado</span>
+          <button class="btn-icon" (click)="openProject(p)" title="Ver proyecto">👁️</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card glass-panel anim-slide mt-4" *ngIf="!isLoading">
+    <h3>🏗️ Proyectos en ejecución (estado por submódulo 1-7)</h3>
+    <div *ngIf="inExecution().length === 0" class="text-muted">No hay proyectos en ejecución.</div>
+    <div class="exec-list" *ngIf="inExecution().length > 0">
+      <div class="exec-card" *ngFor="let p of inExecution()">
+        <div class="exec-head">
+          <strong>{{ p.title }}</strong>
+          <span class="muted">{{ p.clientName }}</span>
+          <span class="badge stage-{{ p.currentStage }}">{{ stageLabel(p.currentStage) }}</span>
+          <span class="muted">{{ progress(p) }}%</span>
+          <button class="btn-icon" (click)="openProject(p)">👁️</button>
+        </div>
+        <div class="progress mt-1"><div class="bar" [style.width.%]="progress(p)"></div></div>
+        <div class="mini-stepper mt-2">
+          <span *ngFor="let s of stages" class="mini-step st-{{ stageState(p, s.key) }}" [title]="s.label + ': ' + stateLabel(stageState(p, s.key))">
+            {{ s.icon }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

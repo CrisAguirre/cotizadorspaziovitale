@@ -137,25 +137,91 @@
       <li *ngFor="let c of detail.checklist">✅ {{ c }}</li>
     </ul>
 
+    <div class="substeps" *ngIf="detail.substeps?.length">
+      <h4>Submódulos</h4>
+      <div class="substep-row" *ngFor="let ss of detail.substeps">
+        <span class="substep-key">{{ ss.key }}</span>
+        <span class="substep-label">{{ ss.label }}</span>
+        <span class="muted small">Resp: {{ ss.responsible }}</span>
+        <span class="badge st-{{ stageDetailInfo(selected!, detail.key, ss.key)?.status || 'pendiente' }}">
+          {{ stateLabel(stageDetailInfo(selected!, detail.key, ss.key)?.status || 'pendiente') }}
+        </span>
+        <span class="muted small" *ngIf="stageDetailInfo(selected!, detail.key, ss.key)?.byEmail">
+          · {{ stageDetailInfo(selected!, detail.key, ss.key)?.byEmail }} · {{ stageDetailInfo(selected!, detail.key, ss.key)?.updatedAt | date:'short' }}
+        </span>
+        <p class="muted small" *ngIf="stageDetailInfo(selected!, detail.key, ss.key)?.notes">{{ stageDetailInfo(selected!, detail.key, ss.key)?.notes }}</p>
+      </div>
+    </div>
+
+    <div class="step-update glass-panel" *ngIf="!detail.pending">
+      <h4>📝 Actualizar paso (tiempo real)</h4>
+      <div class="form-grid">
+        <select class="form-control" [(ngModel)]="stepSubstep">
+          <option value="">Etapa general</option>
+          <option *ngFor="let ss of detail.substeps" [value]="ss.key">{{ ss.key }} · {{ ss.label }}</option>
+        </select>
+        <select class="form-control" [(ngModel)]="stepStatus">
+          <option value="pendiente">Pendiente</option>
+          <option value="en_curso">En curso</option>
+          <option value="completado">Completado</option>
+          <option value="bloqueado">Bloqueado</option>
+        </select>
+        <input class="form-control" placeholder="Responsable" [(ngModel)]="stepResponsible" />
+      </div>
+      <textarea class="form-control mt-2" rows="2" placeholder="Detalles técnicos / avance..." [(ngModel)]="stepNotes"></textarea>
+      <div class="mt-2">
+        <button class="btn-primary" (click)="updateStep(selected!)">Actualizar paso</button>
+      </div>
+    </div>
+    <p class="warn" *ngIf="detail.pending">⚠️ Módulo pendiente de definición por Spazio Vitale. Se mantiene como placeholder.</p>
+
     <!-- 1 INICIO -->
     <div *ngIf="selected.currentStage === 'inicio'" class="stage-form">
       <label>Requerimiento o necesidad del cliente *</label>
       <textarea class="form-control" rows="3" placeholder="Ej. Cocina integral en melamina con mesón en quarztone..." [(ngModel)]="selected.requirement"></textarea>
+      <div class="form-grid mt-2">
+        <div><label>Tipo de necesidad</label>
+          <select class="form-control" [(ngModel)]="selected.needType">
+            <option value="">—</option>
+            <option value="compra">Compra</option>
+            <option value="fabricacion">Fabricación</option>
+            <option value="servicio">Servicio</option>
+            <option value="mixto">Mixto</option>
+          </select>
+        </div>
+        <div><label>Presupuesto de diseño</label><input type="number" class="form-control" [(ngModel)]="selected.designBudget" /></div>
+      </div>
+      <label class="check mt-2"><input type="checkbox" [(ngModel)]="selected.designPaymentReceived" /> Pago de diseño recibido</label>
+      <label class="mt-2">Notas de recepción</label>
+      <textarea class="form-control" rows="2" [(ngModel)]="selected.receptionNotes"></textarea>
     </div>
 
     <!-- 2 ANALISIS -->
     <div *ngIf="selected.currentStage === 'analisis'" class="stage-form">
-      <label>Cotización vinculada * (ID o N°/ref)</label>
-      <div class="form-grid">
+      <label>Elaboración de diseño (notas técnicas)</label>
+      <textarea class="form-control" rows="2" [(ngModel)]="selected.designElaborationNotes"></textarea>
+      <label class="mt-2">Presentación de diseño (notas)</label>
+      <textarea class="form-control" rows="2" [(ngModel)]="selected.designPresentationNotes"></textarea>
+      <label class="check mt-2"><input type="checkbox" [(ngModel)]="selected.materialsConfirmed" /> Confirmación de existencia de materiales y productos</label>
+      <label class="mt-2">Cotización vinculada * (guardada en Cotizaciones)</label>
+      <select class="form-control" (change)="onQuotationSelect(selected!, $event)">
+        <option value="">— Seleccionar cotización guardada —</option>
+        <option *ngFor="let q of quotations" [value]="q._id">{{ q.number }} · {{ q.client?.name || '' }} · {{ q.city }}</option>
+      </select>
+      <div class="form-grid mt-2">
         <input class="form-control" placeholder="ID cotización (ObjectId)" [(ngModel)]="selected.quotationId" />
         <input class="form-control" placeholder="Ref / N° cotización" [(ngModel)]="selected.quotationRef" />
       </div>
-      <p class="muted">Genera la cotización en 📄 Cotizaciones y pega aquí el ID o número.</p>
+      <p class="muted">Genera la cotización en 📄 Cotizaciones (guardada, no temporal) y pega aquí el ID o número.</p>
     </div>
 
     <!-- 3 PRESENTACION -->
     <div *ngIf="selected.currentStage === 'presentacion'" class="stage-form">
-      <label>Retroalimentación del cliente * (para avanzar o devolver)</label>
+      <label>Socialización de cotización (notas)</label>
+      <textarea class="form-control" rows="2" [(ngModel)]="selected.quotationSocializationNotes"></textarea>
+      <label class="mt-2">Socialización de electrodomésticos (notas)</label>
+      <textarea class="form-control" rows="2" [(ngModel)]="selected.appliancesSocializationNotes"></textarea>
+      <label class="mt-2">Retroalimentación del cliente * (para avanzar o devolver)</label>
       <textarea class="form-control" rows="3" placeholder="Ej. Cliente aprueba propuesta / pide ajustar mesón..." [(ngModel)]="stageNotes"></textarea>
       <p class="muted" *ngIf="selected.feedback">Último feedback guardado: {{ selected.feedback }}</p>
       <div class="btn-row">
@@ -176,11 +242,19 @@
           </select>
         </div>
       </div>
+      <label class="check mt-2"><input type="checkbox" [(ngModel)]="selected.contractElaborated" /> Contrato elaborado</label>
+      <label class="check"><input type="checkbox" [(ngModel)]="selected.plansElaborated" /> Planos elaborados</label>
+      <label class="check"><input type="checkbox" [(ngModel)]="selected.documentsSignedClient" /> Firma cliente</label>
+      <label class="check"><input type="checkbox" [(ngModel)]="selected.documentsSignedAdmin" /> Firma administración</label>
+      <label class="check"><input type="checkbox" [(ngModel)]="selected.payment60Received" /> Abono 60% recibido</label>
     </div>
 
     <!-- 5 PREPARACION -->
     <div *ngIf="selected.currentStage === 'preparacion'" class="stage-form">
-      <label class="check"><input type="checkbox" [(ngModel)]="selected.insumosRequested" /> Insumos solicitados *</label>
+      <label class="check"><input type="checkbox" [(ngModel)]="selected.designerDocumentSent" /> Documento enviado a diseñador</label>
+      <label class="check"><input type="checkbox" [(ngModel)]="selected.materialsOrderReady" /> Pedido de materiales cargado</label>
+      <label class="check"><input type="checkbox" [(ngModel)]="selected.materialsChecklistDone" /> Revisión y checklist de materiales</label>
+      <label class="check mt-2"><input type="checkbox" [(ngModel)]="selected.insumosRequested" /> Insumos solicitados *</label>
       <label>Preparaciones varias</label>
       <textarea class="form-control" rows="2" placeholder="Medidas verificadas, herrajes apartados..." [(ngModel)]="selected.insumosNotes"></textarea>
     </div>
@@ -229,4 +303,23 @@
     </table>
   </div>
   <ng-template #noHist><p class="text-muted">Sin historial todavía.</p></ng-template>
+
+  <h3 class="mt-4">📋 Actualizaciones por paso (tiempo real)</h3>
+  <div class="table-responsive" *ngIf="selected.stepUpdates?.length; else noSteps">
+    <table class="data-table w-100">
+      <thead><tr><th>Etapa</th><th>Subpaso</th><th>Estado</th><th>Responsable</th><th>Por</th><th>Fecha</th><th>Detalle</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let u of selected.stepUpdates">
+          <td data-label="Etapa">{{ stageLabel(u.stage) }}</td>
+          <td data-label="Subpaso">{{ u.substep || '—' }}</td>
+          <td data-label="Estado"><span class="badge st-{{ u.status }}">{{ stateLabel(u.status) }}</span></td>
+          <td data-label="Responsable">{{ u.responsible || '—' }}</td>
+          <td data-label="Por">{{ u.byEmail || '—' }}</td>
+          <td data-label="Fecha">{{ u.at | date:'short' }}</td>
+          <td data-label="Detalle">{{ u.notes || '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <ng-template #noSteps><p class="text-muted">Sin actualizaciones de paso todavía.</p></ng-template>
 </div>

@@ -1,8 +1,15 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ProjectService } from '../../services/project.service';
+import { QuotationService } from '../../services/quotation.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
-import { Project, ProjectStage, ContactSource, StageStateStatus } from '../../models/interfaces';
+import { Project, ProjectStage, ContactSource, StageStateStatus, Quotation } from '../../models/interfaces';
+
+interface SubstepMeta {
+  key: string;
+  label: string;
+  responsible: string;
+}
 
 interface StageMeta {
   key: ProjectStage;
@@ -11,6 +18,8 @@ interface StageMeta {
   actors: string;
   description: string;
   checklist: string[];
+  substeps: SubstepMeta[];
+  pending?: boolean;
 }
 
 @Component({
@@ -20,6 +29,7 @@ interface StageMeta {
 })
 export class ProyectosComponent implements OnInit, OnDestroy {
   projects: Project[] = [];
+  quotations: Quotation[] = [];
   isLoading = true;
   search = '';
   filterStage = '';
@@ -36,56 +46,116 @@ export class ProyectosComponent implements OnInit, OnDestroy {
     {
       key: 'inicio', label: '1. Inicio', icon: '🟢', actors: 'Asesor comercial',
       description: 'Contacto con el cliente y definición del requerimiento o necesidad.',
-      checklist: ['Registrar medio de contacto', 'Definir requerimiento o necesidad', 'Asignar asesor comercial']
+      checklist: ['Registrar medio de contacto', 'Definir requerimiento o necesidad', 'Asignar asesor comercial'],
+      substeps: [
+        { key: '1.1', label: 'Recepción del cliente', responsible: 'Asesor comercial' },
+        { key: '1.2', label: 'Identificación de la necesidad (compra, fabricación, etc.)', responsible: 'Asesor comercial' },
+        { key: '1.3', label: 'Obtención de información para presupuesto de diseño', responsible: 'Asesor comercial · Diseñador' },
+        { key: '1.4', label: 'Presupuesto de diseño', responsible: 'Diseñador' },
+        { key: '1.5', label: 'Pago de diseño (previa aprobación de 1.4)', responsible: 'Contadora' }
+      ]
     },
     {
       key: 'analisis', label: '2. Análisis', icon: '🔍', actors: 'Comercial · Diseño',
       description: 'Se genera la cotización del proyecto.',
-      checklist: ['Generar cotización en Cotizaciones', 'Vincular cotización al proyecto']
+      checklist: ['Generar cotización en Cotizaciones', 'Vincular cotización al proyecto'],
+      substeps: [
+        { key: '2.1', label: 'Elaboración de diseño', responsible: 'Diseñador' },
+        { key: '2.2', label: 'Presentación de diseño', responsible: 'Asesor comercial · Diseñador' },
+        { key: '2.3', label: 'Confirmación de existencia de materiales y productos', responsible: 'Diseñador · Operarios' },
+        { key: '2.4', label: 'Generación de cotización', responsible: 'Asesor comercial' }
+      ]
     },
     {
       key: 'presentacion', label: '3. Presentación', icon: '🖥️', actors: 'Comercial · Cliente',
-      description: 'Se socializa el proyecto con el cliente y se recibe retroalimentación. Si aprueba avanza a Contratación; si pide ajustes vuelve a Análisis a regenerar la cotización.',
-      checklist: ['Socializar propuesta', 'Registrar retroalimentación', 'Aprobar a Contratación o devolver a Análisis']
+      description: 'Se socializa el proyecto con el cliente y se recibe retroalimentación.',
+      checklist: ['Socializar propuesta', 'Registrar retroalimentación', 'Aprobar a Contratación o devolver a Análisis'],
+      substeps: [
+        { key: '3.1', label: 'Socialización de cotización', responsible: 'Asesor comercial' },
+        { key: '3.2', label: 'Socialización de electrodomésticos', responsible: 'Asesor comercial' }
+      ]
     },
     {
-      key: 'contratacion', label: '4. Contratación', icon: '📝', actors: 'Contadora',
+      key: 'contratacion', label: '4. Contratación', icon: '📝', actors: 'Contadora · Comercial',
       description: 'Se genera el contrato y los planos/diseños.',
-      checklist: ['Generar contrato', 'Elaborar planos y diseños', 'Aprobar diseños']
+      checklist: ['Generar contrato', 'Elaborar planos y diseños', 'Aprobar diseños', 'Confirmar abono 60%'],
+      substeps: [
+        { key: '4.1', label: 'Elaboración de contrato (jalar cotización guardada)', responsible: 'Contadora' },
+        { key: '4.2', label: 'Elaboración de planos', responsible: 'Diseñador' },
+        { key: '4.3', label: 'Firma de documentos (cliente y administración)', responsible: 'Contadora · Asesor comercial' },
+        { key: '4.4', label: 'Confirmación abono 60%', responsible: 'Contadora' }
+      ]
     },
     {
       key: 'preparacion', label: '5. Preparación', icon: '📐', actors: 'Diseñador · Operarios',
       description: 'Se solicitan los insumos y se hacen preparaciones varias antes de iniciar la obra.',
-      checklist: ['Solicitar insumos', 'Preparaciones varias', 'Verificar medidas/stock']
+      checklist: ['Enviar documento a diseñador', 'Carga de pedido de materiales', 'Revisión y checklist de materiales'],
+      substeps: [
+        { key: '5.1', label: 'Envío de documento a diseñador', responsible: 'Asesor comercial' },
+        { key: '5.2', label: 'Carga de pedido de materiales (cotización guardada)', responsible: 'Diseñador' },
+        { key: '5.3', label: 'Revisión y checklist de materiales', responsible: 'Operarios' }
+      ]
     },
     {
       key: 'produccion', label: '6. Producción', icon: '🏭', actors: 'Operarios',
-      description: 'Se procede a la fabricación.',
-      checklist: ['Fabricar', 'Control de calidad', 'Registrar notas de producción']
+      description: 'Módulo pendiente de definición por Spazio Vitale.',
+      checklist: ['Pendiente de definición'],
+      substeps: [
+        { key: '6.1', label: 'Pendiente de definición por Spazio Vitale', responsible: 'Operarios' }
+      ],
+      pending: true
     },
     {
       key: 'instalacion', label: '7. Instalación', icon: '🔧', actors: 'Operarios',
-      description: 'Paso final: se entrega la obra y se recibe el pago final.',
-      checklist: ['Instalar y entregar obra', 'Registrar entrega', 'Recibir pago final']
+      description: 'Módulo pendiente de definición por Spazio Vitale.',
+      checklist: ['Pendiente de definición'],
+      substeps: [
+        { key: '7.1', label: 'Pendiente de definición por Spazio Vitale', responsible: 'Operarios' }
+      ],
+      pending: true
     }
   ];
 
   stageNotes = '';
+  stepSubstep = '';
+  stepStatus: 'pendiente' | 'en_curso' | 'completado' | 'bloqueado' = 'en_curso';
+  stepResponsible = '';
+  stepNotes = '';
 
   form: Partial<Project> = this.emptyForm();
 
   constructor(
     private projectService: ProjectService,
+    private quotationService: QuotationService,
     public authService: AuthService,
     private toast: ToastService
   ) {}
 
   ngOnInit(): void {
     this.loadProjects();
+    this.loadQuotations();
     // Tiempo real: re-consulta cada 15s para que todos los actores vean el estado actual
     this.refreshTimer = setInterval(() => {
       if (this.autoRefresh && !this.saving) this.loadProjects(true);
     }, 15000);
+  }
+
+  loadQuotations(): void {
+    this.quotationService.getQuotations({ limit: 200 }).subscribe({
+      next: (res) => { if (res.success) this.quotations = res.data || []; },
+      error: () => {}
+    });
+  }
+
+  linkQuotation(p: Project, q: Quotation): void {
+    p.quotationId = q._id;
+    p.quotationRef = String(q.number);
+  }
+
+  onQuotationSelect(p: Project, event: any): void {
+    const id = event?.target?.value;
+    const q = this.quotations.find((x) => x._id === id);
+    if (q) this.linkQuotation(p, q);
   }
 
   ngOnDestroy(): void {
@@ -300,6 +370,32 @@ export class ProyectosComponent implements OnInit, OnDestroy {
     this.moveStage(this.selected, 'analisis');
   }
 
+  updateStep(p: Project): void {
+    const stage = p.currentStage || 'inicio';
+    const substep = this.stepSubstep || '';
+    this.projectService.updateStep(p._id!, {
+      stage,
+      substep,
+      status: this.stepStatus,
+      responsible: this.stepResponsible,
+      notes: this.stepNotes
+    }).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.toast.success('Paso actualizado', `${stage}${substep ? ' · ' + substep : ''} → ${this.stepStatus}`);
+          this.stepNotes = '';
+          this.selected = res.data;
+          this.loadProjects(true);
+        }
+      },
+      error: (err) => this.toast.error('Error', err?.error?.message || 'No se pudo actualizar el paso.')
+    });
+  }
+
+  stageDetailInfo(p: Project, stage: ProjectStage, substep: string): any {
+    return p.stageDetails?.[stage]?.[substep || '_general'];
+  }
+
   saveStageData(p: Project): void {
     const payload: Partial<Project> = {
       title: p.title,
@@ -316,7 +412,24 @@ export class ProyectosComponent implements OnInit, OnDestroy {
       finalAmount: p.finalAmount,
       finalPaymentReceived: p.finalPaymentReceived,
       deliveryNotes: p.deliveryNotes,
-      notes: p.notes
+      notes: p.notes,
+      needType: p.needType,
+      designBudget: p.designBudget,
+      designPaymentReceived: p.designPaymentReceived,
+      receptionNotes: p.receptionNotes,
+      designElaborationNotes: p.designElaborationNotes,
+      designPresentationNotes: p.designPresentationNotes,
+      materialsConfirmed: p.materialsConfirmed,
+      quotationSocializationNotes: p.quotationSocializationNotes,
+      appliancesSocializationNotes: p.appliancesSocializationNotes,
+      contractElaborated: p.contractElaborated,
+      plansElaborated: p.plansElaborated,
+      documentsSignedClient: p.documentsSignedClient,
+      documentsSignedAdmin: p.documentsSignedAdmin,
+      payment60Received: p.payment60Received,
+      designerDocumentSent: p.designerDocumentSent,
+      materialsOrderReady: p.materialsOrderReady,
+      materialsChecklistDone: p.materialsChecklistDone
     };
     // No enviar quotationId vacío (el back lo ignora, pero evitamos cast-error)
     if (typeof p.quotationId === 'string' && p.quotationId.trim()) {

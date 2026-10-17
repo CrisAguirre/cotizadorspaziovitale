@@ -17,6 +17,9 @@
     <a routerLink="/proyectos" routerLinkActive="active" class="nav-item">
       <span>📁 Proyectos</span>
     </a>
+    <a routerLink="/control" routerLinkActive="active" class="nav-item">
+      <span>📊 Control</span>
+    </a>
     <a *ngIf="authService.getUser()?.role === 'admin'" routerLink="/price-list" routerLinkActive="active" class="nav-item">
       <span>💰 Lista de Precios</span>
     </a>
