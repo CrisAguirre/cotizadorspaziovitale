@@ -32,10 +32,26 @@
       <option value="alta">Prioridad alta</option>
       <option value="urgente">Urgente</option>
     </select>
-    <input class="form-control" placeholder="Asesor comercial" [(ngModel)]="form.actors!.asesorComercial" />
-    <input class="form-control" placeholder="Diseñador / Asesor diseño" [(ngModel)]="form.actors!.disenador" />
-    <input class="form-control" placeholder="Operarios" [(ngModel)]="form.actors!.operarios" />
-    <input class="form-control" placeholder="Contadora" [(ngModel)]="form.actors!.contadora" />
+    <select class="form-control" [(ngModel)]="form.actors!.asesorComercial">
+      <option value="">Asesor comercial</option>
+      <option *ngFor="let u of usersByRole('comercial','admin')" [value]="u.email">{{ u.email }}</option>
+    </select>
+    <select class="form-control" [(ngModel)]="form.actors!.disenador">
+      <option value="">Diseñador</option>
+      <option *ngFor="let u of usersByRole('diseno','admin')" [value]="u.email">{{ u.email }}</option>
+    </select>
+    <select class="form-control" [(ngModel)]="form.actors!.asesorDiseno">
+      <option value="">Asesor de diseño</option>
+      <option *ngFor="let u of usersByRole('diseno','admin')" [value]="u.email">{{ u.email }}</option>
+    </select>
+    <select class="form-control" [(ngModel)]="form.actors!.operarios">
+      <option value="">Operarios</option>
+      <option *ngFor="let u of usersByRole('diseno','admin')" [value]="u.email">{{ u.email }}</option>
+    </select>
+    <select class="form-control" [(ngModel)]="form.actors!.contadora">
+      <option value="">Contadora</option>
+      <option *ngFor="let u of usersByRole('contabilidad','admin')" [value]="u.email">{{ u.email }}</option>
+    </select>
   </div>
   <textarea class="form-control mt-2" rows="2" placeholder="Notas iniciales" [(ngModel)]="form.notes"></textarea>
   <div class="mt-2">
@@ -166,7 +182,10 @@
           <option value="completado">Completado</option>
           <option value="bloqueado">Bloqueado</option>
         </select>
-        <input class="form-control" placeholder="Responsable" [(ngModel)]="stepResponsible" />
+        <select class="form-control" [(ngModel)]="stepResponsible">
+          <option value="">Responsable</option>
+          <option *ngFor="let u of users" [value]="u.email">{{ u.email }} ({{ u.role }})</option>
+        </select>
       </div>
       <textarea class="form-control mt-2" rows="2" placeholder="Detalles técnicos / avance..." [(ngModel)]="stepNotes"></textarea>
       <div class="mt-2">

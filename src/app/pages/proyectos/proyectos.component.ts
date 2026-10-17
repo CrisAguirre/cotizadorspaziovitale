@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ProjectService } from '../../services/project.service';
 import { QuotationService } from '../../services/quotation.service';
+import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
 import { Project, ProjectStage, ContactSource, StageStateStatus, Quotation } from '../../models/interfaces';
@@ -31,6 +32,7 @@ interface StageMeta {
 export class ProyectosComponent implements OnInit, OnDestroy {
   projects: Project[] = [];
   quotations: Quotation[] = [];
+  users: { email: string; role: string }[] = [];
   isLoading = true;
   search = '';
   filterStage = '';
@@ -128,6 +130,7 @@ export class ProyectosComponent implements OnInit, OnDestroy {
   constructor(
     private projectService: ProjectService,
     private quotationService: QuotationService,
+    private userService: UserService,
     private route: ActivatedRoute,
     public authService: AuthService,
     private toast: ToastService
@@ -136,10 +139,22 @@ export class ProyectosComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadProjects();
     this.loadQuotations();
+    this.loadUsers();
     // Tiempo real: re-consulta cada 15s para que todos los actores vean el estado actual
     this.refreshTimer = setInterval(() => {
       if (this.autoRefresh && !this.saving) this.loadProjects(true);
     }, 15000);
+  }
+
+  loadUsers(): void {
+    this.userService.getUsers().subscribe({
+      next: (res) => { if (res.success) this.users = res.data || []; },
+      error: () => {}
+    });
+  }
+
+  usersByRole(...roles: string[]): { email: string; role: string }[] {
+    return this.users.filter((u) => roles.includes(u.role));
   }
 
   loadQuotations(): void {
