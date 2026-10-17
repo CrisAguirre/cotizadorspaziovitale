@@ -518,14 +518,27 @@ export class ProyectosComponent implements OnInit, OnDestroy {
     return p.stageDetails?.[stage]?.[substep || '_general'];
   }
 
-  isSubstepCompleted(p: Project, substepKey: string): boolean {
-    const stage = (p.currentStage || 'inicio') as ProjectStage;
+  isSubstepCompleted(p: Project, stage: ProjectStage, substepKey: string): boolean {
     const info = p.stageDetails?.[stage]?.[substepKey];
     return info?.status === 'completado';
   }
 
-  saveSubstep(p: Project, substepKey: string): void {
-    const stage = (p.currentStage || 'inicio') as ProjectStage;
+  activeSubstepKey(detail: StageMeta, p: Project): string | null {
+    for (const ss of detail.substeps) {
+      if (!this.isSubstepCompleted(p, detail.key, ss.key)) return ss.key;
+    }
+    return null;
+  }
+
+  isSubstepEditable(detail: StageMeta, p: Project, ssKey: string): boolean {
+    if (this.isAdmin()) return true;
+    const active = this.activeSubstepKey(detail, p);
+    if (active === ssKey) return this.canEditStage(detail.key);
+    return false;
+  }
+
+  saveSubstep(p: Project, stageKey: ProjectStage, substepKey: string): void {
+    const stage = stageKey;
     const payload: Partial<Project> = {
       title: p.title,
       clientName: p.clientName,

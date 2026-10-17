@@ -149,16 +149,14 @@
   <div class="stage-detail" *ngIf="getStageDetail(viewStage || selected.currentStage) as detail">
     <h3>{{ detail.icon }} {{ detail.label }} — {{ detail.actors }}</h3>
     <p>{{ detail.description }}</p>
-    <ul class="checklist">
-      <li *ngFor="let c of detail.checklist">✅ {{ c }}</li>
-    </ul>
+    <!-- checklist eliminado: el estado se gestiona por submódulo -->
 
     <p class="warn" *ngIf="detail.pending">⚠️ Módulo pendiente de definición por Spazio Vitale. Se mantiene como placeholder.</p>
 
     <!-- SUBMODULOS SECUENCIALES CON FORMULARIOS PROPIOS -->
     <div class="submodule-forms" *ngIf="!detail.pending">
       <div class="submodule-card" *ngFor="let ss of detail.substeps; let i = index"
-           [class.locked]="i > 0 && !isSubstepCompleted(selected, detail.substeps[i-1].key)">
+           [class.locked]="i > 0 && !isSubstepCompleted(selected, detail.key, detail.substeps[i-1].key)">
         <div class="submodule-head">
           <span class="substep-key">{{ ss.key }}</span>
           <strong>{{ ss.label }}</strong>
@@ -171,7 +169,7 @@
 
         <!-- 1.x -->
         <ng-container *ngIf="detail.key === 'inicio'">
-          <div *ngIf="ss.key === '1.1'" class="submodule-body">
+          <div *ngIf="ss.key === '1.1'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label>Medio de contacto</label>
             <select class="form-control" [(ngModel)]="selected.contactSource">
               <option value="redes">Redes</option>
@@ -183,7 +181,7 @@
             <label class="mt-2">Notas de recepción</label>
             <textarea class="form-control" rows="2" [(ngModel)]="selected.receptionNotes"></textarea>
           </div>
-          <div *ngIf="ss.key === '1.2'" class="submodule-body">
+          <div *ngIf="ss.key === '1.2'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label>Tipo de necesidad *</label>
             <select class="form-control" [(ngModel)]="selected.needType">
               <option value="">—</option>
@@ -195,33 +193,33 @@
             <label class="mt-2">Requerimiento o necesidad del cliente *</label>
             <textarea class="form-control" rows="3" [(ngModel)]="selected.requirement"></textarea>
           </div>
-          <div *ngIf="ss.key === '1.3'" class="submodule-body">
+          <div *ngIf="ss.key === '1.3'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label>Información recopilada para presupuesto de diseño</label>
             <textarea class="form-control" rows="3" [(ngModel)]="selected.receptionNotes"></textarea>
           </div>
-          <div *ngIf="ss.key === '1.4'" class="submodule-body">
+          <div *ngIf="ss.key === '1.4'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label>Presupuesto de diseño</label>
             <input type="number" class="form-control" [(ngModel)]="selected.designBudget" />
           </div>
-          <div *ngIf="ss.key === '1.5'" class="submodule-body">
+          <div *ngIf="ss.key === '1.5'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label class="check"><input type="checkbox" [(ngModel)]="selected.designPaymentReceived" /> Pago de diseño recibido</label>
           </div>
         </ng-container>
 
         <!-- 2.x -->
         <ng-container *ngIf="detail.key === 'analisis'">
-          <div *ngIf="ss.key === '2.1'" class="submodule-body">
+          <div *ngIf="ss.key === '2.1'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label>Elaboración de diseño (notas técnicas)</label>
             <textarea class="form-control" rows="2" [(ngModel)]="selected.designElaborationNotes"></textarea>
           </div>
-          <div *ngIf="ss.key === '2.2'" class="submodule-body">
+          <div *ngIf="ss.key === '2.2'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label>Presentación de diseño (notas)</label>
             <textarea class="form-control" rows="2" [(ngModel)]="selected.designPresentationNotes"></textarea>
           </div>
-          <div *ngIf="ss.key === '2.3'" class="submodule-body">
+          <div *ngIf="ss.key === '2.3'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label class="check"><input type="checkbox" [(ngModel)]="selected.materialsConfirmed" /> Confirmación de existencia de materiales y productos</label>
           </div>
-          <div *ngIf="ss.key === '2.4'" class="submodule-body">
+          <div *ngIf="ss.key === '2.4'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label>Cotización vinculada * (guardada en Cotizaciones)</label>
             <select class="form-control" (change)="onQuotationSelect(selected!, $event)">
               <option value="">— Seleccionar cotización guardada —</option>
@@ -236,11 +234,11 @@
 
         <!-- 3.x -->
         <ng-container *ngIf="detail.key === 'presentacion'">
-          <div *ngIf="ss.key === '3.1'" class="submodule-body">
+          <div *ngIf="ss.key === '3.1'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label>Socialización de cotización (notas)</label>
             <textarea class="form-control" rows="2" [(ngModel)]="selected.quotationSocializationNotes"></textarea>
           </div>
-          <div *ngIf="ss.key === '3.2'" class="submodule-body">
+          <div *ngIf="ss.key === '3.2'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label>Socialización de electrodomésticos (notas)</label>
             <textarea class="form-control" rows="2" [(ngModel)]="selected.appliancesSocializationNotes"></textarea>
           </div>
@@ -248,12 +246,12 @@
 
         <!-- 4.x -->
         <ng-container *ngIf="detail.key === 'contratacion'">
-          <div *ngIf="ss.key === '4.1'" class="submodule-body">
+          <div *ngIf="ss.key === '4.1'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label>N° Contrato *</label>
             <input class="form-control" [(ngModel)]="selected.contractNumber" placeholder="CNT-..." [disabled]="isLockedField(selected, 'contractNumber') && !isAdmin()" />
             <label class="check mt-2"><input type="checkbox" [(ngModel)]="selected.contractElaborated" [disabled]="isLockedField(selected, 'contractNumber') && !isAdmin()" /> Contrato elaborado</label>
           </div>
-          <div *ngIf="ss.key === '4.2'" class="submodule-body">
+          <div *ngIf="ss.key === '4.2'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label>Planos / Diseños *</label>
             <select class="form-control" [(ngModel)]="selected.designStatus" [disabled]="isLockedField(selected, 'designStatus') && !isAdmin()">
               <option value="pendiente">Pendiente</option>
@@ -262,25 +260,25 @@
             </select>
             <label class="check mt-2"><input type="checkbox" [(ngModel)]="selected.plansElaborated" /> Planos elaborados</label>
           </div>
-          <div *ngIf="ss.key === '4.3'" class="submodule-body">
+          <div *ngIf="ss.key === '4.3'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label class="check"><input type="checkbox" [(ngModel)]="selected.documentsSignedClient" [disabled]="isLockedField(selected, 'documentsSignedClient') && !isAdmin()" /> Firma cliente</label>
             <label class="check"><input type="checkbox" [(ngModel)]="selected.documentsSignedAdmin" [disabled]="isLockedField(selected, 'documentsSignedAdmin') && !isAdmin()" /> Firma administración</label>
           </div>
-          <div *ngIf="ss.key === '4.4'" class="submodule-body">
+          <div *ngIf="ss.key === '4.4'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label class="check"><input type="checkbox" [(ngModel)]="selected.payment60Received" [disabled]="isLockedField(selected, 'payment60Received') && !isAdmin()" /> Abono 60% recibido</label>
           </div>
         </ng-container>
 
         <!-- 5.x -->
         <ng-container *ngIf="detail.key === 'preparacion'">
-          <div *ngIf="ss.key === '5.1'" class="submodule-body">
+          <div *ngIf="ss.key === '5.1'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label class="check"><input type="checkbox" [(ngModel)]="selected.designerDocumentSent" /> Documento enviado a diseñador</label>
           </div>
-          <div *ngIf="ss.key === '5.2'" class="submodule-body">
+          <div *ngIf="ss.key === '5.2'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label class="check"><input type="checkbox" [(ngModel)]="selected.materialsOrderReady" /> Pedido de materiales cargado</label>
             <label class="check mt-2"><input type="checkbox" [(ngModel)]="selected.insumosRequested" /> Insumos solicitados *</label>
           </div>
-          <div *ngIf="ss.key === '5.3'" class="submodule-body">
+          <div *ngIf="ss.key === '5.3'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label class="check"><input type="checkbox" [(ngModel)]="selected.materialsChecklistDone" /> Revisión y checklist de materiales</label>
             <label class="mt-2">Preparaciones varias</label>
             <textarea class="form-control" rows="2" [(ngModel)]="selected.insumosNotes"></textarea>
@@ -289,14 +287,14 @@
 
         <!-- 6.x / 7.x placeholder -->
         <ng-container *ngIf="detail.key === 'produccion' || detail.key === 'instalacion'">
-          <div class="submodule-body">
+          <div class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
             <label>Notas</label>
             <textarea class="form-control" rows="3" [(ngModel)]="selected.productionNotes"></textarea>
           </div>
         </ng-container>
 
         <!-- Acciones del subpaso (secuencial: solo si el anterior está completado) -->
-        <div class="submodule-actions" *ngIf="i === 0 || isSubstepCompleted(selected, detail.substeps[i-1].key)">
+        <div class="submodule-actions" *ngIf="(i === 0 || isSubstepCompleted(selected, detail.key, detail.substeps[i-1].key)) && isSubstepEditable(detail, selected, ss.key)">
           <label class="mt-2">Estado del subpaso</label>
           <select class="form-control" [(ngModel)]="stepStatus">
             <option value="pendiente">Pendiente</option>
@@ -312,10 +310,10 @@
           <label class="mt-2">Detalles técnicos</label>
           <textarea class="form-control" rows="2" [(ngModel)]="stepNotes"></textarea>
           <div class="mt-2">
-            <button class="btn-success" (click)="saveSubstep(selected, ss.key)">💾 Guardar subpaso</button>
+            <button class="btn-success" (click)="saveSubstep(selected, detail.key, ss.key)">💾 Guardar subpaso</button>
           </div>
         </div>
-        <p class="warn small" *ngIf="i > 0 && !isSubstepCompleted(selected, detail.substeps[i-1].key)">
+        <p class="warn small" *ngIf="i > 0 && !isSubstepCompleted(selected, detail.key, detail.substeps[i-1].key)">
           ⚠️ Completa el subpaso anterior para habilitar este.
         </p>
       </div>
