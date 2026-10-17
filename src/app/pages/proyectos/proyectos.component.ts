@@ -347,7 +347,8 @@ export class ProyectosComponent implements OnInit, OnDestroy {
 
   isLockedField(p: Project, field: string): boolean {
     // Campos sensibles bloqueados una vez diligenciados
-    const lockedFields = ['contractNumber', 'designStatus', 'documentsSignedClient', 'documentsSignedAdmin', 'payment60Received', 'finalPaymentReceived', 'deliveryDate'];
+    if (field === 'designStatus') return p.designStatus === 'aprobado';
+    const lockedFields = ['contractNumber', 'documentsSignedClient', 'documentsSignedAdmin', 'payment60Received', 'finalPaymentReceived', 'deliveryDate'];
     if (!lockedFields.includes(field)) return false;
     const val = (p as any)[field];
     if (typeof val === 'boolean') return val === true;
