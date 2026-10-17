@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { ProjectService } from '../../services/project.service';
 import { QuotationService } from '../../services/quotation.service';
 import { AuthService } from '../../services/auth.service';
@@ -127,6 +128,7 @@ export class ProyectosComponent implements OnInit, OnDestroy {
   constructor(
     private projectService: ProjectService,
     private quotationService: QuotationService,
+    private route: ActivatedRoute,
     public authService: AuthService,
     private toast: ToastService
   ) {}
@@ -206,13 +208,19 @@ export class ProyectosComponent implements OnInit, OnDestroy {
           if (this.filterState) {
             data = data.filter((p) => this.getStageStatus(p, (p.currentStage || 'inicio') as ProjectStage) === this.filterState);
           }
-          this.projects = data;
-          this.lastRefresh = new Date();
-          // Mantener seleccionado actualizado en tiempo real
-          if (this.selected?._id) {
-            const fresh = data.find((x) => x._id === this.selected!._id);
-            if (fresh) this.selected = fresh;
-          }
+           this.projects = data;
+           this.lastRefresh = new Date();
+           // Mantener seleccionado actualizado en tiempo real
+           if (this.selected?._id) {
+             const fresh = data.find((x) => x._id === this.selected!._id);
+             if (fresh) this.selected = fresh;
+           }
+           // Seleccionar proyecto por query param (desde panel de control)
+           const qid = this.route.snapshot.queryParamMap.get('id');
+           if (qid && !this.selected) {
+             const found = data.find((x) => x._id === qid);
+             if (found) this.selected = found;
+           }
         }
         this.isLoading = false;
       },
