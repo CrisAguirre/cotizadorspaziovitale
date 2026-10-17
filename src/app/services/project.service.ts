@@ -36,7 +36,7 @@ export class ProjectService {
     return this.http.patch<ApiResponse<Project>>(`${this.apiUrl}/${id}/stage-state`, { stage, status, notes });
   }
 
-  updateStep(id: string, payload: { stage: string; substep?: string; status?: string; responsible?: string; notes?: string }): Observable<ApiResponse<Project>> {
+  updateStep(id: string, payload: { stage: string; substep?: string; status?: string; responsible?: string; notes?: string; kind?: string; reason?: string }): Observable<ApiResponse<Project>> {
     return this.http.patch<ApiResponse<Project>>(`${this.apiUrl}/${id}/step`, payload);
   }
 

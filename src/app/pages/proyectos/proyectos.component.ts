@@ -120,6 +120,8 @@ export class ProyectosComponent implements OnInit, OnDestroy {
   ];
 
   stageNotes = '';
+  viewStage: ProjectStage | null = null;
+  adjustmentReason = '';
   stepSubstep = '';
   stepStatus: 'pendiente' | 'en_curso' | 'completado' | 'bloqueado' = 'en_curso';
   stepResponsible = '';
@@ -303,7 +305,80 @@ export class ProyectosComponent implements OnInit, OnDestroy {
 
   selectProject(p: Project): void {
     this.selected = p;
+    this.viewStage = (p.currentStage || 'inicio') as ProjectStage;
     this.stageNotes = '';
+  }
+
+  viewStageDetail(stage: ProjectStage): void {
+    // Consulta: no cambia la etapa actual del proyecto
+    this.viewStage = stage;
+  }
+
+  stageActors(stage?: string): string[] {
+    const map: Record<string, string[]> = {
+      inicio: ['asesor_comercial'],
+      analisis: ['asesor_comercial', 'disenador', 'asesor_diseno'],
+      presentacion: ['asesor_comercial', 'cliente'],
+      contratacion: ['contadora', 'asesor_comercial'],
+      preparacion: ['disenador', 'operarios'],
+      produccion: ['operarios'],
+      instalacion: ['operarios']
+    };
+    return map[stage || ''] || [];
+  }
+
+  roleActors(role?: string): string[] {
+    const map: Record<string, string[]> = {
+      admin: ['asesor_comercial', 'contadora', 'operarios', 'disenador', 'asesor_diseno', 'cliente'],
+      comercial: ['asesor_comercial', 'cliente'],
+      contabilidad: ['contadora'],
+      diseno: ['disenador', 'asesor_diseno', 'operarios']
+    };
+    return map[role || ''] || [];
+  }
+
+  canEditStage(stage?: string): boolean {
+    if (this.isAdmin()) return true;
+    const role = this.authService.getUser()?.role;
+    const allowed = this.roleActors(role);
+    const responsibles = this.stageActors(stage);
+    return responsibles.some((a) => allowed.includes(a));
+  }
+
+  isLockedField(p: Project, field: string): boolean {
+    // Campos sensibles bloqueados una vez diligenciados
+    const lockedFields = ['contractNumber', 'designStatus', 'documentsSignedClient', 'documentsSignedAdmin', 'payment60Received', 'finalPaymentReceived', 'deliveryDate'];
+    if (!lockedFields.includes(field)) return false;
+    const val = (p as any)[field];
+    if (typeof val === 'boolean') return val === true;
+    return !!val;
+  }
+
+  requestAdjustment(p: Project, stage: ProjectStage): void {
+    const reason = this.adjustmentReason.trim();
+    if (!reason) {
+      this.toast.warning('Falta justificación', 'Describe el motivo del ajuste solicitado.');
+      return;
+    }
+    this.projectService.updateStep(p._id!, {
+      stage,
+      substep: '',
+      status: this.getStageStatus(p, stage),
+      responsible: '',
+      notes: 'Solicitud de ajuste: ' + reason,
+      kind: 'solicitud_ajuste',
+      reason
+    }).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.toast.success('Solicitud enviada', 'El admin revisará el ajuste.');
+          this.adjustmentReason = '';
+          this.selected = res.data;
+          this.loadProjects(true);
+        }
+      },
+      error: (err) => this.toast.error('Error', err?.error?.message || 'No se pudo registrar la solicitud.')
+    });
   }
 
   getStageDetail(key?: string): StageMeta | undefined {

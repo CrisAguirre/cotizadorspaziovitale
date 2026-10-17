@@ -381,6 +381,8 @@ export interface StepUpdateEntry {
   status?: 'pendiente' | 'en_curso' | 'completado' | 'bloqueado';
   responsible?: string;
   notes?: string;
+  kind?: 'normal' | 'solicitud_ajuste' | 'ajuste_aplicado';
+  reason?: string;
   byEmail?: string;
   byRole?: string;
   at?: string;

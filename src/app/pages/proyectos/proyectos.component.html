@@ -136,7 +136,7 @@
          class="step st-{{ getStageStatus(selected, s.key) }}"
          [class.done]="getStageStatus(selected, s.key) === 'completado'"
          [class.current]="selected.currentStage === s.key"
-         (click)="moveStage(selected, s.key)"
+          (click)="viewStageDetail(s.key)"
          [title]="s.actors + ' · Estado: ' + stateLabel(getStageStatus(selected, s.key)) + (canMove(selected, s.key) ? ' — clic para mover' : ' (secuencial)')">
       <div class="dot">{{ s.icon }}</div>
       <div class="lbl">{{ s.label }}</div>
@@ -146,7 +146,7 @@
     </div>
   </div>
 
-  <div class="stage-detail" *ngIf="getStageDetail(selected.currentStage) as detail">
+  <div class="stage-detail" *ngIf="getStageDetail(viewStage || selected.currentStage) as detail">
     <h3>{{ detail.icon }} {{ detail.label }} — {{ detail.actors }}</h3>
     <p>{{ detail.description }}</p>
     <ul class="checklist">
@@ -169,7 +169,7 @@
       </div>
     </div>
 
-    <div class="step-update glass-panel" *ngIf="!detail.pending">
+    <div class="step-update glass-panel" *ngIf="!detail.pending && (viewStage === selected.currentStage || isAdmin())">
       <h4>📝 Actualizar paso (tiempo real)</h4>
       <div class="form-grid">
         <select class="form-control" [(ngModel)]="stepSubstep">
@@ -193,6 +193,24 @@
       </div>
     </div>
     <p class="warn" *ngIf="detail.pending">⚠️ Módulo pendiente de definición por Spazio Vitale. Se mantiene como placeholder.</p>
+
+    <div class="adjustment-request glass-panel" *ngIf="!detail.pending && !canEditStage(viewStage || selected.currentStage)">
+      <h4>🔒 Edición restringida</h4>
+      <p class="muted">No tienes permiso para editar esta etapa. Puedes solicitar un ajuste al administrador.</p>
+      <textarea class="form-control" rows="2" placeholder="Justificación del ajuste solicitado..." [(ngModel)]="adjustmentReason"></textarea>
+      <div class="mt-2">
+        <button class="btn-secondary" (click)="requestAdjustment(selected!, viewStage || selected.currentStage!)">Solicitar ajuste</button>
+      </div>
+    </div>
+
+    <div class="adjustment-request glass-panel" *ngIf="!detail.pending && canEditStage(viewStage || selected.currentStage) && (isLockedField(selected, 'contractNumber') || isLockedField(selected, 'payment60Received') || isLockedField(selected, 'finalPaymentReceived'))">
+      <h4>⚠️ Campos sensibles bloqueados</h4>
+      <p class="muted">Contrato firmado, pagos o entrega no se pueden modificar directamente. Solicita ajuste con justificación.</p>
+      <textarea class="form-control" rows="2" placeholder="Justificación del ajuste..." [(ngModel)]="adjustmentReason"></textarea>
+      <div class="mt-2">
+        <button class="btn-secondary" (click)="requestAdjustment(selected!, viewStage || selected.currentStage!)">Solicitar ajuste</button>
+      </div>
+    </div>
 
     <!-- 1 INICIO -->
     <div *ngIf="selected.currentStage === 'inicio'" class="stage-form">
@@ -252,9 +270,9 @@
     <!-- 4 CONTRATACION -->
     <div *ngIf="selected.currentStage === 'contratacion'" class="stage-form">
       <div class="form-grid">
-        <div><label>N° Contrato *</label><input class="form-control" [(ngModel)]="selected.contractNumber" placeholder="CNT-..." /></div>
+        <div><label>N° Contrato *</label><input class="form-control" [(ngModel)]="selected.contractNumber" placeholder="CNT-..." [disabled]="isLockedField(selected, 'contractNumber') && !isAdmin()" /></div>
         <div><label>Planos / Diseños *</label>
-          <select class="form-control" [(ngModel)]="selected.designStatus">
+          <select class="form-control" [(ngModel)]="selected.designStatus" [disabled]="isLockedField(selected, 'designStatus') && !isAdmin()">
             <option value="pendiente">Pendiente</option>
             <option value="en_proceso">En proceso</option>
             <option value="aprobado">Aprobado</option>
