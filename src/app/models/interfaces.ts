@@ -438,6 +438,44 @@ export interface Project {
   designerDocumentSent?: boolean;
   materialsOrderReady?: boolean;
   materialsChecklistDone?: boolean;
+
+  // Etapa 6 Fabricación / Producción
+  contractPlansSigned?: boolean;
+  contractSigned?: boolean;
+  appliancesConfirmed?: boolean;
+  appliancesNotes?: string;
+  orderMelamines?: boolean;
+  orderEdges?: boolean;
+  orderFittings?: boolean;
+  orderCountertop?: boolean;
+  orderEstimatedArrival?: string;
+  orderFollowupNotes?: string;
+  targetDeliveryDate?: string;
+  measurementsRectificationDate?: string;
+  mepPlansReady?: boolean;
+  cuttingListScheduled?: boolean;
+  productionTasksScheduled?: boolean;
+  estimatedCompletionDate?: string;
+  mepPlansVerifiedOnSite?: boolean;
+  rectificationNotes?: string;
+  cutAndEdgePlansDone?: boolean;
+  assemblyPlansDone?: boolean;
+  materialsAvailabilityVerified?: boolean;
+  cuttingDone?: boolean;
+  edgingDone?: boolean;
+  assemblyDone?: boolean;
+  fittingsInstalled?: boolean;
+  workshopCompletionDone?: boolean;
+
+  // Etapa 7 Entrega e Instalación
+  civilWorkFinished?: boolean;
+  civilWorkNotes?: string;
+  qualityControlFormSigned?: boolean;
+  qualityControlNotes?: string;
+  deliveryFormSigned?: boolean;
+  maintenanceManualDelivered?: boolean;
+  customerFollowupNotes?: string;
+
   deliveryDate?: string;
   finalAmount?: number;
   finalPaymentReceived?: boolean;
