@@ -285,11 +285,110 @@
           </div>
         </ng-container>
 
-        <!-- 6.x / 7.x placeholder -->
-        <ng-container *ngIf="detail.key === 'produccion' || detail.key === 'instalacion'">
-          <div class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
-            <label>Notas</label>
-            <textarea class="form-control" rows="3" [(ngModel)]="selected.productionNotes"></textarea>
+        <!-- 6.x Fabricación / Producción -->
+        <ng-container *ngIf="detail.key === 'produccion'">
+          <!-- 6.1 Ingreso de contrato a fábrica -->
+          <div *ngIf="ss.key === '6.1'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
+            <label class="check"><input type="checkbox" [(ngModel)]="selected.contractPlansSigned" /> Planos firmados</label>
+            <label class="check mt-1"><input type="checkbox" [(ngModel)]="selected.contractSigned" /> Contratos firmados</label>
+            <label class="check mt-1"><input type="checkbox" [(ngModel)]="selected.appliancesConfirmed" /> Electrodomésticos y accesorios confirmados (fichas técnicas o compra)</label>
+            <label class="mt-2">Notas electrodomésticos / accesorios (Responsable: Área comercial)</label>
+            <textarea class="form-control" rows="2" [(ngModel)]="selected.appliancesNotes"></textarea>
+          </div>
+
+          <!-- 6.2 Pedidos y seguimiento de materiales -->
+          <div *ngIf="ss.key === '6.2'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
+            <p class="muted small">Responsable: Área de contabilidad — verificar fechas estimadas de llegada</p>
+            <label class="check"><input type="checkbox" [(ngModel)]="selected.orderMelamines" /> Melaminas pedidas</label>
+            <label class="check mt-1"><input type="checkbox" [(ngModel)]="selected.orderEdges" /> Cantos pedidos</label>
+            <label class="check mt-1"><input type="checkbox" [(ngModel)]="selected.orderFittings" /> Herrajes pedidos</label>
+            <label class="check mt-1"><input type="checkbox" [(ngModel)]="selected.orderCountertop" /> Mesón pedido</label>
+            <label class="mt-2">Fecha estimada de llegada</label>
+            <input type="text" class="form-control" [(ngModel)]="selected.orderEstimatedArrival" placeholder="Ej: 15-Nov-2026" />
+            <label class="mt-2">Notas de seguimiento</label>
+            <textarea class="form-control" rows="2" [(ngModel)]="selected.orderFollowupNotes"></textarea>
+          </div>
+
+          <!-- 6.3 Identificar fechas y programación de obra -->
+          <div *ngIf="ss.key === '6.3'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
+            <p class="muted small">Responsable: Área comercial y producción</p>
+            <label class="mt-1">Fecha límite de entrega de obra</label>
+            <input type="date" class="form-control" [(ngModel)]="selected.targetDeliveryDate" />
+            <label class="mt-2">Fecha de rectificación de medidas</label>
+            <input type="date" class="form-control" [(ngModel)]="selected.measurementsRectificationDate" />
+            <label class="check mt-2"><input type="checkbox" [(ngModel)]="selected.mepPlansReady" /> Planos de puntos eléctricos e hidráulicos listos</label>
+            <label class="check mt-1"><input type="checkbox" [(ngModel)]="selected.cuttingListScheduled" /> Elaboración de despiece programada</label>
+            <label class="check mt-1"><input type="checkbox" [(ngModel)]="selected.productionTasksScheduled" /> Tareas de producción programadas (corte, enchape, armado)</label>
+          </div>
+
+          <!-- 6.4 Rectificación final de medidas -->
+          <div *ngIf="ss.key === '6.4'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
+            <p class="muted small">Responsable: Área de producción</p>
+            <label class="mt-1">Fecha estimada de obra terminada</label>
+            <input type="date" class="form-control" [(ngModel)]="selected.estimatedCompletionDate" />
+            <label class="check mt-2"><input type="checkbox" [(ngModel)]="selected.mepPlansVerifiedOnSite" /> Planos de puntos eléctricos e hidráulicos verificados en obra</label>
+            <label class="mt-2">Notas de rectificación</label>
+            <textarea class="form-control" rows="2" [(ngModel)]="selected.rectificationNotes"></textarea>
+          </div>
+
+          <!-- 6.5 Elaboración final de despiece -->
+          <div *ngIf="ss.key === '6.5'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
+            <p class="muted small">Responsable: Área de producción</p>
+            <label class="check"><input type="checkbox" [(ngModel)]="selected.cutAndEdgePlansDone" /> Despiece de planos de corte y enchape listo</label>
+            <label class="check mt-1"><input type="checkbox" [(ngModel)]="selected.assemblyPlansDone" /> Planos de armado listos</label>
+          </div>
+
+          <!-- 6.6 Inicio y finalización de producción -->
+          <div *ngIf="ss.key === '6.6'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
+            <p class="muted small">Responsable: Área de producción</p>
+            <label class="check"><input type="checkbox" [(ngModel)]="selected.materialsAvailabilityVerified" /> Disponibilidad de material y herrajes verificada</label>
+            <label class="check mt-1"><input type="checkbox" [(ngModel)]="selected.cuttingDone" /> Corte completado</label>
+            <label class="check mt-1"><input type="checkbox" [(ngModel)]="selected.edgingDone" /> Enchape completado</label>
+            <label class="check mt-1"><input type="checkbox" [(ngModel)]="selected.assemblyDone" /> Armado completado</label>
+            <label class="check mt-1"><input type="checkbox" [(ngModel)]="selected.fittingsInstalled" /> Herrajes instalados</label>
+            <label class="check mt-1"><input type="checkbox" [(ngModel)]="selected.workshopCompletionDone" /> Obra finalizada en taller</label>
+            <label class="mt-2">Notas de producción</label>
+            <textarea class="form-control" rows="2" [(ngModel)]="selected.productionNotes"></textarea>
+          </div>
+        </ng-container>
+
+        <!-- 7.x Entrega e Instalación -->
+        <ng-container *ngIf="detail.key === 'instalacion'">
+          <!-- 7.1 Verificación de la obra -->
+          <div *ngIf="ss.key === '7.1'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
+            <p class="muted small">Responsable: Área comercial y producción</p>
+            <label class="check"><input type="checkbox" [(ngModel)]="selected.civilWorkFinished" /> Obra civil terminada y en condiciones para instalación</label>
+            <label class="mt-2">Notas de verificación</label>
+            <textarea class="form-control" rows="2" [(ngModel)]="selected.civilWorkNotes"></textarea>
+          </div>
+
+          <!-- 7.2 Control de calidad, despacho e instalación -->
+          <div *ngIf="ss.key === '7.2'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
+            <p class="muted small">Responsable: Área de producción</p>
+            <label class="check"><input type="checkbox" [(ngModel)]="selected.qualityControlFormSigned" /> Formato de control de calidad diligenciado</label>
+            <label class="mt-2">Notas de control de calidad</label>
+            <textarea class="form-control" rows="2" [(ngModel)]="selected.qualityControlNotes"></textarea>
+          </div>
+
+          <!-- 7.3 Formalización de la entrega -->
+          <div *ngIf="ss.key === '7.3'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
+            <p class="muted small">Responsable: Área comercial y producción</p>
+            <label class="check"><input type="checkbox" [(ngModel)]="selected.deliveryFormSigned" /> Formato de entrega de obra diligenciado</label>
+            <label class="mt-2">Fecha de entrega</label>
+            <input type="date" class="form-control" [(ngModel)]="selected.deliveryDate" />
+            <label class="mt-2">Monto final</label>
+            <input type="number" class="form-control" [(ngModel)]="selected.finalAmount" />
+            <label class="check mt-2"><input type="checkbox" [(ngModel)]="selected.finalPaymentReceived" /> Pago final recibido</label>
+            <label class="mt-2">Notas de entrega</label>
+            <textarea class="form-control" rows="2" [(ngModel)]="selected.deliveryNotes"></textarea>
+          </div>
+
+          <!-- 7.4 Seguimiento al cliente -->
+          <div *ngIf="ss.key === '7.4'" class="submodule-body" [attr.inert]="isSubstepEditable(detail, selected, ss.key) ? null : ''">
+            <p class="muted small">Responsable: Área comercial</p>
+            <label class="check"><input type="checkbox" [(ngModel)]="selected.maintenanceManualDelivered" /> Manual de mantenimiento de tableros y herrajes entregado</label>
+            <label class="mt-2">Notas de seguimiento post-venta</label>
+            <textarea class="form-control" rows="2" [(ngModel)]="selected.customerFollowupNotes"></textarea>
           </div>
         </ng-container>
 

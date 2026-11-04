@@ -101,22 +101,40 @@ export class ProyectosComponent implements OnInit, OnDestroy {
       ]
     },
     {
-      key: 'produccion', label: '6. Producción', icon: '🏭', actors: 'Operarios',
-      description: 'Módulo pendiente de definición por Spazio Vitale.',
-      checklist: ['Pendiente de definición'],
-      substeps: [
-        { key: '6.1', label: 'Pendiente de definición por Spazio Vitale', responsible: 'Operarios' }
+      key: 'produccion', label: '6. Fabricación', icon: '🏭', actors: 'Comercial · Contabilidad · Producción',
+      description: 'Proceso de fabricación: ingreso de contrato a fábrica, pedidos y seguimiento de materiales, programación de obra, rectificación de medidas, despiece y ejecución de producción.',
+      checklist: [
+        'Ingreso de contrato a fábrica (planos, contratos, fichas técnicas electrodomésticos)',
+        'Pedidos de materiales y seguimiento (melaminas, cantos, herrajes, mesón)',
+        'Identificar fechas y programación de obra',
+        'Rectificación final de medidas y verificación puntos eléctricos/hidráulicos',
+        'Elaboración final de despiece (corte, enchape, armado)',
+        'Inicio y finalización de producción (corte, enchape, armado, herrajes)'
       ],
-      pending: true
+      substeps: [
+        { key: '6.1', label: 'Ingreso de contrato a fábrica', responsible: 'Comercial · Producción' },
+        { key: '6.2', label: 'Pedidos y seguimiento de materiales', responsible: 'Contabilidad' },
+        { key: '6.3', label: 'Fechas de instalación y programación de obra', responsible: 'Comercial · Producción' },
+        { key: '6.4', label: 'Rectificación final de medidas', responsible: 'Producción' },
+        { key: '6.5', label: 'Elaboración final de despiece', responsible: 'Producción' },
+        { key: '6.6', label: 'Inicio y finalización de producción', responsible: 'Producción' }
+      ]
     },
     {
-      key: 'instalacion', label: '7. Instalación', icon: '🔧', actors: 'Operarios',
-      description: 'Módulo pendiente de definición por Spazio Vitale.',
-      checklist: ['Pendiente de definición'],
-      substeps: [
-        { key: '7.1', label: 'Pendiente de definición por Spazio Vitale', responsible: 'Operarios' }
+      key: 'instalacion', label: '7. Entrega e Instalación', icon: '🔧', actors: 'Comercial · Producción',
+      description: 'Verificación de obra civil, control de calidad, despacho e instalación, formalización de entrega y seguimiento post-venta.',
+      checklist: [
+        'Verificación de la obra (obra civil terminada y en condiciones)',
+        'Control de calidad despacho e instalación (formato diligenciado)',
+        'Formalización de la entrega (formato y fecha de entrega)',
+        'Seguimiento al cliente (manual de mantenimiento tableros y herrajes)'
       ],
-      pending: true
+      substeps: [
+        { key: '7.1', label: 'Verificación de la obra', responsible: 'Comercial · Producción' },
+        { key: '7.2', label: 'Control de calidad, despacho e instalación', responsible: 'Producción' },
+        { key: '7.3', label: 'Formalización de la entrega', responsible: 'Comercial · Producción' },
+        { key: '7.4', label: 'Seguimiento al cliente', responsible: 'Comercial' }
+      ]
     }
   ];
 
@@ -141,8 +159,16 @@ export class ProyectosComponent implements OnInit, OnDestroy {
     '5.1': 'Enviar documento al diseñador.',
     '5.2': 'Cargar pedido de materiales desde la cotización guardada.',
     '5.3': 'Revisar y completar checklist de materiales.',
-    '6.1': 'Pendiente de definición por Spazio Vitale.',
-    '7.1': 'Pendiente de definición por Spazio Vitale.'
+    '6.1': 'Ingresar contrato a fábrica: planos firmados, contratos firmados, fichas técnicas o compra de electrodomésticos y accesorios.',
+    '6.2': 'Registrar pedidos de melaminas, cantos, herrajes y mesón. Seguimiento a fechas estimadas de llegada (responsable: contabilidad).',
+    '6.3': 'Definir fecha límite de entrega de obra, programar rectificación de medidas, planos de puntos eléctricos e hidráulicos, despiece y tareas de producción.',
+    '6.4': 'Estimar fecha de obra terminada, verificar que los planos de puntos eléctricos e hidráulicos coincidan con lo entregado.',
+    '6.5': 'Crear despiece de planos de corte y enchape, y planos de armado.',
+    '6.6': 'Verificar disponibilidad del material y herrajes, programar y ejecutar corte, enchape, armado, instalación de herrajes y finalización de obra en taller.',
+    '7.1': 'Confirmar que la obra civil esté terminada y en condiciones para continuar con la instalación.',
+    '7.2': 'Diligenciar formato de control de calidad antes del despacho e instalación.',
+    '7.3': 'Completar formato de entrega de obra, registrar fecha de entrega y verificar pago final.',
+    '7.4': 'Entregar manual de mantenimiento de tableros y herrajes al cliente. Seguimiento post-venta.'
   };
   adjustmentReason = '';
   stepSubstep = '';
@@ -571,7 +597,42 @@ export class ProyectosComponent implements OnInit, OnDestroy {
       payment60Received: p.payment60Received,
       designerDocumentSent: p.designerDocumentSent,
       materialsOrderReady: p.materialsOrderReady,
-      materialsChecklistDone: p.materialsChecklistDone
+      materialsChecklistDone: p.materialsChecklistDone,
+      // Etapa 6 Fabricación
+      contractPlansSigned: p.contractPlansSigned,
+      contractSigned: p.contractSigned,
+      appliancesConfirmed: p.appliancesConfirmed,
+      appliancesNotes: p.appliancesNotes,
+      orderMelamines: p.orderMelamines,
+      orderEdges: p.orderEdges,
+      orderFittings: p.orderFittings,
+      orderCountertop: p.orderCountertop,
+      orderEstimatedArrival: p.orderEstimatedArrival,
+      orderFollowupNotes: p.orderFollowupNotes,
+      targetDeliveryDate: p.targetDeliveryDate,
+      measurementsRectificationDate: p.measurementsRectificationDate,
+      mepPlansReady: p.mepPlansReady,
+      cuttingListScheduled: p.cuttingListScheduled,
+      productionTasksScheduled: p.productionTasksScheduled,
+      estimatedCompletionDate: p.estimatedCompletionDate,
+      mepPlansVerifiedOnSite: p.mepPlansVerifiedOnSite,
+      rectificationNotes: p.rectificationNotes,
+      cutAndEdgePlansDone: p.cutAndEdgePlansDone,
+      assemblyPlansDone: p.assemblyPlansDone,
+      materialsAvailabilityVerified: p.materialsAvailabilityVerified,
+      cuttingDone: p.cuttingDone,
+      edgingDone: p.edgingDone,
+      assemblyDone: p.assemblyDone,
+      fittingsInstalled: p.fittingsInstalled,
+      workshopCompletionDone: p.workshopCompletionDone,
+      // Etapa 7 Entrega
+      civilWorkFinished: p.civilWorkFinished,
+      civilWorkNotes: p.civilWorkNotes,
+      qualityControlFormSigned: p.qualityControlFormSigned,
+      qualityControlNotes: p.qualityControlNotes,
+      deliveryFormSigned: p.deliveryFormSigned,
+      maintenanceManualDelivered: p.maintenanceManualDelivered,
+      customerFollowupNotes: p.customerFollowupNotes
     };
     if (typeof p.quotationId === 'string' && (p.quotationId as string).trim()) {
       (payload as any).quotationId = (p.quotationId as string).trim();
@@ -637,7 +698,42 @@ export class ProyectosComponent implements OnInit, OnDestroy {
       payment60Received: p.payment60Received,
       designerDocumentSent: p.designerDocumentSent,
       materialsOrderReady: p.materialsOrderReady,
-      materialsChecklistDone: p.materialsChecklistDone
+      materialsChecklistDone: p.materialsChecklistDone,
+      // Etapa 6 Fabricación
+      contractPlansSigned: p.contractPlansSigned,
+      contractSigned: p.contractSigned,
+      appliancesConfirmed: p.appliancesConfirmed,
+      appliancesNotes: p.appliancesNotes,
+      orderMelamines: p.orderMelamines,
+      orderEdges: p.orderEdges,
+      orderFittings: p.orderFittings,
+      orderCountertop: p.orderCountertop,
+      orderEstimatedArrival: p.orderEstimatedArrival,
+      orderFollowupNotes: p.orderFollowupNotes,
+      targetDeliveryDate: p.targetDeliveryDate,
+      measurementsRectificationDate: p.measurementsRectificationDate,
+      mepPlansReady: p.mepPlansReady,
+      cuttingListScheduled: p.cuttingListScheduled,
+      productionTasksScheduled: p.productionTasksScheduled,
+      estimatedCompletionDate: p.estimatedCompletionDate,
+      mepPlansVerifiedOnSite: p.mepPlansVerifiedOnSite,
+      rectificationNotes: p.rectificationNotes,
+      cutAndEdgePlansDone: p.cutAndEdgePlansDone,
+      assemblyPlansDone: p.assemblyPlansDone,
+      materialsAvailabilityVerified: p.materialsAvailabilityVerified,
+      cuttingDone: p.cuttingDone,
+      edgingDone: p.edgingDone,
+      assemblyDone: p.assemblyDone,
+      fittingsInstalled: p.fittingsInstalled,
+      workshopCompletionDone: p.workshopCompletionDone,
+      // Etapa 7 Entrega
+      civilWorkFinished: p.civilWorkFinished,
+      civilWorkNotes: p.civilWorkNotes,
+      qualityControlFormSigned: p.qualityControlFormSigned,
+      qualityControlNotes: p.qualityControlNotes,
+      deliveryFormSigned: p.deliveryFormSigned,
+      maintenanceManualDelivered: p.maintenanceManualDelivered,
+      customerFollowupNotes: p.customerFollowupNotes
     };
     // No enviar quotationId vacío (el back lo ignora, pero evitamos cast-error)
     if (typeof p.quotationId === 'string' && p.quotationId.trim()) {
