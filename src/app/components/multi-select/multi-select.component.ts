@@ -32,9 +32,17 @@ export class MultiSelectComponent {
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
-    if (!this.el.nativeElement.contains(event.target as Node)) {
-      this.close();
-    }
+    // composedPath conserva el recorrido original aunque Angular haya
+    // recreado el nodo clicado al actualizar la selección.
+    const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
+    const inside = path.length
+      ? path.includes(this.el.nativeElement)
+      : this.el.nativeElement.contains(event.target as Node);
+    if (!inside) this.close();
+  }
+
+  trackByValue(_index: number, option: MultiSelectOption): string {
+    return option.value;
   }
 
   @HostListener('document:keydown.escape')

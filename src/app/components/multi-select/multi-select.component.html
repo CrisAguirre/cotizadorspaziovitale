@@ -6,7 +6,7 @@
           aria-haspopup="listbox"
           (click)="toggleOpen()">
     <span class="ms-values" *ngIf="selectedOptions.length; else placeholderTpl">
-      <span class="ms-chip" *ngFor="let o of selectedOptions">
+      <span class="ms-chip" *ngFor="let o of selectedOptions; trackBy: trackByValue">
         <span class="ms-chip__label" [title]="o.label">{{ o.label }}</span>
         <span class="ms-chip__x"
               role="button"
@@ -33,7 +33,7 @@
 
     <ul class="ms-list" role="listbox" aria-multiselectable="true">
       <li class="ms-option"
-          *ngFor="let o of filteredOptions"
+          *ngFor="let o of filteredOptions; trackBy: trackByValue"
           [class.ms-option--selected]="isSelected(o.value)"
           role="option"
           tabindex="0"
