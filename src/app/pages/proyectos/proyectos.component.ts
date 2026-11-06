@@ -5,7 +5,8 @@ import { QuotationService } from '../../services/quotation.service';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
-import { Project, ProjectStage, ContactSource, StageStateStatus, Quotation } from '../../models/interfaces';
+import { Project, ProjectActors, ProjectStage, ContactSource, StageStateStatus, Quotation } from '../../models/interfaces';
+import { MultiSelectOption } from '../../components/multi-select/multi-select.component';
 
 interface SubstepMeta {
   key: string;
@@ -44,6 +45,8 @@ export class ProyectosComponent implements OnInit, OnDestroy {
   saving = false;
   lastRefresh: Date | null = null;
   autoRefresh = true;
+  teamEditing = false;
+  teamDraft: ProjectActors = {};
   private refreshTimer: any = null;
 
   stages: StageMeta[] = [
@@ -239,8 +242,71 @@ export class ProyectosComponent implements OnInit, OnDestroy {
       contactSource: 'almacen' as ContactSource,
       priority: 'media',
       notes: '',
-      actors: { asesorComercial: '', contadora: '', operarios: '', disenador: '', asesorDiseno: '' }
+      actors: { asesorComercial: '', contadora: '', operarios: [], disenador: '', asesorDiseno: '' }
     };
+  }
+
+  /** Opciones del multiselect de operarios (roles de diseño y admin). */
+  get operariosOptions(): MultiSelectOption[] {
+    return this.usersByRole('diseno', 'admin').map((u) => ({
+      value: u.email,
+      label: u.email,
+      hint: u.role
+    }));
+  }
+
+  /** Normaliza operarios a lista (soporta datos legacy guardados como string). */
+  operariosOf(actors?: ProjectActors | null): string[] {
+    const value = actors?.operarios as string[] | string | undefined;
+    if (!value) return [];
+    const list = Array.isArray(value) ? value : [value];
+    return list.map((v) => String(v).trim()).filter(Boolean);
+  }
+
+  setFormOperarios(next: string[]): void {
+    this.form = { ...this.form, actors: { ...(this.form.actors || {}), operarios: next } };
+  }
+
+  setTeamOperarios(next: string[]): void {
+    this.teamDraft = { ...this.teamDraft, operarios: next };
+  }
+
+  toggleTeamEdit(p: Project): void {
+    this.teamEditing = !this.teamEditing;
+    if (this.teamEditing) {
+      this.teamDraft = {
+        asesorComercial: p.actors?.asesorComercial || '',
+        contadora: p.actors?.contadora || '',
+        operarios: this.operariosOf(p.actors),
+        disenador: p.actors?.disenador || '',
+        asesorDiseno: p.actors?.asesorDiseno || ''
+      };
+    }
+  }
+
+  saveActors(p: Project): void {
+    const actors: ProjectActors = {
+      asesorComercial: (this.teamDraft.asesorComercial || '').trim(),
+      contadora: (this.teamDraft.contadora || '').trim(),
+      operarios: this.operariosOf(this.teamDraft),
+      disenador: (this.teamDraft.disenador || '').trim(),
+      asesorDiseno: (this.teamDraft.asesorDiseno || '').trim()
+    };
+    this.projectService.updateProject(p._id!, { title: p.title, clientName: p.clientName, actors }).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.toast.success('Equipo actualizado', 'Responsables del proyecto guardados.');
+          this.selected = res.data;
+          this.teamEditing = false;
+          this.loadProjects(true);
+        }
+      },
+      error: (err) => this.toast.error('Error', err?.error?.message || 'No se pudo guardar el equipo.')
+    });
+  }
+
+  actorLabel(email?: string): string {
+    return email?.trim() || 'Sin asignar';
   }
 
   isAdmin(): boolean {
@@ -356,6 +422,7 @@ export class ProyectosComponent implements OnInit, OnDestroy {
     this.selected = p;
     this.viewStage = (p.currentStage || 'inicio') as ProjectStage;
     this.stageNotes = '';
+    this.teamEditing = false;
   }
 
   viewStageDetail(stage: ProjectStage): void {

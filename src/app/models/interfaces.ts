@@ -353,7 +353,8 @@ export type ContactSource = 'redes' | 'almacen' | 'recomendacion' | 'recurrente'
 export interface ProjectActors {
   asesorComercial?: string;
   contadora?: string;
-  operarios?: string;
+  /** Varios operarios asignados al proyecto (lista de correos). */
+  operarios?: string[];
   disenador?: string;
   asesorDiseno?: string;
 }

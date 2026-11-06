@@ -1,0 +1,57 @@
+<div class="ms" [class.ms--open]="isOpen" [class.ms--disabled]="disabled">
+  <button type="button"
+          class="ms-trigger"
+          [disabled]="disabled"
+          [attr.aria-expanded]="isOpen"
+          aria-haspopup="listbox"
+          (click)="toggleOpen()">
+    <span class="ms-values" *ngIf="selectedOptions.length; else placeholderTpl">
+      <span class="ms-chip" *ngFor="let o of selectedOptions">
+        <span class="ms-chip__label" [title]="o.label">{{ o.label }}</span>
+        <span class="ms-chip__x"
+              role="button"
+              tabindex="0"
+              [attr.aria-label]="'Quitar ' + o.label"
+              (click)="remove(o.value, $event)"
+              (keydown.enter)="remove(o.value, $event)">×</span>
+      </span>
+    </span>
+    <ng-template #placeholderTpl>
+      <span class="ms-placeholder">{{ placeholder }}</span>
+    </ng-template>
+    <span class="ms-arrow" aria-hidden="true">▾</span>
+  </button>
+
+  <div class="ms-panel" *ngIf="isOpen">
+    <div class="ms-search">
+      <input type="search"
+             class="ms-search__input"
+             [placeholder]="searchPlaceholder"
+             [(ngModel)]="search"
+             (click)="$event.stopPropagation()" />
+    </div>
+
+    <ul class="ms-list" role="listbox" aria-multiselectable="true">
+      <li class="ms-option"
+          *ngFor="let o of filteredOptions"
+          [class.ms-option--selected]="isSelected(o.value)"
+          role="option"
+          tabindex="0"
+          [attr.aria-selected]="isSelected(o.value)"
+          (click)="toggle(o.value)"
+          (keydown.enter)="toggle(o.value)">
+        <span class="ms-check" aria-hidden="true">{{ isSelected(o.value) ? '✓' : '' }}</span>
+        <span class="ms-option__body">
+          <span class="ms-option__label">{{ o.label }}</span>
+          <span class="ms-option__hint" *ngIf="o.hint">{{ o.hint }}</span>
+        </span>
+      </li>
+      <li class="ms-empty" *ngIf="filteredOptions.length === 0">{{ emptyText }}</li>
+    </ul>
+
+    <div class="ms-footer" *ngIf="selected.length">
+      <span class="ms-count">{{ selected.length }} seleccionado(s)</span>
+      <button type="button" class="ms-clear" (click)="clear($event)">Limpiar</button>
+    </div>
+  </div>
+</div>
