@@ -1,19 +1,19 @@
 <div class="projects-page">
-<div class="page-head">
-  <div class="page-head__text">
+<div class="page-header">
+  <div>
     <h1>📁 Proyectos</h1>
-    <p class="page-head__desc">Monitor secuencial en tiempo real — todos los actores ven el estado actual de cada proceso.</p>
-    <div class="refresh-line">
-      <span class="refresh-state">
-        <span class="refresh-dot"></span>
-        <span *ngIf="lastRefresh; else noRefresh">Actualizado {{ lastRefresh | date:'mediumTime' }}</span>
-        <ng-template #noRefresh><span>Sin actualizar</span></ng-template>
-      </span>
-      <label class="check inline"><input type="checkbox" [(ngModel)]="autoRefresh" /> Auto (15s)</label>
-      <button class="btn-icon refresh-btn" (click)="refreshNow()" title="Actualizar ahora" aria-label="Actualizar ahora">↻</button>
-    </div>
+    <p>Monitor secuencial en tiempo real — todos los actores ven el estado actual de cada proceso.</p>
   </div>
-  <button class="btn-primary" (click)="showForm = !showForm">{{ showForm ? '✖ Cerrar' : '＋ Nuevo proyecto' }}</button>
+  <div class="header-actions">
+    <span class="refresh-state">
+      <span class="refresh-dot"></span>
+      <span *ngIf="lastRefresh; else noRefresh">Actualizado {{ lastRefresh | date:'mediumTime' }}</span>
+      <ng-template #noRefresh><span>Sin actualizar</span></ng-template>
+    </span>
+    <label class="check inline"><input type="checkbox" [(ngModel)]="autoRefresh" /> Auto (15s)</label>
+    <button class="btn-icon refresh-btn" (click)="refreshNow()" title="Actualizar ahora" aria-label="Actualizar ahora">↻</button>
+    <button class="btn-primary" (click)="showForm = !showForm">{{ showForm ? '✖ Cerrar' : '＋ Nuevo proyecto' }}</button>
+  </div>
 </div>
 
 <section class="card glass-panel panel mb-4" *ngIf="showForm">
@@ -82,11 +82,15 @@
       </select>
     </div>
     <div class="field">
-      <label class="field-label" for="np-operators">Operarios</label>
-      <select id="np-operators" class="form-control" [(ngModel)]="form.actors!.operarios">
-        <option value="">Sin asignar</option>
-        <option *ngFor="let u of usersByRole('diseno','admin')" [value]="u.email">{{ u.email }}</option>
-      </select>
+      <label class="field-label">Operarios <span class="muted">(puedes asignar varios)</span></label>
+      <app-multi-select
+        [options]="operariosOptions"
+        [selected]="operariosOf(form.actors)"
+        (selectedChange)="setFormOperarios($event)"
+        placeholder="Asignar operarios…"
+        searchPlaceholder="Buscar operario…"
+        emptyText="No hay operarios disponibles">
+      </app-multi-select>
     </div>
     <div class="field">
       <label class="field-label" for="np-accountant">Contadora</label>
@@ -206,6 +210,90 @@
     </div>
   </div>
   <p class="project-notes" *ngIf="selected.notes">{{ selected.notes }}</p>
+
+  <section class="team-panel">
+    <div class="team-panel__head">
+      <div>
+        <h3>Equipo responsable</h3>
+        <p class="muted">Responsables del proyecto. Puedes asignar varios operarios.</p>
+      </div>
+      <button class="btn-secondary btn-sm" type="button" *ngIf="!teamEditing" (click)="toggleTeamEdit(selected)">✏️ Editar equipo</button>
+    </div>
+
+    <div class="team-summary" *ngIf="!teamEditing">
+      <div class="team-item">
+        <span class="team-item__label">Asesor comercial</span>
+        <span class="team-item__value">{{ actorLabel(selected.actors?.asesorComercial) }}</span>
+      </div>
+      <div class="team-item">
+        <span class="team-item__label">Contadora</span>
+        <span class="team-item__value">{{ actorLabel(selected.actors?.contadora) }}</span>
+      </div>
+      <div class="team-item">
+        <span class="team-item__label">Diseñador</span>
+        <span class="team-item__value">{{ actorLabel(selected.actors?.disenador) }}</span>
+      </div>
+      <div class="team-item">
+        <span class="team-item__label">Asesor de diseño</span>
+        <span class="team-item__value">{{ actorLabel(selected.actors?.asesorDiseno) }}</span>
+      </div>
+      <div class="team-item team-item--wide">
+        <span class="team-item__label">Operarios</span>
+        <span class="team-chips" *ngIf="operariosOf(selected.actors).length; else noOps">
+          <span class="chip" *ngFor="let op of operariosOf(selected.actors)">{{ op }}</span>
+        </span>
+        <ng-template #noOps><span class="team-item__value muted">Sin asignar</span></ng-template>
+      </div>
+    </div>
+
+    <div class="team-edit" *ngIf="teamEditing">
+      <div class="form-grid">
+        <div class="field">
+          <label class="field-label" for="team-commercial">Asesor comercial</label>
+          <select id="team-commercial" class="form-control" [(ngModel)]="teamDraft.asesorComercial">
+            <option value="">Sin asignar</option>
+            <option *ngFor="let u of usersByRole('comercial','admin')" [value]="u.email">{{ u.email }}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="team-accountant">Contadora</label>
+          <select id="team-accountant" class="form-control" [(ngModel)]="teamDraft.contadora">
+            <option value="">Sin asignar</option>
+            <option *ngFor="let u of usersByRole('contabilidad','admin')" [value]="u.email">{{ u.email }}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="team-designer">Diseñador</label>
+          <select id="team-designer" class="form-control" [(ngModel)]="teamDraft.disenador">
+            <option value="">Sin asignar</option>
+            <option *ngFor="let u of usersByRole('diseno','admin')" [value]="u.email">{{ u.email }}</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="team-design-advisor">Asesor de diseño</label>
+          <select id="team-design-advisor" class="form-control" [(ngModel)]="teamDraft.asesorDiseno">
+            <option value="">Sin asignar</option>
+            <option *ngFor="let u of usersByRole('diseno','admin')" [value]="u.email">{{ u.email }}</option>
+          </select>
+        </div>
+        <div class="field field--full">
+          <label class="field-label">Operarios <span class="muted">(puedes asignar varios)</span></label>
+          <app-multi-select
+            [options]="operariosOptions"
+            [selected]="teamDraft.operarios || []"
+            (selectedChange)="setTeamOperarios($event)"
+            placeholder="Asignar operarios…"
+            searchPlaceholder="Buscar operario…"
+            emptyText="No hay operarios disponibles">
+          </app-multi-select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-secondary" type="button" (click)="toggleTeamEdit(selected)">Cancelar</button>
+        <button class="btn-success" type="button" (click)="saveActors(selected)">💾 Guardar equipo</button>
+      </div>
+    </div>
+  </section>
 
   <div class="stepper">
     <div *ngFor="let s of stages; let i = index"
