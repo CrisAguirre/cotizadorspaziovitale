@@ -232,38 +232,29 @@ export class PdfGeneratorService {
         const furnClientPrice = unitPrice * (furn.quantity || 1);
         areaSubtotal += furnClientPrice;
 
-        tableBody.push([
-          { text: (index + 1).toString() },
-          { text: [
-              { text: `${furn.name}\n`, bold: true },
-              { text: furn.description ? `${furn.description}\n` : '' },
-              { text: `Medidas: ${furn.measurements || 'N/A'}`, fontSize: 9, color: '#666' }
-            ] 
-          },
-          { text: (furn.quantity || 1).toString() },
-          { text: this.formatCurrency(unitPrice), alignment: 'right' as 'right' },
-          { text: this.formatCurrency(furnClientPrice), alignment: 'right' as 'right' }
-        ]);
-
-        if (furn.type === 'meson' && furn.mesonDetails) {
-          const md = furn.mesonDetails;
-          mesonBreakdowns.push({
-            text: [
-              { text: `   ── Desglose Mesón: ${md.materialName || furn.name} ──`, fontSize: 9, bold: true, color: '#0B4249' },
-              { text: `\n   Precio M² sin IVA: ${this.formatCurrency(md.basePricePerM2)}`, fontSize: 9 },
-              { text: `   × Fondo: ${md.depth}`, fontSize: 9 },
-              { text: `   = Precio Lineal: ${this.formatCurrency(md.linearPrice)}`, fontSize: 9 },
-              { text: `   + Transporte y M.O.: ${this.formatCurrency(md.transportCost)}`, fontSize: 9 },
-              { text: `   = VR. CON TRANSPORTE: ${this.formatCurrency(md.baseCost)}`, fontSize: 9 },
-              { text: `   + Utilidad ${md.profitPercentage}%: ${this.formatCurrency(md.profitAmount)}`, fontSize: 9 },
-              { text: `   = SUBTOTAL: ${this.formatCurrency(md.subtotal)}`, fontSize: 9 },
-              { text: `   + IVA ${md.taxPercentage}%: ${this.formatCurrency(md.taxAmount)}`, fontSize: 9 },
-              { text: `   = VR. FINAL POR ML: ${this.formatCurrency(md.finalPricePerMl)}`, fontSize: 9, bold: true },
-              { text: `   Total (× ${furn.quantity || 1} × ${furn.areaSqm || 1} ML): ${this.formatCurrency(furn.totalBudget)}`, fontSize: 9, bold: true, color: '#D5A052' },
-              { text: '\n' }
-            ],
-            margin: [0, 2, 0, 4]
-          });
+        // Mesones: solo título (sin descripción, medidas ni desglose) – datos sensibles
+        if (furn.type === 'meson') {
+          tableBody.push([
+            { text: (index + 1).toString() },
+            { text: furn.name, bold: true },
+            { text: (furn.quantity || 1).toString() },
+            { text: this.formatCurrency(unitPrice), alignment: 'right' as 'right' },
+            { text: this.formatCurrency(furnClientPrice), alignment: 'right' as 'right' }
+          ]);
+          // No se agrega desglose de mesón al PDF del cliente
+        } else {
+          tableBody.push([
+            { text: (index + 1).toString() },
+            { text: [
+                { text: `${furn.name}\n`, bold: true },
+                { text: furn.description ? `${furn.description}\n` : '' },
+                { text: `Medidas: ${furn.measurements || 'N/A'}`, fontSize: 9, color: '#666' }
+              ] 
+            },
+            { text: (furn.quantity || 1).toString() },
+            { text: this.formatCurrency(unitPrice), alignment: 'right' as 'right' },
+            { text: this.formatCurrency(furnClientPrice), alignment: 'right' as 'right' }
+          ]);
         }
       });
 
