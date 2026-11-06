@@ -398,7 +398,7 @@
             <label>Cotización vinculada * (guardada en Cotizaciones)</label>
             <select class="form-control" (change)="onQuotationSelect(selected!, $event)">
               <option value="">— Seleccionar cotización guardada —</option>
-              <option *ngFor="let q of quotations" [value]="q._id">{{ q.number }} · {{ q.client?.name || '' }} · {{ q.city }}</option>
+              <option *ngFor="let q of quotations" [value]="q._id">{{ q.number }} · {{ q.client.name || '' }} · {{ q.city }}</option>
             </select>
             <div class="form-grid mt-2">
               <div class="field">
