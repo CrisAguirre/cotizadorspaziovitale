@@ -17,6 +17,12 @@ export class QuotationCalculatorService {
       return quotation;
     }
 
+    // Modo "Cotización de diseños": liquidación de horas con tarifa de diseño + IVA 19% y descuento opcional
+    if (quotation.wizardConfig?.clientPriceMode === 'design') {
+      quotation.totals = this.calculateDesignTotals(quotation, config);
+      return quotation;
+    }
+
     let globalTotalSqm = 0;
     let globalTotalCost = 0; // Costo bruto para cálculo global
     let globalMesonesSubtotal = 0; // Subtotal ya liquidado
@@ -370,6 +376,46 @@ export class QuotationCalculatorService {
       discountAmount: 0,
       grandTotal,
       totalSqm,
+      pricePerSqm: 0,
+      viaticos
+    };
+  }
+
+  private calculateDesignTotals(quotation: Quotation, config: AppConfig): QuotationTotals {
+    const existing = quotation.totals;
+    const taxPercent = existing?.taxPercent ?? config.taxPercent ?? 19;
+    const discountPercent = existing?.discountPercent ?? 0;
+    const viaticos = Number(quotation.client?.viaticos || 0);
+
+    let subtotal = 0;
+    const designs = quotation.designs || [];
+    for (const d of designs) {
+      d.total = Math.round((d.hours || 0) * (d.hourlyRate || 0));
+      subtotal += d.total;
+    }
+
+    const discountAmount = Math.round(subtotal * (discountPercent / 100));
+    const baseForTax = subtotal - discountAmount;
+    const taxAmount = Math.round(baseForTax * (taxPercent / 100));
+    const totalWithTax = baseForTax + taxAmount;
+    const grandTotal = totalWithTax + viaticos;
+
+    return {
+      totalCost: 0,
+      unforeseenPercent: 0,
+      unforeseenAmount: 0,
+      profitPercent: 0,
+      profitAmount: 0,
+      indirectPercent: 0,
+      indirectAmount: 0,
+      subtotal,
+      discountPercent,
+      discountAmount,
+      taxPercent,
+      taxAmount,
+      totalWithTax,
+      grandTotal,
+      totalSqm: 0,
       pricePerSqm: 0,
       viaticos
     };

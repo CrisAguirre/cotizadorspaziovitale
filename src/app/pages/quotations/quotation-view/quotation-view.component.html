@@ -68,8 +68,35 @@
       </div>
     </div>
 
+    <!-- Diseños (modo cotización de diseños) -->
+    <div class="products-section mt-4" *ngIf="quotation.designs && quotation.designs.length">
+      <h3>Servicios de Diseño</h3>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Descripción del Diseño</th>
+              <th>Horas</th>
+              <th>Tarifa / Hora</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of quotation.designs; let dIdx = index">
+              <td>{{ dIdx + 1 }}</td>
+              <td>{{ item.description }}</td>
+              <td>{{ item.hours }} h</td>
+              <td>{{ (item.hourlyRate || 0) | currency:'COP':'symbol':'1.0-2' }}</td>
+              <td>{{ (item.total || 0) | currency:'COP':'symbol':'1.0-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Areas & Furniture -->
-    <div class="areas-section mt-4">
+    <div class="areas-section mt-4" *ngIf="quotation.areas && quotation.areas.length && quotation.wizardConfig?.clientPriceMode !== 'design'">
       <h3>Detalle de Muebles</h3>
       <div *ngFor="let area of quotation.areas; let aIndex = index" class="area-card mt-3">
         <h4 class="area-title">

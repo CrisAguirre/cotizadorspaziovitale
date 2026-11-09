@@ -172,6 +172,66 @@ export class PdfGeneratorService {
       return content;
     }
 
+    // Modo "Cotización de diseños": documento simplificado de diseño por horas
+    if (quotation.wizardConfig?.clientPriceMode === 'design') {
+      const dtotals = quotation.totals || { subtotal: 0, discountPercent: 0, discountAmount: 0, taxAmount: 0, taxPercent: 19, viaticos: 0, grandTotal: 0 };
+
+      const designBody: any[][] = [
+        [{ text: '#', bold: true }, { text: 'Descripción del Diseño', bold: true }, { text: 'Horas', bold: true, alignment: 'center' as 'center' },
+         { text: 'Tarifa / Hora', bold: true, alignment: 'right' as 'right' }, { text: 'Total', bold: true, alignment: 'right' as 'right' }]
+      ];
+      (quotation.designs || []).forEach((d, idx) => {
+        designBody.push([
+          (idx + 1).toString(),
+          d.description || '',
+          { text: `${d.hours ?? 0} h`, alignment: 'center' as 'center' },
+          { text: this.formatCurrency(d.hourlyRate || 0), alignment: 'right' as 'right' },
+          { text: this.formatCurrency(d.total || 0), alignment: 'right' as 'right' }
+        ]);
+      });
+
+      content.push({ text: 'Servicios de Diseño', style: 'sectionTitle' });
+      content.push({
+        table: { widths: ['8%', '*', '14%', '22%', '22%'], body: designBody },
+        layout: 'lightHorizontalLines',
+        margin: [0, 5, 0, 0]
+      });
+
+      const designTotalBody: any[][] = [
+        [{ text: opts.showTax ? 'SUBTOTAL (sin IVA):' : 'SUBTOTAL:', bold: true }, { text: this.formatCurrency(dtotals.subtotal), alignment: 'right' as 'right', bold: true }],
+        ...((dtotals.discountPercent || 0) > 0 ? [[`Descuento (${dtotals.discountPercent}%):`, { text: `- ${this.formatCurrency(dtotals.discountAmount || 0)}`, alignment: 'right' as 'right' }]] : []),
+        ...(opts.showTax ? [[`IVA (${dtotals.taxPercent ?? 19}%):`, { text: this.formatCurrency(dtotals.taxAmount), alignment: 'right' as 'right' }]] : []),
+        ...((dtotals.viaticos || 0) > 0 ? [['Viáticos (sin %):', { text: this.formatCurrency(dtotals.viaticos), alignment: 'right' as 'right' }]] : []),
+        [{ text: 'VALOR TOTAL:', style: 'grandTotalLabel' }, { text: this.formatCurrency(dtotals.grandTotal), style: 'grandTotalValue', alignment: 'right' as 'right' }]
+      ];
+
+      content.push({
+        columns: [
+          { width: '*', text: '' },
+          {
+            width: '42%',
+            table: {
+              widths: ['*', 'auto'],
+              body: designTotalBody
+            },
+            layout: 'noBorders'
+          }
+        ],
+        margin: [0, 20, 0, 40]
+      });
+
+      content.push({ text: 'Condiciones Comerciales', style: 'sectionTitle' });
+      content.push({
+        ul: [
+          `Forma de pago: ${quotation.paymentTerms || 'No especificada'}`,
+          `Validez de la oferta: ${quotation.validityDays || 15} días`,
+          ...(quotation.notes ? [`Notas adicionales: ${quotation.notes}`] : [])
+        ],
+        margin: [0, 5, 0, 0]
+      });
+      return content;
+    }
+
     // Mapeo lógico de configuración con fallback
     const wConfig = quotation.wizardConfig || {
       clientPriceMode: 'unit_sqm',

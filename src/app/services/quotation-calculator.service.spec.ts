@@ -346,4 +346,74 @@ describe('QuotationCalculatorService', () => {
       expect(result).toBeCloseTo(1000000, 0);
     });
   });
+
+  describe('Modo Cotización de Diseños', () => {
+    it('debe liquidar cotizaciones de diseño correctamente con horas, tarifa, IVA 19% y descuento opcional', () => {
+      const designQuotation: Quotation = {
+        number: 8888,
+        date: '2026-11-09',
+        city: 'Pasto',
+        installationAddress: '',
+        sameAddress: true,
+        validityDays: 15,
+        paymentTerms: '',
+        notes: '',
+        title: 'Diseño Cocina 3D',
+        status: 'borrador',
+        areas: [],
+        client: { name: 'Cliente Diseños', phone: '123', city: 'Bogota', email: 'c@test.com', address: 'Calle 1' },
+        wizardConfig: {
+          clientPriceMode: 'design',
+          areaDisplayMode: 'subtotals',
+          hardwareDisplayMode: 'table',
+          mesonMode: 'no_meson',
+          pricingTier: 'industrial',
+          requiresDesignFiles: false,
+          moTimeMode: 'manual',
+          designFilesInternal: false,
+          wizardCompleted: true
+        },
+        designs: [
+          { description: 'Diseño 3D Cocina Integral', hours: 10, hourlyRate: 16780, total: 0 },
+          { description: 'Renderizado adicional', hours: 5, hourlyRate: 16780, total: 0 }
+        ],
+        totals: {
+          totalCost: 0,
+          unforeseenPercent: 0,
+          unforeseenAmount: 0,
+          profitPercent: 0,
+          profitAmount: 0,
+          indirectPercent: 0,
+          indirectAmount: 0,
+          subtotal: 0,
+          taxPercent: 19,
+          taxAmount: 0,
+          totalWithTax: 0,
+          discountPercent: 10,
+          discountAmount: 0,
+          grandTotal: 0,
+          totalSqm: 0,
+          pricePerSqm: 0,
+          viaticos: 0
+        }
+      };
+
+      service.recalculateAll(designQuotation, config);
+
+      // Subtotal = 10 * 16780 + 5 * 16780 = 167800 + 83900 = 251700
+      expect(designQuotation.totals.subtotal).toBe(251700);
+      expect(designQuotation.designs![0].total).toBe(167800);
+      expect(designQuotation.designs![1].total).toBe(83900);
+
+      // Descuento 10% = 25170
+      expect(designQuotation.totals.discountAmount).toBe(25170);
+
+      // Base gravable = 251700 - 25170 = 226530
+      // IVA 19% = 226530 * 0.19 = 43040.7 -> 43041
+      expect(designQuotation.totals.taxAmount).toBe(43041);
+
+      // Gran Total = 226530 + 43041 = 269571
+      expect(designQuotation.totals.grandTotal).toBe(269571);
+    });
+  });
 });

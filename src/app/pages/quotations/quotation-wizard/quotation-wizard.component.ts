@@ -46,8 +46,8 @@ export class QuotationWizardComponent implements OnInit {
     if (step === 2) {
       const c = this.activeQuotation.wizardConfig;
       if (!c.clientPriceMode) return false;
-      // En modo "Venta de productos y servicios" no aplican las preguntas 2-5 de configuración
-      if (this.isProductsMode()) return true;
+      // En modo productos o modo diseño no aplican las preguntas 2-5 de configuración
+      if (this.isProductsMode() || this.isDesignMode()) return true;
       if (c.requiresDesignFiles === null) return false;
       if (!c.areaDisplayMode) return false;
       if (!c.mesonMode) return false;
@@ -58,6 +58,13 @@ export class QuotationWizardComponent implements OnInit {
     if (this.isProductsMode()) {
       if (step === 3) {
         return !!(this.activeQuotation.products && this.activeQuotation.products.length > 0);
+      }
+      return true; // Paso 4 Resumen siempre válido
+    }
+    if (this.isDesignMode()) {
+      if (step === 3) {
+        return !!(this.activeQuotation.designs && this.activeQuotation.designs.length > 0 &&
+          this.activeQuotation.designs.every(d => d.description && d.description.trim() !== '' && (d.hours || 0) > 0));
       }
       return true; // Paso 4 Resumen siempre válido
     }
@@ -155,19 +162,23 @@ export class QuotationWizardComponent implements OnInit {
     return this.activeQuotation.wizardConfig?.clientPriceMode === 'products';
   }
 
+  isDesignMode(): boolean {
+    return this.activeQuotation.wizardConfig?.clientPriceMode === 'design';
+  }
+
   isManualMode(): boolean {
     return this.activeQuotation.wizardConfig?.clientPriceMode === 'manual';
   }
 
   get maxWizardStep(): number {
-    // En modo productos solo existe la pregunta 1; en manual se omite la lista de precios (5)
-    if (this.isProductsMode()) return 1;
+    // En modo productos o modo diseño solo existe la pregunta 1; en manual se omite la lista de precios (5)
+    if (this.isProductsMode() || this.isDesignMode()) return 1;
     if (this.isManualMode()) return this.TOTAL_WIZARD_QUESTIONS - 1;
     return this.TOTAL_WIZARD_QUESTIONS;
   }
 
   get maxSteps(): number {
-    return this.isProductsMode() ? 4 : this.TOTAL_STEPS;
+    return (this.isProductsMode() || this.isDesignMode()) ? 4 : this.TOTAL_STEPS;
   }
 
   getFilteredSampleProducts() {
@@ -199,7 +210,7 @@ export class QuotationWizardComponent implements OnInit {
       if (existing) {
         existing.quantity = qty;
       } else {
-        this.activeQuotation.products.push({
+        this.activeQuotation.products.unshift({
           code: item.code,
           description: item.description,
           unit: item.unit,
@@ -411,8 +422,8 @@ export class QuotationWizardComponent implements OnInit {
     let stepName = 'Inicio';
     if (this.currentStep === 1) stepName = 'Cliente';
     if (this.currentStep === 2) stepName = 'Configuración';
-    if (this.currentStep === 3) stepName = this.isProductsMode() ? 'Productos y servicios' : 'Muebles';
-    if (this.currentStep === 4) stepName = this.isProductsMode() ? 'Resumen' : 'Presupuesto';
+    if (this.currentStep === 3) stepName = this.isProductsMode() ? 'Productos y servicios' : (this.isDesignMode() ? 'Diseños' : 'Muebles');
+    if (this.currentStep === 4) stepName = (this.isProductsMode() || this.isDesignMode()) ? 'Resumen' : 'Presupuesto';
     if (this.currentStep === 5) stepName = 'Resumen';
 
     const clientName = this.quotationForm.value.client?.name || 'Borrador sin cliente';
@@ -560,6 +571,27 @@ export class QuotationWizardComponent implements OnInit {
 
   onClientPriceModeChange() {
     this.wizardStep = 1;
+    // Inicializar el array de diseños si se selecciona modo diseño
+    if (this.isDesignMode() && (!this.activeQuotation.designs || this.activeQuotation.designs.length === 0)) {
+      this.activeQuotation.designs = [];
+    }
+  }
+
+  // ===== DISEÑOS (modo 'design') =====
+  addDesign() {
+    if (!this.activeQuotation.designs) this.activeQuotation.designs = [];
+    this.activeQuotation.designs.unshift({
+      description: '',
+      hours: 0,
+      hourlyRate: this.appConfig?.designRatePerHour || 16780,
+      total: 0
+    });
+    this.recalculate();
+  }
+
+  removeDesign(index: number) {
+    this.activeQuotation.designs?.splice(index, 1);
+    this.recalculate();
   }
 
   isWizardComplete(): boolean {
@@ -712,6 +744,7 @@ export class QuotationWizardComponent implements OnInit {
     const isChecked = (event.target as HTMLInputElement).checked;
     if (isChecked) {
       furn.type = 'meson';
+      furn.unit = 'M2';
       if (!furn.mesonDetails) {
         furn.mesonDetails = {
           basePricePerM2: 0,
@@ -782,6 +815,7 @@ export class QuotationWizardComponent implements OnInit {
       item['unitOfMeasure'] = 'LAMINA';
       item['quantity'] = 0;
       item['unitPrice'] = 0;
+      item['color'] = '';
     }
     if (type === 'edgeBands') {
       item['unitOfMeasure'] = 'ML';
@@ -820,7 +854,7 @@ export class QuotationWizardComponent implements OnInit {
       item['valorMinuto'] = 0;
     }
 
-    (furniture[type] as unknown[]).push(item);
+    (furniture[type] as unknown[]).unshift(item);
     this.recalculate();
   }
 

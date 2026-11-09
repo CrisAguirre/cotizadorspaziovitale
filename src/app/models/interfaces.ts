@@ -76,6 +76,7 @@ export interface AppConfig {
 // ===== QUOTATION SUB-SCHEMAS =====
 export interface SupplyItem {
   description: string;
+  color?: string;
   providerColor: string;
   dimension: string;
   unitOfMeasure: string;
@@ -307,7 +308,7 @@ export interface ProductItem {
 // ===== WIZARD CONFIG (FASE 0.5) =====
 export interface WizardConfig {
   /** Modo de precio: unit_sqm = Precio unitario x M²/Lineal (básica), manual = Ingreso manual (Premium), outsource = Tercerización */
-  clientPriceMode: 'unit_sqm' | 'manual' | 'outsource' | 'products' | '';
+  clientPriceMode: 'unit_sqm' | 'manual' | 'outsource' | 'products' | 'design' | '';
   /** Modo herrajes — migrado al Paso 3 (Muebles) desde reunión 17-jun */
   hardwareDisplayMode: 'table' | 'included' | 'selective' | '';
   /** Modo tiempos MO — migrado al Paso 3 (Muebles) desde reunión 17-jun */
@@ -323,6 +324,13 @@ export interface WizardConfig {
   wizardCompleted: boolean;
 }
 
+export interface DesignItem {
+  description: string;
+  hours: number;
+  hourlyRate: number;
+  total: number;
+}
+
 export interface Quotation {
   _id?: string;
   number: number;
@@ -334,6 +342,7 @@ export interface Quotation {
   title: string;
   areas: Area[];
   products?: ProductItem[];
+  designs?: DesignItem[];
   totals: QuotationTotals;
   wizardConfig: WizardConfig;
   status: 'nuevo' | 'en_revision' | 'aceptada' | 'rechazada' | 'archivada_aceptada' | 'archivada_rechazada' | 'borrador' | 'auditada' | 'enviada' | 'aprobada';
