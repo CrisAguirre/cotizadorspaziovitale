@@ -5,6 +5,7 @@ import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { TDocumentDefinitions, Content, TableCell, StyleDictionary } from 'pdfmake/interfaces';
 import { LOGO_BASE64 } from './logo-base64';
 import { ToastService } from './toast.service';
+import { AuthService } from './auth.service';
 
 // Safe assignment for vfs fonts
 const fonts = (pdfFonts as any);
@@ -14,7 +15,12 @@ const fonts = (pdfFonts as any);
   providedIn: 'root'
 })
 export class PdfGeneratorService {
-  constructor(private toastService: ToastService) {}
+  constructor(private toastService: ToastService, private authService: AuthService) {}
+
+  /** Los herrajes no muestran precios a usuarios no-admin (ni en el PDF). */
+  private get canShowHardwarePrices(): boolean {
+    return this.authService.getUser()?.role === 'admin';
+  }
 
 
   generateQuotationPdf(quotation: Quotation, appConfig: AppConfig | null) {
@@ -400,10 +406,16 @@ export class PdfGeneratorService {
     // Q2: Tabla de herrajes (si aplica)
     if (wConfig.hardwareDisplayMode === 'table' && allAccessories.length > 0) {
       content.push({ text: 'Herrajes y Accesorios Adicionales', style: 'areaTitle', margin: [0, 10, 0, 10] });
+      const showPrices = this.canShowHardwarePrices;
       const accBody: TableCell[][] = [
-        [{ text: 'Mueble', style: 'tableHeader' }, { text: 'Descripción', style: 'tableHeader' }, { text: 'Cant', style: 'tableHeader' }, { text: 'Total', style: 'tableHeader', alignment: 'right' as 'right' }]
+        [
+          { text: 'Mueble', style: 'tableHeader' },
+          { text: 'Descripción', style: 'tableHeader' },
+          { text: 'Cant', style: 'tableHeader' },
+          ...(showPrices ? [{ text: 'Total', style: 'tableHeader', alignment: 'right' as 'right' }] : [])
+        ]
       ];
-      
+
       let accTotal = 0;
       allAccessories.forEach(item => {
         accTotal += item.clientPrice;
@@ -411,25 +423,27 @@ export class PdfGeneratorService {
           { text: item.furnName, fontSize: 9 },
           { text: item.acc.description || 'Accesorio / Herraje' },
           { text: (item.acc.quantity || 1).toString() },
-          { text: this.formatCurrency(item.clientPrice), alignment: 'right' as 'right' }
+          ...(showPrices ? [{ text: this.formatCurrency(item.clientPrice), alignment: 'right' as 'right' }] : [])
         ]);
       });
 
       content.push({
         table: {
           headerRows: 1,
-          widths: ['auto', '*', 'auto', 'auto'],
+          widths: showPrices ? ['auto', '*', 'auto', 'auto'] : ['auto', '*', 'auto'],
           body: accBody
         },
         layout: 'lightHorizontalLines',
         margin: [0, 0, 0, 10]
       });
-      content.push({
-        text: `Subtotal Herrajes: ${this.formatCurrency(accTotal)}`,
-        style: 'areaSubtotal',
-        alignment: 'right' as 'right',
-        margin: [0, 0, 0, 20]
-      });
+      if (showPrices) {
+        content.push({
+          text: `Subtotal Herrajes: ${this.formatCurrency(accTotal)}`,
+          style: 'areaSubtotal',
+          alignment: 'right' as 'right',
+          margin: [0, 0, 0, 20]
+        });
+      }
     }
 
     // Totales

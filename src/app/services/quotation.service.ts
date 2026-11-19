@@ -44,6 +44,18 @@ export class QuotationService {
     return this.http.patch<ApiResponse<Quotation>>(`${this.apiUrl}/${id}/status`, { status });
   }
 
+  presentQuotation(id: string): Observable<ApiResponse<Quotation>> {
+    return this.http.post<ApiResponse<Quotation>>(`${this.apiUrl}/${id}/present`, {});
+  }
+
+  getMergeCandidates(id: string): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`${this.apiUrl}/${id}/merge-candidates`);
+  }
+
+  mergeQuotations(id: string, ids: string[]): Observable<ApiResponse<Quotation>> {
+    return this.http.post<ApiResponse<Quotation>>(`${this.apiUrl}/${id}/merge`, { ids });
+  }
+
   duplicateQuotation(id: string): Observable<ApiResponse<Quotation>> {
     return this.http.post<ApiResponse<Quotation>>(`${this.apiUrl}/${id}/duplicate`, {});
   }

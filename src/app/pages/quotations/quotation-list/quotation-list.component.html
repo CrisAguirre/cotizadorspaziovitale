@@ -81,6 +81,10 @@
           <td data-label="Total">{{ q.totals.grandTotal | currency:'COP':'symbol':'1.0-2' }}</td>
           <td data-label="Estado">
             <span class="badge" [ngClass]="getStatusClass(q.status)">{{ getStatusLabel(q.status) }}</span>
+            <span *ngIf="q.presentedAt" class="badge" style="margin-left:4px; background:#334155; font-size:0.75em;"
+                  [title]="'Presentada el ' + (q.presentedAt | date:'dd/MM/yyyy') + ' por ' + (q.presentedBy || '—')">
+              v{{ q.version || 1 }} · presentada
+            </span>
           </td>
           <td data-label="Creada por" style="font-size: 0.85em; word-break: break-word;">{{ getCreatorEmail(q) }}</td>
           <td data-label="Ciclo de Vida" class="lifecycle-actions">
@@ -129,6 +133,10 @@
           <td data-label="Acciones" class="actions-cell">
             <button class="btn-icon" title="Ver Resumen" (click)="viewQuotation(q._id)">👁️</button>
             <button *ngIf="canEdit(q)" class="btn-icon" title="Editar" (click)="editQuotation(q._id)">✏️</button>
+            <button *ngIf="!q.presentedAt && canEdit(q)" class="btn-icon" title="Marcar como presentada al cliente"
+                    (click)="markPresented(q)">📤</button>
+            <button *ngIf="isAdmin()" class="btn-icon" title="Fusionar cotizaciones compatibles del mismo cliente"
+                    (click)="openMerge(q)">🔗</button>
             <button class="btn-icon" title="Duplicar como mía" (click)="duplicateQuotation(q._id)">📋</button>
             <button class="btn-icon" title="Descargar PDF" (click)="downloadPdf(q)">📄</button>
             <button *ngIf="isAdmin()" class="btn-icon" title="Eliminar" (click)="deleteQuotation(q._id, q.number)" style="color: #ff6b6b;">🗑️</button>
@@ -141,5 +149,30 @@
         </tr>
       </tbody>
     </table>
+  </div>
+</div>
+
+<!-- Modal: fusión de cotizaciones del mismo cliente (solo admin) -->
+<div *ngIf="mergeTarget" class="modal-overlay" (click)="closeMerge()">
+  <div class="modal-card glass-panel" (click)="$event.stopPropagation()" style="max-width: 560px;">
+    <h3>Fusionar cotizaciones</h3>
+    <p class="text-muted">
+      Cotización base: <strong>No. {{ mergeTarget.number }}</strong> · {{ mergeTarget.client.name }}.
+      Se consolidarán las cotizaciones seleccionadas en una sola (mismo cliente, ventana de 7 días).
+    </p>
+    <app-multi-select
+      [options]="mergeOptions"
+      [selected]="mergeSelected"
+      [disabled]="mergeLoading"
+      placeholder="Selecciona cotizaciones compatibles…"
+      (selectedChange)="mergeSelected = $event">
+    </app-multi-select>
+    <div class="modal-actions" style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+      <button type="button" class="btn-secondary" (click)="closeMerge()">Cancelar</button>
+      <button type="button" class="btn-primary" (click)="confirmMerge()"
+              [disabled]="mergeLoading || mergeSelected.length === 0">
+        {{ mergeLoading ? 'Fusionando…' : 'Fusionar (' + mergeSelected.length + ')' }}
+      </button>
+    </div>
   </div>
 </div>

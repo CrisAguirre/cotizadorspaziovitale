@@ -550,10 +550,11 @@
           <!-- Configuración Herrajes -->
           <div class="form-group">
             <label>🔩 Visualización de Herrajes</label>
-            <select [(ngModel)]="activeQuotation.wizardConfig.hardwareDisplayMode" class="form-control">
-              <option value="table">Tabla separada con precios</option>
+            <select [(ngModel)]="activeQuotation.wizardConfig.hardwareDisplayMode" class="form-control"
+                    (ngModelChange)="onHardwareModeChange()">
+              <option value="table" *ngIf="canSeeHardwarePrices">Tabla separada con precios (solo administrador)</option>
               <option value="included">Incluidos en el precio del mueble</option>
-              <option value="selective">Selección manual (ocultar/mostrar)</option>
+              <option value="selective">Selección manual (proveedor y marca)</option>
             </select>
             <small class="text-muted" style="display: block; margin-top: 5px;">
               <span *ngIf="activeQuotation.wizardConfig.hardwareDisplayMode === 'table'">El cliente verá una tabla
@@ -582,6 +583,30 @@
                 permite modificaciones.</span>
             </small>
           </div>
+        </div>
+      </div>
+
+      <!-- Listado de herrajes por mueble: proveedor y marca para todos; precios solo admin -->
+      <div class="card glass-panel mt-4" style="padding: 15px;">
+        <h4 style="margin-top: 0;">🔩 Herrajes por mueble</h4>
+        <div *ngIf="!hasHardware()" class="text-muted">No hay herrajes agregados.</div>
+        <div *ngFor="let area of activeQuotation.areas">
+          <ng-container *ngFor="let furn of area.furniture">
+            <div *ngIf="furn.accessories?.length" style="margin-bottom: 10px;">
+              <strong>{{ furn.name }}</strong>
+              <ul style="margin: 4px 0 0 18px;">
+                <li *ngFor="let acc of furn.accessories">
+                  {{ acc.description || 'Herraje' }}
+                  <span class="text-muted">
+                    · {{ hardwareMeta(acc).provider || 'Sin proveedor' }}
+                    · {{ hardwareMeta(acc).brand || 'Sin marca' }}
+                    · {{ acc.quantity || 1 }} und
+                  </span>
+                  <span *ngIf="canSeeHardwarePrices"> — ${{ acc.totalPrice | number:'1.0-2' }}</span>
+                </li>
+              </ul>
+            </div>
+          </ng-container>
         </div>
       </div>
 
@@ -859,7 +884,7 @@
                     </div>
                     <div *ngIf="sup._isManual" style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
                       <span class="picker-meta" style="color: #fbbf24; font-weight: 600;">Ingreso manual</span>
-                      <select class="form-control-sm" [(ngModel)]="sup.quantityMode" (ngModelChange)="recalculate()">
+                      <select class="form-control-sm" [(ngModel)]="sup.quantityMode" (ngModelChange)="onSupplyModeChange(sup)">
                         <option value="unit">Venta por Unidad</option>
                         <option value="sqm">Venta por m²</option>
                       </select>
@@ -877,7 +902,7 @@
                   </td>
                   <td>
                     <div class="sqm-input-wrapper">
-                      <input type="text" currencyInput [(ngModel)]="sup.unitPrice" (change)="recalculate()"
+                      <input type="text" currencyInput [(ngModel)]="sup.unitPrice" (change)="onSupplyPriceChange(sup)"
                         class="form-control-sm num-input" [readonly]="!sup._isManual" inputmode="decimal">
                       <span class="sqm-label" *ngIf="sup.quantityMode === 'sqm'">/m²</span>
                     </div>
@@ -1073,16 +1098,17 @@
                     <input type="text" *ngIf="acc._isManual" [(ngModel)]="acc.unit" class="form-control-sm" style="width: 70px;" placeholder="UNIDAD">
                   </td>
                   <td>
-                    <input type="text" currencyInput [(ngModel)]="acc.unitPrice" (change)="recalculate()"
+                    <input *ngIf="canSeeHardwarePrices" type="text" currencyInput [(ngModel)]="acc.unitPrice" (change)="recalculate()"
                       class="form-control-sm num-input" inputmode="decimal">
-                    <div class="picker-meta" *ngIf="acc.apply5Percent">c/ flete 5%: $ {{ getEffectiveUnitPrice(acc) | number:'1.0-2' }}</div>
+                    <span *ngIf="!canSeeHardwarePrices" class="picker-meta" title="Precios visibles solo para administradores">—</span>
+                    <div class="picker-meta" *ngIf="canSeeHardwarePrices && acc.apply5Percent">c/ flete 5%: $ {{ getEffectiveUnitPrice(acc) | number:'1.0-2' }}</div>
                   </td>
                   <td class="text-center" style="min-width: 60px;">
                     <input type="number" [ngModel]="(acc.timeHours || 0) * 60" (ngModelChange)="acc.timeHours = $event / 60; recalculate()"
                       class="form-control-sm num-input" step="1" style="width: 60px;" title="Minutos de mano de obra">
                     <div style="font-size: 11px;">{{ getTotalTimeMinutes(acc) }} min total</div>
                   </td>
-                  <td>$ {{ acc.totalPrice | number:'1.0-2' }}</td>
+                  <td>{{ canSeeHardwarePrices ? '$ ' + (acc.totalPrice | number:'1.0-2') : '—' }}</td>
                   <td class="text-center">
                     <input type="checkbox" [ngModel]="acc.apply5Percent"
                       (ngModelChange)="acc.apply5Percent = $event; recalculate()"
@@ -1455,6 +1481,8 @@
     <div *ngIf="currentStep === 4 && !isProductsMode() && !isDesignMode() && !isStepValid(4)" class="text-error" style="margin-left: 10px; align-self: center;">
       ⚠️ Por favor, revisa los ítems marcados en rojo. Todos los insumos y herrajes deben tener un precio asignado.
     </div>
+    <button type="button" class="btn-secondary" (click)="resetChanges()" [disabled]="isLoading"
+      style="margin-left: 10px;" title="Descarta todos los cambios desde que abriste o creaste la cotización">↺ Restablecer cambios</button>
     <button type="button" class="btn-success ml-auto" *ngIf="currentStep === maxSteps" (click)="saveQuotation()"
       [disabled]="isLoading || isReadOnly || !isStepValid(currentStep)">Guardar Cotización</button>
   </div>

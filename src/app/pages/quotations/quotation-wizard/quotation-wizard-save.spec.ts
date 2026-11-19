@@ -19,6 +19,7 @@ function makeComponent(overrides: any = {}) {
   const toastService: any = {
     success: jasmine.createSpy('success'),
     error: jasmine.createSpy('error'),
+    info: jasmine.createSpy('info'),
   };
   const router: any = { navigate: jasmine.createSpy('navigate') };
   const route: any = { params: of({}), queryParams: of({}) };
@@ -108,5 +109,43 @@ describe('QuotationWizard saveQuotation (fix guardar + sobrescribir)', () => {
     cmp.saveQuotation();
     expect(toastService.error).toHaveBeenCalled();
     expect((cmp as any).isLoading).toBeFalse();
+  });
+
+  it('no re-guarda una cotización abierta sin cambios (lectura congelada)', () => {
+    const { cmp, quotationService, toastService, router } = makeComponent();
+    (cmp as any).activeQuotation._id = 'q1';
+    (cmp as any).initialSnapshot = (cmp as any).snapshotOf((cmp as any).activeQuotation);
+
+    expect(cmp.hasUnsavedChanges()).toBeFalse();
+    cmp.saveQuotation();
+
+    expect(quotationService.updateQuotation).not.toHaveBeenCalled();
+    expect(toastService.info).toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('sí guarda cuando hay un cambio real', () => {
+    const { cmp, quotationService } = makeComponent();
+    (cmp as any).activeQuotation._id = 'q1';
+    (cmp as any).initialSnapshot = (cmp as any).snapshotOf((cmp as any).activeQuotation);
+    (cmp as any).activeQuotation.client.name = 'Cliente editado';
+    quotationService.updateQuotation.and.returnValue(of({ success: true, data: { number: 2701 } }));
+
+    expect(cmp.hasUnsavedChanges()).toBeTrue();
+    cmp.saveQuotation();
+    expect(quotationService.updateQuotation).toHaveBeenCalledWith('q1', jasmine.any(Object));
+  });
+
+  it('loadConfig no pisa porcentajes ni totales de una cotización guardada', () => {
+    const { cmp } = makeComponent();
+    (cmp as any).activeQuotation._id = 'q1';
+    (cmp as any).activeQuotation.totals = {
+      unforeseenPercent: 7, profitPercent: 20, indirectPercent: 11,
+      taxPercent: 5, discountPercent: 3, grandTotal: 123456
+    };
+    cmp.loadConfig();
+    expect((cmp as any).activeQuotation.totals.profitPercent).toBe(20);
+    expect((cmp as any).activeQuotation.totals.taxPercent).toBe(5);
+    expect((cmp as any).activeQuotation.totals.discountPercent).toBe(3);
   });
 });

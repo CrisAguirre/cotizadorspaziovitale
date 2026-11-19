@@ -5,6 +5,7 @@ import { Quotation } from '../../../models/interfaces';
 import { Router, ActivatedRoute } from '@angular/router';
 import { PdfGeneratorService } from '../../../services/pdf-generator.service';
 import { ToastService } from '../../../services/toast.service';
+import { MultiSelectOption } from '../../../components/multi-select/multi-select.component';
 
 @Component({
   selector: 'app-quotation-list',
@@ -17,6 +18,13 @@ export class QuotationListComponent implements OnInit {
   isLoading = true;
   activeTab: 'activas' | 'archivo' = 'activas';
   filterStatus: string | null = null;
+
+  // Fusión de cotizaciones (solo admin)
+  mergeTarget: any = null;
+  mergeCandidates: any[] = [];
+  mergeOptions: MultiSelectOption[] = [];
+  mergeSelected: string[] = [];
+  mergeLoading = false;
 
   // Sorting
   sortColumn: string = '';
@@ -179,12 +187,80 @@ export class QuotationListComponent implements OnInit {
 
   canEdit(q: any): boolean {
     if (this.isAdmin()) return true;
+    // Presentada al cliente: bloqueada para no-admin (el backend también lo valida).
+    if (q.presentedAt) return false;
     const me = this.authService.getUser()?.email?.toLowerCase?.();
     if (!me) return false;
     const owner = this.getCreatorEmail(q)?.toLowerCase?.();
     // Legacy sin autor: permitir intentar (el backend decide por _id)
     if (!owner || owner === 'sin registro') return true;
     return owner === me;
+  }
+
+  /** Abre el selector de cotizaciones compatibles (mismo cliente, ±7 días). */
+  openMerge(q: any): void {
+    if (!this.isAdmin() || !q?._id) return;
+    this.mergeLoading = true;
+    this.mergeTarget = q;
+    this.mergeSelected = [];
+    this.quotationService.getMergeCandidates(q._id).subscribe({
+      next: (res: any) => {
+        this.mergeLoading = false;
+        this.mergeCandidates = res.success ? (res.data || []) : [];
+        this.mergeOptions = this.mergeCandidates.map((c) => ({
+          value: String(c._id),
+          label: `No. ${c.number} · ${new Date(c.date).toLocaleDateString('es-CO')}`,
+          hint: `$ ${new Intl.NumberFormat('es-CO').format(c.grandTotal || 0)}`
+        }));
+        if (!this.mergeCandidates.length) {
+          this.toastService.info('Sin cotizaciones compatibles', 'No hay cotizaciones del mismo cliente en los 7 días alrededor de esta fecha.');
+          this.mergeTarget = null;
+        }
+      },
+      error: (err: any) => {
+        this.mergeLoading = false;
+        this.toastService.error('No se pudieron cargar las cotizaciones', err?.error?.message || '');
+      }
+    });
+  }
+
+  closeMerge(): void {
+    this.mergeTarget = null;
+    this.mergeCandidates = [];
+    this.mergeSelected = [];
+  }
+
+  confirmMerge(): void {
+    if (!this.mergeTarget || !this.mergeSelected.length) return;
+    this.mergeLoading = true;
+    this.quotationService.mergeQuotations(this.mergeTarget._id, this.mergeSelected).subscribe({
+      next: (res: any) => {
+        this.mergeLoading = false;
+        if (res.success) {
+          this.toastService.success('Cotización consolidada', res.message || 'Cotización fusionada correctamente.');
+          this.closeMerge();
+          this.loadQuotations();
+        }
+      },
+      error: (err: any) => {
+        this.mergeLoading = false;
+        this.toastService.error('No se pudo fusionar', err?.error?.message || '');
+      }
+    });
+  }
+
+  /** Marca el punto de inflexión: la cotización queda cerrada para no-admin. */
+  markPresented(q: any): void {
+    if (!q?._id) return;
+    this.quotationService.presentQuotation(q._id).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.toastService.success('Cotización presentada', `La cotización No. ${q.number} quedó cerrada para edición.`);
+          this.loadQuotations();
+        }
+      },
+      error: (err: any) => this.toastService.error('No se pudo presentar', err?.error?.message || '')
+    });
   }
 
   duplicateQuotation(id?: string) {

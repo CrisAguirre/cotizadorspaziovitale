@@ -76,6 +76,12 @@ export interface AppConfig {
 // ===== QUOTATION SUB-SCHEMAS =====
 export interface SupplyItem {
   description: string;
+  // Identidad estable del material (persistida). La marca y el color forman parte
+  // del precio: sin ellos la cotizacion cambia al reabrirla.
+  brand?: string;
+  provider?: string;
+  materialId?: string;
+  materialCode?: string;
   color?: string;
   providerColor: string;
   dimension: string;
@@ -85,6 +91,11 @@ export interface SupplyItem {
   total: number;
   unitPrice: number;
   totalPrice: number;
+  // Base de mano de obra por m² (persistida)
+  sqmPerSheet?: number;
+  laborMinutes?: number;
+  // Precio unitario efectivo congelado (material + M.O. por m²). Manda sobre unitPrice.
+  effectiveUnitPrice?: number;
   // Transitorios del dropdown de láminas (no se persisten en BD)
   _lamina?: string;
   _colorGroup?: string;
@@ -115,6 +126,7 @@ export interface EdgeBandItem {
   rigidez?: string;
   moMinutesPerMl?: number;
   moTotal?: number;
+  valorMinuto?: number; // valor del minuto congelado en la cotización guardada
   // Transitorios del combobox de cantos (no se persisten en BD)
   _cantoSearch?: string;
   _cantoOpen?: boolean;
@@ -353,6 +365,22 @@ export interface Quotation {
   createdByEmail?: string;
   createdAt?: string;
   updatedAt?: string;
+  /** Primera presentación al cliente: desde aquí solo admin puede editar. */
+  presentedAt?: string;
+  presentedBy?: string;
+  version?: number;
+  versionHistory?: QuotationVersionEntry[];
+  /** Auditoría interna de la fusión (no se imprime en el PDF). */
+  mergedFrom?: any[];
+}
+
+export interface QuotationVersionEntry {
+  version: number;
+  changedAt: string;
+  changedBy?: string;
+  changedByEmail?: string;
+  reason?: string;
+  snapshot?: any;
 }
 
 // ===== PROYECTOS (monitor secuencial local comercial) =====

@@ -32,6 +32,40 @@ export class QuotationWizardComponent implements OnInit {
 
   temporalId?: string;
   isReadOnly = false;
+  /** Huella de la cotización tal como se abrió, para detectar cambios reales. */
+  private initialSnapshot = '';
+  /** Estado inicial exacto, para el botón "Restablecer cambios". */
+  private initialQuotation: Quotation | null = null;
+  private initialStep = 1;
+
+  /** Los precios de herrajes son visibles solo para administradores. */
+  get canSeeHardwarePrices(): boolean {
+    return this.authService.getUser()?.role === 'admin';
+  }
+
+  /** Un no-admin nunca puede elegir la tabla con precios. */
+  onHardwareModeChange(silent = false): void {
+    if (!this.canSeeHardwarePrices && this.activeQuotation.wizardConfig.hardwareDisplayMode === 'table') {
+      this.activeQuotation.wizardConfig.hardwareDisplayMode = 'included';
+      if (!silent) {
+        this.toastService.warning('Opción no disponible', 'La tabla con precios de herrajes es exclusiva del administrador.');
+      }
+    }
+  }
+
+  hasHardware(): boolean {
+    return !!(this.activeQuotation.areas || []).some((area) =>
+      (area.furniture || []).some((furn) => (furn.accessories || []).length > 0)
+    );
+  }
+
+  /** Proveedor y marca del herraje, tomados del catálogo de materiales. */
+  hardwareMeta(acc: AccessoryItem): { provider: string; brand: string } {
+    const material = this.materialService.preloadedMaterials.find((m) =>
+      (!!acc.code && m.code === acc.code) || (!!acc.description && m.description === acc.description)
+    );
+    return { provider: material?.provider || '', brand: material?.brand || '' };
+  }
 
   availableLaborTimes: LaborTime[] = [];
   
@@ -291,6 +325,7 @@ export class QuotationWizardComponent implements OnInit {
         setTimeout(() => {
           if (!this.activeQuotation._id) {
             this.addArea();
+            if (!this.initialQuotation) this.captureInitialState();
           }
         }, 100);
       }
@@ -321,11 +356,15 @@ export class QuotationWizardComponent implements OnInit {
             paymentTerms: this.activeQuotation.paymentTerms,
             validityDays: this.activeQuotation.validityDays
           });
+          this.hydrateSupplyItems();
           this.initMesonUIStates();
           if (this.availableLaborTimes && this.availableLaborTimes.length > 0) {
             this.buildMOActivities();
           }
-          this.recalculate();
+          // Un no-admin nunca ve la tabla de herrajes con precios.
+          this.onHardwareModeChange(true);
+          // La cotización guardada se muestra tal cual: no se recalcula al leer.
+          this.captureInitialState();
           this.isLoading = false;
         }
       },
@@ -334,6 +373,46 @@ export class QuotationWizardComponent implements OnInit {
         this.toastService.error('Error', 'No se pudo cargar la cotización');
         this.isLoading = false;
       }
+    });
+  }
+
+  /**
+   * Reconstruye el estado del selector de láminas a partir de los datos persistidos.
+   * Sin esto, al reabrir la cotización se perdía la marca/color y una edición
+   * posterior podía reasignar otra variante (y otro precio).
+   */
+  private hydrateSupplyItems(): void {
+    this.activeQuotation?.areas?.forEach((area) => {
+      area.furniture?.forEach((furn) => {
+        furn.supplies?.forEach((s) => {
+          // Precio efectivo derivado del total guardado: es el precio acordado,
+          // no una estimación. Así un recálculo posterior no lo reasigna.
+          const qty = (s.total || 0) > 0 ? s.total : (s.quantity || 0);
+          if (!(s.effectiveUnitPrice || 0) && (s.totalPrice || 0) > 0 && qty > 0) {
+            s.effectiveUnitPrice = s.totalPrice / qty;
+          }
+          if (s._isManual) return;
+          if (!s._lamina) s._lamina = s.description || '';
+          if (!s._laminaSearch) s._laminaSearch = s._lamina;
+          if (!s._colorGroup) s._colorGroup = s.color || '';
+          if (!s._brand) s._brand = s.brand || '';
+          if (!s.sqmPerSheet && s._sqmPerSheet) s.sqmPerSheet = s._sqmPerSheet;
+          if (!s.laborMinutes && s._laborMinutes) s.laborMinutes = s._laborMinutes;
+          if (!s._materialLabel) {
+            const variante = [s.provider, s.brand, s.color].filter(Boolean).join(' · ');
+            if (variante) s._materialLabel = variante;
+          }
+        });
+        // Tasa de M.O. derivada de los cantos guardados: congela el valor del
+        // minuto vigente cuando se hizo la cotización.
+        furn.edgeBands?.forEach((e) => {
+          const moTotal = e.moTotal || 0;
+          const moMinutesPerMl = e.moMinutesPerMl || 0;
+          if (!(e.valorMinuto || 0) && moTotal > 0 && (e.total || 0) > 0 && moMinutesPerMl > 0) {
+            e.valorMinuto = moTotal / (e.total * moMinutesPerMl);
+          }
+        });
+      });
     });
   }
 
@@ -366,6 +445,11 @@ export class QuotationWizardComponent implements OnInit {
   private checkReadOnly(): void {
     const me = this.authService.getUser()?.email?.toLowerCase?.() || '';
     const role = this.authService.getUser()?.role;
+    if (this.activeQuotation.presentedAt && role !== 'admin') {
+      this.isReadOnly = true;
+      this.toastService.warning('Cotización presentada', 'Fue presentada al cliente. Solo un administrador puede editarla; se creará una nueva versión.');
+      return;
+    }
     if (role === 'admin' || !me) { this.isReadOnly = false; return; }
     const owner = this.getOwnerEmail(this.activeQuotation);
     // Legacy sin autor: se permite editar (el backend valida por _id)
@@ -404,8 +488,10 @@ export class QuotationWizardComponent implements OnInit {
             paymentTerms: this.activeQuotation.paymentTerms,
             validityDays: this.activeQuotation.validityDays
           });
+          this.hydrateSupplyItems();
           this.initMesonUIStates();
           this.recalculate();
+          this.captureInitialState();
         }
       },
       error: (err) => console.error('Error loading temporal', err)
@@ -470,6 +556,10 @@ export class QuotationWizardComponent implements OnInit {
     this.configService.getConfig().subscribe((res: any) => {
       if (res.success) {
         this.appConfig = res.data;
+        // Una cotización ya guardada es un documento cerrado: sus porcentajes y
+        // totales no se sobreescriben con la configuración global actual.
+        // Los valores por defecto solo aplican a cotizaciones nuevas.
+        if (this.activeQuotation?._id) return;
         this.activeQuotation.totals.unforeseenPercent = this.appConfig.unforeseenPercent;
         this.activeQuotation.totals.profitPercent = this.appConfig.profitPercent;
         this.activeQuotation.totals.indirectPercent = this.appConfig.indirectPercent;
@@ -481,6 +571,16 @@ export class QuotationWizardComponent implements OnInit {
         this.recalculate();
       }
     });
+  }
+
+  /**
+   * Recalcula solo si hay algo que recalcular. Para una cotización guardada
+   * sin cambios, navegar entre pasos no debe alterar sus totales.
+   */
+  private recalculateIfChanged(): void {
+    if (!this.activeQuotation?._id || this.hasUnsavedChanges()) {
+      this.recalculate();
+    }
   }
   nextStep() {
     if (this.currentStep === 1) {
@@ -506,7 +606,7 @@ export class QuotationWizardComponent implements OnInit {
     }
 
     if (this.currentStep === 4) {
-      this.recalculate();
+      this.recalculateIfChanged();
     }
 
     if (this.currentStep < this.maxSteps) {
@@ -514,7 +614,7 @@ export class QuotationWizardComponent implements OnInit {
     }
 
     if (this.currentStep === this.maxSteps) {
-      this.recalculate();
+      this.recalculateIfChanged();
     }
     
     this.autoSave();
@@ -878,12 +978,24 @@ export class QuotationWizardComponent implements OnInit {
 
   applySupplyMaterial(furn: Furniture, item: SupplyItem, material: Material): void {
     item.description = material.description;
-    item.providerColor = material.provider;
+    // Identidad estable: la marca y el color determinan el precio y deben sobrevivir al guardado.
+    item.brand = material.brand || '';
+    item.provider = material.provider || '';
+    item.color = material.color || '';
+    item.materialId = material._id || '';
+    item.materialCode = material.code || '';
+    item.providerColor = material.provider; // compatibilidad con documentos previos
     item.unitOfMeasure = material.unit || 'LAMINA';
 
-    // Datos del material para la mano de obra por m² (regla de 3)
-    item._sqmPerSheet = material.sqmPerSheet || 0;
-    item._laborMinutes = material.laborMinutes || 0;
+    // Precio efectivo congelado: al cambiar de material se invalida para que se
+    // recalcule con el precio de la nueva lámina y la tarifa vigente.
+    item.effectiveUnitPrice = 0;
+
+    // Base de mano de obra por m² (regla de 3): se persiste, no solo en campos transitorios.
+    item.sqmPerSheet = material.sqmPerSheet || 0;
+    item.laborMinutes = material.laborMinutes || 0;
+    item._sqmPerSheet = item.sqmPerSheet;
+    item._laborMinutes = item.laborMinutes;
 
     // Para tableros (uropack, alto brillo, mdf, melaminas): usar precio por m²
     if (material.unit === 'LAMINA' && material.pricePerSqm > 0) {
@@ -952,8 +1064,25 @@ export class QuotationWizardComponent implements OnInit {
     return this.colorGroupsFor(sup).length > 0;
   }
 
+  /** Edición manual del precio: se descarta el precio congelado y se recalcula. */
+  onSupplyPriceChange(sup: SupplyItem): void {
+    sup.effectiveUnitPrice = 0;
+    this.recalculate();
+  }
+
+  /** Cambiar la modalidad de venta cambia la base del precio: se recalcula. */
+  onSupplyModeChange(sup: SupplyItem): void {
+    sup.effectiveUnitPrice = 0;
+    this.recalculate();
+  }
+
   brandsFor(sup: SupplyItem): string[] {
-    return sup && sup._lamina ? this.insumoLaminas.find((x) => x.description === sup._lamina)?.brands || [] : [];
+    if (!sup || !sup._lamina) return [];
+    const e = this.insumoLaminas.find((x) => x.description === sup._lamina);
+    if (!e) return [];
+    // Solo marcas disponibles para el color elegido: evita combinaciones inexistentes
+    const mats = sup._colorGroup ? e.materials.filter((m) => m.color === sup._colorGroup) : e.materials;
+    return [...new Set(mats.map((m) => m.brand).filter((b): b is string => !!b))].sort();
   }
 
   hasBrands(sup: SupplyItem): boolean {
@@ -977,8 +1106,14 @@ export class QuotationWizardComponent implements OnInit {
   }
 
   onColorGroupSelect(furn: Furniture, sup: SupplyItem): void {
+    const brands = this.brandsFor(sup);
+    // Si la marca elegida no existe para este color, se descarta (no se re-precio en silencio)
+    if (sup._brand && !brands.includes(sup._brand)) sup._brand = '';
     // Si hay varias marcas para la lámina, se espera a que el operador elija la marca
-    if (this.brandsFor(sup).length > 1) return;
+    if (brands.length > 1) {
+      sup._materialLabel = 'Selecciona la marca';
+      return;
+    }
     this.applyResolvedSupply(furn, sup);
   }
 
@@ -1018,17 +1153,35 @@ export class QuotationWizardComponent implements OnInit {
     if (!sup || !sup._lamina) return undefined;
     const e = this.insumoLaminas.find((x) => x.description === sup._lamina);
     if (!e || e.materials.length === 0) return undefined;
-    const candidates = sup._colorGroup
-      ? e.materials.filter((m) => m.color === sup._colorGroup)
-      : e.materials;
-    const filtered = sup._brand ? candidates.filter((m) => m.brand === sup._brand) : candidates;
-    return filtered.length ? filtered[0] : (candidates.length ? candidates[0] : undefined);
+
+    let candidates = e.materials;
+    if (sup._colorGroup) {
+      const byColor = candidates.filter((m) => m.color === sup._colorGroup);
+      // Color ya inexistente en el catálogo: conservar el precio guardado, no reasignar.
+      if (byColor.length === 0) return undefined;
+      candidates = byColor;
+    }
+    if (sup._brand) {
+      const byBrand = candidates.filter((m) => m.brand === sup._brand);
+      // Marca inexistente para ese color: no cambiar de marca en silencio.
+      if (byBrand.length === 0) return undefined;
+      candidates = byBrand;
+    }
+    return candidates[0];
   }
 
   applyResolvedSupply(furn: Furniture, sup: SupplyItem): void {
     const material = this.resolveSupplyMaterial(sup);
-    if (!material) return;
-    sup._materialLabel = `${material.provider} · ${material.brand || ''} · $${material.pricePerSqm.toLocaleString('es-CO')}/m²`;
+    if (!material) {
+      if (sup._colorGroup || sup._brand) sup._materialLabel = 'Variante no disponible en el catálogo';
+      return;
+    }
+    // Reflejar la variante resuelta en los selectores (así queda visible y consistente)
+    sup._lamina = material.description || sup._lamina;
+    sup._colorGroup = material.color || '';
+    sup._brand = material.brand || '';
+    const variante = [material.provider, material.brand, material.color].filter(Boolean).join(' · ');
+    sup._materialLabel = `${variante} · $${(material.pricePerSqm || 0).toLocaleString('es-CO')}/m²`;
     this.applySupplyMaterial(furn, sup, material);
   }
 
@@ -1041,6 +1194,8 @@ export class QuotationWizardComponent implements OnInit {
     item.tipo = material.tipo || '';
     item.rigidez = material.rigidez || '';
     item.moMinutesPerMl = material.moMinutesPerMl || 3;
+    // Se invalida la tasa congelada para usar la tarifa vigente al elegir otro canto.
+    item.valorMinuto = 0;
     item._calibre = item.calibre;
     item._tipo = item.tipo;
     item._rigidez = item.rigidez;
@@ -1242,26 +1397,14 @@ export class QuotationWizardComponent implements OnInit {
           if (it.description && !it._activity) {
             it._activity = it.description;
             it._activitySearch = it.description;
-            const lt = this.armadoActivities.find((x) => x.activityName === it.description);
-            if (lt) { 
-              if (it.minutes === undefined) it.minutes = lt.minutes; 
-              if (it.valorMinuto === undefined) it.valorMinuto = lt.valorMinuto; 
-              if (it.persons === undefined) it.persons = lt.persons; 
-              if (it.baseQuantity === undefined) it.baseQuantity = lt.quantity || 1; 
-            }
+            // Solo estado de UI: no rellenar minutes/valorMinuto al leer,
+            // porque cambiaría el precio de una cotización ya guardada.
           }
         });
         f.installation?.forEach((it) => {
           if (it.description && !it._activity) {
             it._activity = it.description;
             it._activitySearch = it.description;
-            const lt = this.instalacionActivities.find((x) => x.activityName === it.description);
-            if (lt) { 
-              if (it.minutes === undefined) it.minutes = lt.minutes; 
-              if (it.valorMinuto === undefined) it.valorMinuto = lt.valorMinuto; 
-              if (it.persons === undefined) it.persons = lt.persons; 
-              if (it.baseQuantity === undefined) it.baseQuantity = lt.quantity || 1; 
-            }
           }
         });
       })
@@ -1322,6 +1465,51 @@ export class QuotationWizardComponent implements OnInit {
     this.recalculate();
   }
 
+  /** Huella estable de la cotización (sin transitorios ni metadatos). */
+  private snapshotOf(quotation: Quotation): string {
+    return JSON.stringify(this.sanitizeQuotation(quotation));
+  }
+
+  /** true si hubo cambios reales desde que se abrió la cotización. */
+  hasUnsavedChanges(): boolean {
+    if (!this.activeQuotation?._id) return true; // borrador nuevo: siempre se guarda
+    return this.snapshotOf(this.activeQuotation) !== this.initialSnapshot;
+  }
+
+  /** Guarda el punto de partida (apertura o creación) y el paso del wizard. */
+  private captureInitialState(): void {
+    this.initialQuotation = JSON.parse(JSON.stringify(this.activeQuotation));
+    this.initialStep = this.currentStep;
+    this.initialSnapshot = this.snapshotOf(this.activeQuotation);
+  }
+
+  /** Deshace todos los cambios de la sesión y vuelve al paso inicial del wizard. */
+  resetChanges(): void {
+    if (!this.initialQuotation) {
+      this.toastService.warning('Sin estado inicial', 'No hay cambios para restablecer.');
+      return;
+    }
+    this.activeQuotation = JSON.parse(JSON.stringify(this.initialQuotation));
+    this.quotationForm.patchValue({
+      number: this.activeQuotation.number,
+      date: this.activeQuotation.date,
+      city: this.activeQuotation.city,
+      installationAddress: this.activeQuotation.installationAddress || '',
+      sameAddress: this.activeQuotation.sameAddress ?? true,
+      title: this.activeQuotation.title,
+      client: this.activeQuotation.client,
+      paymentTerms: this.activeQuotation.paymentTerms,
+      validityDays: this.activeQuotation.validityDays
+    });
+    this.hydrateSupplyItems();
+    this.initMesonUIStates();
+    if (this.availableLaborTimes?.length) this.buildMOActivities();
+    this.currentStep = this.initialStep;
+    this.wizardStep = 1;
+    this.initialSnapshot = this.snapshotOf(this.activeQuotation);
+    this.toastService.info('Cambios restablecidos', 'La cotización volvió a su estado inicial.');
+  }
+
   /** Limpia campos transitorios del wizard (prefijo _) antes de enviar al backend. */
   private sanitizeQuotation(q: Quotation): any {
     const clone = JSON.parse(JSON.stringify(q));
@@ -1345,6 +1533,13 @@ export class QuotationWizardComponent implements OnInit {
     delete clone.createdAt;
     delete clone.updatedAt;
     delete clone.__v;
+    // Un no-admin recibe los herrajes sin precios: no debe reenviarlos y
+    // sobrescribir los precios reales guardados en el servidor.
+    if (!this.canSeeHardwarePrices && q._id) {
+      clone.areas?.forEach((area: any) =>
+        area.furniture?.forEach((furn: any) => delete furn.accessories)
+      );
+    }
     return clone;
   }
 
@@ -1380,6 +1575,12 @@ export class QuotationWizardComponent implements OnInit {
   saveQuotation() {
     if (this.isReadOnly) {
       this.toastService.error('Solo lectura', 'No puedes guardar cambios en una cotización de otro usuario. Duplícala desde el listado.');
+      return;
+    }
+    // Si se abrió de la BD y no hubo cambios reales, no se vuelve a guardar:
+    // así no se recalcula ni se alteran totales históricos.
+    if (this.activeQuotation._id && !this.hasUnsavedChanges()) {
+      this.toastService.info('Sin cambios', 'La cotización no tiene modificaciones que guardar.');
       return;
     }
     this.isLoading = true;

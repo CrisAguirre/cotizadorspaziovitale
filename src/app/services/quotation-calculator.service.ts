@@ -153,12 +153,24 @@ export class QuotationCalculatorService {
         let effectiveUnitPrice = s.unitPrice || 0;
         s._laborPerSqm = 0;
 
-        // Regla de 3: minutos = (m² × M.O) ÷ M2-lámina
-        if (s.quantityMode === 'sqm' && (s._sqmPerSheet || 0) > 0 && (s._laborMinutes || 0) > 0) {
-          const minutes = (qty * (s._laborMinutes || 0)) / (s._sqmPerSheet || 1);
-          const laborCost = minutes * valorMinuto;
-          s._laborPerSqm = qty > 0 ? laborCost / qty : 0;
-          effectiveUnitPrice = effectiveUnitPrice + s._laborPerSqm;
+        // Precio efectivo congelado: manda sobre el unitPrice y evita repreciar
+        // una cotización guardada cuando cambian las tarifas globales.
+        const frozenUnitPrice = s.effectiveUnitPrice || 0;
+        if (frozenUnitPrice <= 0) {
+          // Regla de 3: minutos = (m² × M.O) ÷ M2-lámina
+          const sqmPerSheet = (s.sqmPerSheet || 0) > 0 ? s.sqmPerSheet! : (s._sqmPerSheet || 0);
+          const laborMinutes = (s.laborMinutes || 0) > 0 ? s.laborMinutes! : (s._laborMinutes || 0);
+          if (s.quantityMode === 'sqm' && sqmPerSheet > 0 && laborMinutes > 0) {
+            const minutes = (qty * laborMinutes) / sqmPerSheet;
+            const laborCost = minutes * valorMinuto;
+            s._laborPerSqm = qty > 0 ? laborCost / qty : 0;
+            effectiveUnitPrice = effectiveUnitPrice + s._laborPerSqm;
+          }
+          s.effectiveUnitPrice = effectiveUnitPrice;
+        } else {
+          effectiveUnitPrice = frozenUnitPrice;
+          // Informativo: cuánto M.O. iba incluido en el precio guardado.
+          s._laborPerSqm = Math.max(0, effectiveUnitPrice - (s.unitPrice || 0));
         }
 
         s.totalPrice = qty * effectiveUnitPrice;
@@ -175,7 +187,10 @@ export class QuotationCalculatorService {
         e.waste = (e.quantity || 0) * factor;
         e.total = (e.quantity || 0) + e.waste;
         const materialCost = e.total * (e.unitPrice || 0);
-        const moCosto = e.total * (e.moMinutesPerMl || 3) * valorMinuto;
+        // Valor del minuto congelado en la cotización guardada.
+        const edgeValorMinuto = (e.valorMinuto || 0) > 0 ? e.valorMinuto! : valorMinuto;
+        const moCosto = e.total * (e.moMinutesPerMl || 3) * edgeValorMinuto;
+        e.valorMinuto = edgeValorMinuto;
         e.moTotal = moCosto;
         e.totalPrice = materialCost + moCosto;
         furniture.totalEdgeBands! += e.totalPrice;
