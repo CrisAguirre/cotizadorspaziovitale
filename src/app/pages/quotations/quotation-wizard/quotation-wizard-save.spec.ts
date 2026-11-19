@@ -20,6 +20,7 @@ function makeComponent(overrides: any = {}) {
     success: jasmine.createSpy('success'),
     error: jasmine.createSpy('error'),
     info: jasmine.createSpy('info'),
+    warning: jasmine.createSpy('warning'),
   };
   const router: any = { navigate: jasmine.createSpy('navigate') };
   const route: any = { params: of({}), queryParams: of({}) };
@@ -134,6 +135,21 @@ describe('QuotationWizard saveQuotation (fix guardar + sobrescribir)', () => {
     expect(cmp.hasUnsavedChanges()).toBeTrue();
     cmp.saveQuotation();
     expect(quotationService.updateQuotation).toHaveBeenCalledWith('q1', jasmine.any(Object));
+  });
+
+  it('la visibilidad de precios en el presupuesto depende del rol, no del modo del PDF', () => {
+    const admin = makeComponent().cmp;
+    const comercial = makeComponent({
+      authService: { getUser: () => ({ email: 'comercial@sv.com', role: 'comercial' }) }
+    }).cmp;
+
+    // Cambiar el modo elegido en el paso 3 no altera quién ve precios en el paso 4.
+    for (const mode of ['table', 'included', 'selective']) {
+      (admin as any).activeQuotation.wizardConfig.hardwareDisplayMode = mode as any;
+      (comercial as any).activeQuotation.wizardConfig.hardwareDisplayMode = mode as any;
+      expect(admin.canSeeHardwarePrices).toBeTrue();
+      expect(comercial.canSeeHardwarePrices).toBeFalse();
+    }
   });
 
   it('loadConfig no pisa porcentajes ni totales de una cotización guardada', () => {

@@ -38,7 +38,11 @@ export class QuotationWizardComponent implements OnInit {
   private initialQuotation: Quotation | null = null;
   private initialStep = 1;
 
-  /** Los precios de herrajes son visibles solo para administradores. */
+  /**
+   * Visibilidad de precios de herrajes en el wizard: depende SOLO del rol.
+   * El modo elegido en el paso 3 (Visualización de Herrajes) afecta únicamente
+   * a cómo se muestra el PDF, nunca a este paso.
+   */
   get canSeeHardwarePrices(): boolean {
     return this.authService.getUser()?.role === 'admin';
   }
@@ -125,7 +129,10 @@ export class QuotationWizardComponent implements OnInit {
           const hasZeroPrice = (items: any[]) => items && items.some(i => i.unitPrice == null || i.unitPrice <= 0);
           
           if (hasEstimated(f.accessories) || hasEstimated(f.assembly) || hasEstimated(f.installation)) return false;
-          if (hasZeroPrice(f.supplies) || hasZeroPrice(f.edgeBands) || hasZeroPrice(f.accessories)) return false;
+          if (hasZeroPrice(f.supplies) || hasZeroPrice(f.edgeBands)) return false;
+          // Un no-admin recibe los herrajes sin precios desde la API y no puede
+          // editarlos: no debe bloquearse por un dato que no puede ver.
+          if (this.canSeeHardwarePrices && hasZeroPrice(f.accessories)) return false;
           
           return true;
         })

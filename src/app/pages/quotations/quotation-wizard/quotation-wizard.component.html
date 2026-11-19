@@ -586,7 +586,7 @@
         </div>
       </div>
 
-      <!-- Listado de herrajes por mueble: proveedor y marca para todos; precios solo admin -->
+      <!-- Listado de herrajes por mueble: proveedor y marca siempre; precio solo admin -->
       <div class="card glass-panel mt-4" style="padding: 15px;">
         <h4 style="margin-top: 0;">🔩 Herrajes por mueble</h4>
         <div *ngIf="!hasHardware()" class="text-muted">No hay herrajes agregados.</div>
@@ -1057,7 +1057,7 @@
             </table>
           </div>
 
-          <!-- Herrajes -->
+          <!-- Herrajes del presupuesto: la visibilidad de precios depende SOLO del rol -->
           <div class="budget-section">
             <div class="flex-between" style="align-items: flex-start;">
               <h5>{{ hideDesignSection ? '3' : '4' }}. Herrajes y Accesorios</h5>
@@ -1073,16 +1073,16 @@
                   <th>Descripción</th>
                   <th>Cantidad</th>
                   <th>Tipo Medida</th>
-                  <th>Precio unitario</th>
+                  <th *ngIf="canSeeHardwarePrices">Precio unitario</th>
                   <th>Tiempo M.O.</th>
-                  <th>Total</th>
-                  <th title="Agrega 5% de flete al precio unitario">Flete +5%</th>
+                  <th *ngIf="canSeeHardwarePrices">Total</th>
+                  <th *ngIf="canSeeHardwarePrices" title="Agrega 5% de flete al precio unitario">Flete +5%</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let acc of furn.accessories; let i = index"
-                  [class.estimated-row]="acc.description.includes('⧦Est.') || acc.unitPrice == null || acc.unitPrice <= 0">
+                  [class.estimated-row]="canSeeHardwarePrices && (acc.description.includes('⧦Est.') || acc.unitPrice == null || acc.unitPrice <= 0)">
                   <td>
                     <app-material-picker *ngIf="!acc._isManual" category="accesorio,herraje" placeholder="Herraje / accesorio..."
                       (materialSelected)="applyAccessoryMaterial(acc, $event)"></app-material-picker>
@@ -1097,19 +1097,18 @@
                     <span class="sqm-label" *ngIf="!acc._isManual">{{ acc.unit || 'UNIDAD' }}</span>
                     <input type="text" *ngIf="acc._isManual" [(ngModel)]="acc.unit" class="form-control-sm" style="width: 70px;" placeholder="UNIDAD">
                   </td>
-                  <td>
-                    <input *ngIf="canSeeHardwarePrices" type="text" currencyInput [(ngModel)]="acc.unitPrice" (change)="recalculate()"
+                  <td *ngIf="canSeeHardwarePrices">
+                    <input type="text" currencyInput [(ngModel)]="acc.unitPrice" (change)="recalculate()"
                       class="form-control-sm num-input" inputmode="decimal">
-                    <span *ngIf="!canSeeHardwarePrices" class="picker-meta" title="Precios visibles solo para administradores">—</span>
-                    <div class="picker-meta" *ngIf="canSeeHardwarePrices && acc.apply5Percent">c/ flete 5%: $ {{ getEffectiveUnitPrice(acc) | number:'1.0-2' }}</div>
+                    <div class="picker-meta" *ngIf="acc.apply5Percent">c/ flete 5%: $ {{ getEffectiveUnitPrice(acc) | number:'1.0-2' }}</div>
                   </td>
                   <td class="text-center" style="min-width: 60px;">
                     <input type="number" [ngModel]="(acc.timeHours || 0) * 60" (ngModelChange)="acc.timeHours = $event / 60; recalculate()"
                       class="form-control-sm num-input" step="1" style="width: 60px;" title="Minutos de mano de obra">
                     <div style="font-size: 11px;">{{ getTotalTimeMinutes(acc) }} min total</div>
                   </td>
-                  <td>{{ canSeeHardwarePrices ? '$ ' + (acc.totalPrice | number:'1.0-2') : '—' }}</td>
-                  <td class="text-center">
+                  <td *ngIf="canSeeHardwarePrices">$ {{ acc.totalPrice | number:'1.0-2' }}</td>
+                  <td class="text-center" *ngIf="canSeeHardwarePrices">
                     <input type="checkbox" [ngModel]="acc.apply5Percent"
                       (ngModelChange)="acc.apply5Percent = $event; recalculate()"
                       title="Agrega 5% de flete al precio unitario">
@@ -1268,7 +1267,7 @@
             <span>Insumos: $ {{ furn.totalSupplies | number:'1.0-2' }}</span>
             <span>Cantos: $ {{ furn.totalEdgeBands | number:'1.0-2' }}</span>
             <span>Diseño: $ {{ furn.totalDesignTime | number:'1.0-2' }}</span>
-            <span>Accesorios: $ {{ furn.totalAccessories | number:'1.0-2' }}</span>
+            <span *ngIf="canSeeHardwarePrices">Accesorios: $ {{ furn.totalAccessories | number:'1.0-2' }}</span>
             <span>M.O. Armado: $ {{ furn.totalAssembly | number:'1.0-2' }}</span>
             <span>M.O. Instalación: $ {{ furn.totalInstallation | number:'1.0-2' }}</span>
           </div>
