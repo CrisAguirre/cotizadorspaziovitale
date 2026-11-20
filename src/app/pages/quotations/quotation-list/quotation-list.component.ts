@@ -301,6 +301,24 @@ export class QuotationListComponent implements OnInit {
     });
   }
 
+  /** PDF alterno para admin: herrajes con precios aunque el modo sea "incluidos". */
+  downloadHardwarePricesPdf(quotation: Quotation): void {
+    if (!this.isAdmin() || !quotation._id) return;
+    this.quotationService.getQuotationById(quotation._id).subscribe({
+      next: (res: any) => {
+        if (res.success && res.data) {
+          this.pdfGenerator.generateHardwarePricesPdf(res.data, null);
+        } else {
+          this.toastService.error('Error', 'No se pudo obtener la cotización completa para el PDF.');
+        }
+      },
+      error: (err: any) => {
+        console.error('Error fetching full quotation:', err);
+        this.toastService.error('Error al descargar PDF', 'Verifica la consola para más detalles.');
+      }
+    });
+  }
+
   deleteQuotation(id: string | undefined, number: number) {
     if (!id) return;
     this.toastService.confirm({

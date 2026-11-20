@@ -31,7 +31,30 @@ export class PdfGeneratorService {
     this.downloadPdf(quotation, appConfig, { includeBranding: false, showTax: false });
   }
 
-  private downloadPdf(quotation: Quotation, appConfig: AppConfig | null, opts: { includeBranding: boolean; showTax: boolean }) {
+  /**
+   * Versión alterna SOLO para administrador: fuerza la tabla de herrajes con
+   * precios aunque la cotización esté en modo "incluidos" o "selective".
+   * No modifica la cotización ni su modo (eso afecta al PDF normal).
+   */
+  generateHardwarePricesPdf(quotation: Quotation, appConfig: AppConfig | null) {
+    if (!this.canShowHardwarePrices) {
+      this.toastService.error('No disponible', 'La versión con precios de herrajes es exclusiva del administrador.');
+      return;
+    }
+    const copy: Quotation = JSON.parse(JSON.stringify(quotation));
+    copy.wizardConfig = { ...copy.wizardConfig, hardwareDisplayMode: 'table' };
+    this.downloadPdf(copy, appConfig, {
+      includeBranding: true,
+      showTax: true,
+      fileNameSuffix: '_herrajes_con_precios'
+    });
+  }
+
+  private downloadPdf(
+    quotation: Quotation,
+    appConfig: AppConfig | null,
+    opts: { includeBranding: boolean; showTax: boolean; fileNameSuffix?: string }
+  ) {
     try {
       const docDef: TDocumentDefinitions = {
         content: this.buildContent(quotation, appConfig, opts),
@@ -51,7 +74,9 @@ export class PdfGeneratorService {
           };
         }
       };
-      pdfMake.createPdf(docDef).download(`Cotizacion_${quotation.number}_${quotation.client.name.replace(/\s+/g, '_')}.pdf`);
+      pdfMake.createPdf(docDef).download(
+        `Cotizacion_${quotation.number}_${quotation.client.name.replace(/\s+/g, '_')}${opts.fileNameSuffix || ''}.pdf`
+      );
     } catch (err) {
       console.error('Error al generar PDF:', err);
       this.toastService.error('Error al generar PDF', 'Verifica la consola para más detalles.');

@@ -139,6 +139,8 @@
                     (click)="openMerge(q)">🔗</button>
             <button class="btn-icon" title="Duplicar como mía" (click)="duplicateQuotation(q._id)">📋</button>
             <button class="btn-icon" title="Descargar PDF" (click)="downloadPdf(q)">📄</button>
+            <button *ngIf="isAdmin()" class="btn-icon" title="PDF alterno: herrajes con precios"
+                    (click)="downloadHardwarePricesPdf(q)">📄💲</button>
             <button *ngIf="isAdmin()" class="btn-icon" title="Eliminar" (click)="deleteQuotation(q._id, q.number)" style="color: #ff6b6b;">🗑️</button>
           </td>
         </tr>

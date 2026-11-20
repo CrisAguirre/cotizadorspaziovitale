@@ -137,7 +137,7 @@ describe('QuotationWizard saveQuotation (fix guardar + sobrescribir)', () => {
     expect(quotationService.updateQuotation).toHaveBeenCalledWith('q1', jasmine.any(Object));
   });
 
-  it('la visibilidad de precios en el presupuesto depende del rol, no del modo del PDF', () => {
+  it('la visibilidad de precios de herrajes depende del rol, no del modo del PDF', () => {
     const admin = makeComponent().cmp;
     const comercial = makeComponent({
       authService: { getUser: () => ({ email: 'comercial@sv.com', role: 'comercial' }) }
