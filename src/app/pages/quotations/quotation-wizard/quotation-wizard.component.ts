@@ -39,22 +39,16 @@ export class QuotationWizardComponent implements OnInit {
   private initialStep = 1;
 
   /**
-   * Visibilidad de precios de herrajes en el wizard: depende SOLO del rol.
-   * El modo elegido en el paso 3 (Visualización de Herrajes) afecta únicamente
-   * a cómo se muestra el PDF, nunca a este paso.
+   * Visibilidad de precios de herrajes: todos los usuarios ven lo mismo.
+   * El modo elegido en el paso 3 (Visualización de Herrajes) sigue afectando
+   * únicamente al PDF, nunca a este paso.
    */
   get canSeeHardwarePrices(): boolean {
-    return this.authService.getUser()?.role === 'admin';
+    return true;
   }
 
-  /** Un no-admin nunca puede elegir la tabla con precios. */
-  onHardwareModeChange(silent = false): void {
-    if (!this.canSeeHardwarePrices && this.activeQuotation.wizardConfig.hardwareDisplayMode === 'table') {
-      this.activeQuotation.wizardConfig.hardwareDisplayMode = 'included';
-      if (!silent) {
-        this.toastService.warning('Opción no disponible', 'La tabla con precios de herrajes es exclusiva del administrador.');
-      }
-    }
+  onHardwareModeChange(_silent = false): void {
+    // Sin restricciones: cualquier usuario puede elegir cualquier modo.
   }
 
   hasHardware(): boolean {
@@ -447,37 +441,17 @@ export class QuotationWizardComponent implements OnInit {
   }
 
   private checkReadOnly(): void {
-    const me = this.authService.getUser()?.email?.toLowerCase?.() || '';
-    const role = this.authService.getUser()?.role;
-    if (this.activeQuotation.presentedAt && role !== 'admin') {
-      this.isReadOnly = true;
-      this.toastService.warning('Cotización presentada', 'Fue presentada al cliente. Solo un administrador puede editarla; se creará una nueva versión.');
-      return;
-    }
-    if (role === 'admin' || !me) { this.isReadOnly = false; return; }
-    const owner = this.getOwnerEmail(this.activeQuotation);
-    // Legacy sin autor: se permite editar (el backend valida por _id)
-    if (!owner) { this.isReadOnly = false; return; }
-    this.isReadOnly = owner !== me;
-    if (this.isReadOnly) {
-      this.toastService.error('Solo lectura', 'Esta cotización es de otro usuario. Duplícala desde el listado para crear tu copia.');
-    }
+    // Todos los usuarios pueden editar cualquier cotización, incluso la ya
+    // presentada (el servidor versiona el cambio con fecha y usuario).
+    this.isReadOnly = false;
   }
 
   loadTemporal(id: string) {
     this.temporalService.getTemporal(id).subscribe({
       next: (res) => {
         if (res.success && res.data) {
-          const owner = String((res.data as any).createdByEmail || (res.data as any).createdBy?.email || '').toLowerCase();
-          const me = String(this.authService.getUser()?.email || '').toLowerCase();
-          const role = this.authService.getUser()?.role;
-          if (owner && me && owner !== me && role !== 'admin') {
-            // Temporal ajeno: no tomar su _id para no sobrescribirlo; se creará copia propia al avanzar
-            this.temporalId = undefined;
-            this.toastService.error('Temporal de otro usuario', `Creado por ${owner}. Se guardará como copia tuya al avanzar.`);
-          } else {
-            this.temporalId = res.data._id;
-          }
+          // Cualquier usuario puede retomar y guardar un borrador; igual que un admin.
+          this.temporalId = res.data._id;
           this.activeQuotation = res.data.data;
           this.currentStep = res.data.currentStepNumber || 1;
           
@@ -1537,13 +1511,6 @@ export class QuotationWizardComponent implements OnInit {
     delete clone.createdAt;
     delete clone.updatedAt;
     delete clone.__v;
-    // Un no-admin recibe los herrajes sin precios: no debe reenviarlos y
-    // sobrescribir los precios reales guardados en el servidor.
-    if (!this.canSeeHardwarePrices && q._id) {
-      clone.areas?.forEach((area: any) =>
-        area.furniture?.forEach((furn: any) => delete furn.accessories)
-      );
-    }
     return clone;
   }
 

@@ -181,20 +181,16 @@ export class QuotationListComponent implements OnInit {
     return 'Sin registro';
   }
 
+  /**
+   * Todas las interfaces de cotizaciones son iguales para todos los roles:
+   * se conserva el método porque la plantilla lo usa, pero ya no filtra.
+   */
   isAdmin(): boolean {
-    return this.authService.getUser()?.role === 'admin';
+    return true;
   }
 
-  canEdit(q: any): boolean {
-    if (this.isAdmin()) return true;
-    // Presentada al cliente: bloqueada para no-admin (el backend también lo valida).
-    if (q.presentedAt) return false;
-    const me = this.authService.getUser()?.email?.toLowerCase?.();
-    if (!me) return false;
-    const owner = this.getCreatorEmail(q)?.toLowerCase?.();
-    // Legacy sin autor: permitir intentar (el backend decide por _id)
-    if (!owner || owner === 'sin registro') return true;
-    return owner === me;
+  canEdit(_q?: any): boolean {
+    return true;
   }
 
   /** Abre el selector de cotizaciones compatibles (mismo cliente, ±7 días). */

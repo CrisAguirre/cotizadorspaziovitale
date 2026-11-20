@@ -17,9 +17,9 @@ const fonts = (pdfFonts as any);
 export class PdfGeneratorService {
   constructor(private toastService: ToastService, private authService: AuthService) {}
 
-  /** Los herrajes no muestran precios a usuarios no-admin (ni en el PDF). */
+  /** Todas las interfaces y datos de cotizaciones son iguales para todos los roles. */
   private get canShowHardwarePrices(): boolean {
-    return this.authService.getUser()?.role === 'admin';
+    return true;
   }
 
 
@@ -37,10 +37,6 @@ export class PdfGeneratorService {
    * No modifica la cotización ni su modo (eso afecta al PDF normal).
    */
   generateHardwarePricesPdf(quotation: Quotation, appConfig: AppConfig | null) {
-    if (!this.canShowHardwarePrices) {
-      this.toastService.error('No disponible', 'La versión con precios de herrajes es exclusiva del administrador.');
-      return;
-    }
     const copy: Quotation = JSON.parse(JSON.stringify(quotation));
     copy.wizardConfig = { ...copy.wizardConfig, hardwareDisplayMode: 'table' };
     this.downloadPdf(copy, appConfig, {

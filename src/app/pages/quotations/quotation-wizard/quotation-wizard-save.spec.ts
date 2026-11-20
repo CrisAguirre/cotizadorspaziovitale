@@ -137,18 +137,18 @@ describe('QuotationWizard saveQuotation (fix guardar + sobrescribir)', () => {
     expect(quotationService.updateQuotation).toHaveBeenCalledWith('q1', jasmine.any(Object));
   });
 
-  it('la visibilidad de precios de herrajes depende del rol, no del modo del PDF', () => {
-    const admin = makeComponent().cmp;
-    const comercial = makeComponent({
-      authService: { getUser: () => ({ email: 'comercial@sv.com', role: 'comercial' }) }
-    }).cmp;
-
-    // Cambiar el modo elegido en el paso 3 no altera quién ve precios en el paso 4.
-    for (const mode of ['table', 'included', 'selective']) {
-      (admin as any).activeQuotation.wizardConfig.hardwareDisplayMode = mode as any;
-      (comercial as any).activeQuotation.wizardConfig.hardwareDisplayMode = mode as any;
-      expect(admin.canSeeHardwarePrices).toBeTrue();
-      expect(comercial.canSeeHardwarePrices).toBeFalse();
+  it('todos los roles ven los precios de herrajes, sin importar el modo del PDF', () => {
+    const roles = ['admin', 'comercial', 'contabilidad', 'diseno'];
+    for (const role of roles) {
+      const cmp = makeComponent({
+        authService: { getUser: () => ({ email: `${role}@sv.com`, role }) }
+      }).cmp;
+      for (const mode of ['table', 'included', 'selective']) {
+        (cmp as any).activeQuotation.wizardConfig.hardwareDisplayMode = mode as any;
+        expect(cmp.canSeeHardwarePrices).toBeTrue();
+      }
+      (cmp as any).checkReadOnly();
+      expect((cmp as any).isReadOnly).toBeFalse();
     }
   });
 

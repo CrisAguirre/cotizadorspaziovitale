@@ -128,7 +128,6 @@
                     (click)="changeStatus(q, 'archivada_rechazada')">
               📁 Archivar
             </button>
-            <span *ngIf="!canEdit(q)" style="font-size: 0.8em; color: #888;">Solo lectura</span>
           </td>
           <td data-label="Acciones" class="actions-cell">
             <button class="btn-icon" title="Ver Resumen" (click)="viewQuotation(q._id)">👁️</button>
