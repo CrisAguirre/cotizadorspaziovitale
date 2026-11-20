@@ -70,7 +70,9 @@ export class QuotationViewComponent implements OnInit {
     if (!this.quotation) return 0;
     
     if (furn.type === 'meson' && furn.mesonDetails) {
-      return furn.totalBudget || 0;
+      const md = furn.mesonDetails;
+      const finalPerMl = (md.finalPricePerMl || 0) > 0 ? md.finalPricePerMl : (md.subtotal || 0) + (md.taxAmount || 0);
+      return finalPerMl * (furn.areaSqm || 1) * (furn.quantity || 1);
     }
 
     const wConfig = this.quotation.wizardConfig || { clientPriceMode: 'proportional', hardwareDisplayMode: 'table' };

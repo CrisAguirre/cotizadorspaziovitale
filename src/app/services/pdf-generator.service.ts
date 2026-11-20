@@ -22,6 +22,28 @@ export class PdfGeneratorService {
     return true;
   }
 
+  /** Valor final con IVA de 1 ML de mesón (compatibilidad con documentos viejos). */
+  private mesonFinalPricePerMl(furn: any): number {
+    const md = furn?.mesonDetails;
+    if (!md) return 0;
+    if ((md.finalPricePerMl || 0) > 0) return md.finalPricePerMl;
+    const baseCost = (md.baseCost || 0) > 0
+      ? md.baseCost
+      : (md.basePricePerM2 || 0) * (md.depth || 0.8) + (md.transportCost || 0);
+    const subtotal = (md.subtotal || 0) > 0
+      ? md.subtotal
+      : baseCost * (1 + (md.profitPercentage || 68) / 100);
+    const tax = (md.taxAmount || 0) > 0
+      ? md.taxAmount
+      : subtotal * ((md.taxPercentage || 19) / 100);
+    return subtotal + tax;
+  }
+
+  /** Total del mesón = valor final con IVA por ML × metros lineales × cantidad. */
+  private mesonClientPrice(furn: any): number {
+    return this.mesonFinalPricePerMl(furn) * (furn?.areaSqm || 1) * (furn?.quantity || 1);
+  }
+
 
   generateQuotationPdf(quotation: Quotation, appConfig: AppConfig | null) {
     this.downloadPdf(quotation, appConfig, { includeBranding: true, showTax: true });
@@ -306,17 +328,20 @@ export class PdfGeneratorService {
           }
         }
 
-        // Q1: Precio Cliente
+        // Q1: Precio Cliente. Los mesones se liquidan aparte: valor final con
+        // IVA por ML × metraje × cantidad (no el costo con transporte × AIU).
         let unitPrice = 0;
-        if (wConfig.clientPriceMode === 'unit_sqm') {
+        let furnClientPrice = 0;
+        if (furn.type === 'meson') {
+          unitPrice = this.mesonFinalPricePerMl(furn) * (furn.areaSqm || 1);
+          furnClientPrice = this.mesonClientPrice(furn);
+        } else if (wConfig.clientPriceMode === 'unit_sqm') {
           unitPrice = (furn.areaSqm || 0) * (totals.pricePerSqm || 0);
-        } else if (wConfig.clientPriceMode === 'manual' || wConfig.clientPriceMode === 'outsource') {
-          unitPrice = furnBaseCost * markupFactor;
+          furnClientPrice = unitPrice * (furn.quantity || 1);
         } else {
-          unitPrice = furnBaseCost * markupFactor; 
+          unitPrice = furnBaseCost * markupFactor;
+          furnClientPrice = unitPrice * (furn.quantity || 1);
         }
-
-        const furnClientPrice = unitPrice * (furn.quantity || 1);
         areaSubtotal += furnClientPrice;
 
         // Mesones: solo título (sin descripción, medidas ni desglose) – datos sensibles
